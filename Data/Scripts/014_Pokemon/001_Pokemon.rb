@@ -323,6 +323,26 @@ class Pokemon
     return self.types.include?(type)
   end
 
+  def affinity1
+    return species_data.affinity1
+  end
+
+  def affinity2
+    return species_data.affinity2 || species_data.affinity1
+  end
+
+  def affinities
+    sp_data = species_data
+    ret = [sp_data.affinity1]
+    ret.push(sp_data.affinity2) if sp_data.affinity2 && sp_data.affinity2 != sp_data.affinity1
+    return ret
+  end
+
+  def hasAffinity?(type)
+    type = GameData::Type.get(type).id
+    return self.affinities.include?(type)
+  end
+
   #=============================================================================
   # Gender
   #=============================================================================
@@ -896,6 +916,8 @@ class Pokemon
       gain = [-10, -10, -15][happiness_range]
     when "revivalherb"
       gain = [-15, -15, -20][happiness_range]
+    when "honeyedberry"
+      gain = [50, 30, 20][happiness_range]
     else
       raise _INTL("Unknown happiness-changing method: {1}", method.to_s)
     end
@@ -904,6 +926,7 @@ class Pokemon
       gain += 1 if @poke_ball == :LUXURYBALL
       gain = (gain * 1.5).floor if hasItem?(:SOOTHEBELL)
     end
+    gain *= 2 if pbActiveDrink == "happiness" && gain > 0
     @happiness = (@happiness + gain).clamp(0, 255)
   end
 
@@ -1112,7 +1135,7 @@ class Pokemon
     @obtain_text      = nil
     @obtain_level     = level
     @hatched_map      = 0
-    @timeReceived     = pbGetTimeNow.to_i
+    @timeReceived     = Time.now.to_i
     @timeEggHatched   = nil
     @fused            = nil
     @personalID       = rand(2 ** 16) | rand(2 ** 16) << 16

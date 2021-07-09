@@ -1053,10 +1053,63 @@ def drawSingleFormattedChar(bitmap,ch)
     if ch[0]!="\n" && ch[0]!="\r" && ch[0]!=" " && !isWaitChar(ch[0])
       bitmap.font.bold=ch[6] if bitmap.font.bold!=ch[6]
       bitmap.font.italic=ch[7] if bitmap.font.italic!=ch[7]
+      offset=0
+      sp = 2
+      rects = charRects(ch[0],bitmap.font.name)
+      for r in rects
+        r[1] -= 2
+      end
+      if ch[9] # shadow
+        bitmap.font.color=ch[9]
+        if (ch[16]&1)!=0 # outline
+          offset=1
+        elsif (ch[16]&2)!=0 # outline 2
+          offset=2
+        else
+          for r in rects
+            bitmap.fill_rect(ch[1]+r[0]*sp,ch[2]+r[1]*sp,((r[2]+1)*sp).ceil,((r[3]+1)*sp).ceil,bitmap.font.color)
+          end
+        end
+      end
+      if bitmap.font.color!=ch[8]
+        bitmap.font.color=ch[8]
+      end
+      for r in rects
+        bitmap.fill_rect(ch[1]+r[0]*sp,ch[2]+r[1]*sp,(r[2]*sp).ceil,(r[3]*sp).ceil,bitmap.font.color)
+      end
+    end
+    if ch[10] # underline
+      bitmap.fill_rect(ch[1],ch[2]+ch[4]-[(ch[4]-bitmap.font.size)/2,0].max-2,
+         ch[3]-2,2,ch[8])
+    end
+    if ch[11] # strikeout
+      bitmap.fill_rect(ch[1],ch[2]+(ch[4]/2),ch[3]-2,2,ch[8])
+    end
+  end
+end
+
+def drawSingleFormattedChar2(bitmap,ch)
+  if ch[5] # If a graphic
+    graphic=Bitmap.new(ch[0])
+    graphicRect=ch[15]
+    bitmap.blt(ch[1], ch[2], graphic,graphicRect,ch[8].alpha)
+    graphic.dispose
+  else
+    if bitmap.font.size!=ch[13]
+      bitmap.font.size=ch[13]
+    end
+    if ch[0]!="\n" && ch[0]!="\r" && ch[0]!=" " && !isWaitChar(ch[0])
+      if bitmap.font.bold!=ch[6]
+        bitmap.font.bold=ch[6]
+      end
+      if bitmap.font.italic!=ch[7]
+        bitmap.font.italic=ch[7]
+      end
       bitmap.font.name=ch[12] if bitmap.font.name!=ch[12]
       offset=0
       if ch[9] # shadow
         bitmap.font.color=ch[9]
+        type = (ch[16]&1)!=0 ? 1 : ((ch[16]&2)!=0 ? 2 : 0)
         if (ch[16]&1)!=0 # outline
           offset=1
           bitmap.draw_text(ch[1],ch[2],ch[3]+2,ch[4],ch[0])
@@ -1124,10 +1177,75 @@ def drawTextTable(bitmap,x,y,totalWidth,rowHeight,columnWidthPercents,table)
   end
 end
 
-def drawTextEx(bitmap,x,y,width,numlines,text,baseColor,shadowColor)
+def getNormTextLines(normtext)
+  lines=0
+  last_y=-1
+  for word in normtext
+    if word[2] != last_y
+      lines+=1
+      last_y = word[2]
+    end
+  end
+  return lines
+end
+
+def perfectlySpacedLines(bitmap,normtext,boxheight,lines,maxlines)
+  return if lines == 0 || normtext.length <= 0
+  lines = maxlines - 1 if lines < maxlines - 1
+  lineheight = boxheight / lines
+  min_y = normtext[0][2]
+  ycoords = []
+  for word in normtext
+    min_y = word[2] if word[2] < min_y
+    ycoords.push(word[2]) if !ycoords.include?(word[2])
+  end
+  ycoords.sort! {|a,b| a<=>b}
+  for word in normtext
+    index = 0
+    for i in 0...ycoords.length
+      if word[2]==ycoords[i]
+        index = i
+        break
+      end
+    end
+    word[2] = min_y + lineheight * index
+    if lines == 2 && maxlines == 2 && bitmap.font.name=="Small"
+      word[2]+=2
+    elsif lines == 3 && maxlines == 3 && bitmap.font.name=="Smallest"
+      word[2]-=2
+    elsif lines == 2 && maxlines == 3 && bitmap.font.name=="Smallest"
+      word[2] = min_y + (lineheight - 4) * index + 4
+    end
+  end
+end
+
+def drawTextEx(bitmap,x,y,width,numlines,text,baseColor,shadowColor,adjust=false)
+  boxheight=numlines*32
+  pbSetSystemFont(bitmap)
   normtext=getLineBrokenChunks(bitmap,text,width,nil,true)
-  renderLineBrokenChunksWithShadow(bitmap,x,y,normtext,numlines*32,
-     baseColor,shadowColor)
+  lines=getNormTextLines(normtext)
+  if adjust && lines>numlines
+    numlines+=1 if numlines >= 5
+    pbSetSmallFont(bitmap)
+    normtext=getLineBrokenChunks(bitmap,text,width,nil,true)
+    lines=getNormTextLines(normtext)
+    perfectlySpacedLines(bitmap,normtext,boxheight,lines,numlines)
+    if lines>numlines
+      numlines+=1 if numlines >= 2
+      pbSetSmallestFont(bitmap)
+      normtext=getLineBrokenChunks(bitmap,text,width,nil,true)
+      lines=getNormTextLines(normtext)
+      perfectlySpacedLines(bitmap,normtext,boxheight,lines,numlines)
+      renderLineBrokenChunksWithShadow(bitmap,x,y,normtext,numlines*32,
+         baseColor,shadowColor)
+    else
+      renderLineBrokenChunksWithShadow(bitmap,x,y,normtext,numlines*32,
+         baseColor,shadowColor)
+    end
+  else
+    renderLineBrokenChunksWithShadow(bitmap,x,y,normtext,numlines*32,
+       baseColor,shadowColor)
+  end
 end
 
 def drawFormattedTextEx(bitmap,x,y,width,text,baseColor=nil,shadowColor=nil,lineheight=32)
@@ -1192,11 +1310,11 @@ end
 #  4 - Base color
 #  5 - Shadow color
 #  6 - If true or 1, the text has an outline. Otherwise, the text has a shadow.
-def pbDrawTextPositions(bitmap,textpos)
+def pbDrawTextPositions(bitmap,textpos,shift=true)
   for i in textpos
     textsize = bitmap.text_size(i[0])
     x = i[1]
-    y = i[2] + 6
+    y = i[2] + (shift ? 6 : 0)
     if i[3]==true || i[3]==1   # right align
       x -= textsize.width
     elsif i[3]==2 # centered
@@ -1230,7 +1348,12 @@ def pbDrawImagePositions(bitmap,textpos)
     width=(i[5] && i[5]>=0) ? i[5] : srcbitmap.width
     height=(i[6] && i[6]>=0) ? i[6] : srcbitmap.height
     srcrect=Rect.new(srcx,srcy,width,height)
-    bitmap.blt(x,y,srcbitmap.bitmap,srcrect)
+    if i.length >= 9
+      destrect=Rect.new(x,y,i[7],i[8])
+      bitmap.stretch_blt(destrect,srcbitmap.bitmap,srcrect)
+    else
+      bitmap.blt(x,y,srcbitmap.bitmap,srcrect)
+    end
     srcbitmap.dispose
   end
 end

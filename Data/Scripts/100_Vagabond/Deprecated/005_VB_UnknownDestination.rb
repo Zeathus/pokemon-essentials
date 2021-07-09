@@ -41,7 +41,7 @@ def pbDialogDukeUnknownDestination
     "With whom you ask?WT That is for you to find out.")
   pbSpeech("Duke","neutral",
     "Before you go, I have something for you.")
-  Kernel.pbReceiveItem(PBItems::ODDSTONE)
+  Kernel.pbReceiveItem(:ODDSTONE)
   pbSpeech("Duke","neutral",
     "It's a gift from a special someone.WTBREAKTake good care of it.")
   pbSpeech("Duke","huzzah",

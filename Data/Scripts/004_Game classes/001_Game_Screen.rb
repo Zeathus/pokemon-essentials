@@ -17,6 +17,7 @@ class Game_Screen
   attr_reader   :weather_type       # weather type
   attr_reader   :weather_max        # max number of weather sprites
   attr_accessor :weather_duration   # ticks in which the weather should fade in
+  attr_reader   :vfx_type
   #-----------------------------------------------------------------------------
   # * Object Initialization
   #-----------------------------------------------------------------------------
@@ -41,6 +42,7 @@ class Game_Screen
     @weather_type     = 0
     @weather_max      = 0.0
     @weather_duration = 0
+    @vfx_type = 0
   end
   #-----------------------------------------------------------------------------
   # * Start Changing Color Tone
@@ -84,6 +86,14 @@ class Game_Screen
     @weather_type     = GameData::Weather.get(type).id
     @weather_max      = (power + 1) * RPG::Weather::MAX_SPRITES / 10
     @weather_duration = duration   # In 1/20ths of a seconds
+  end
+  #-----------------------------------------------------------------------------
+  # * Set  VFX
+  #     type : type
+  #-----------------------------------------------------------------------------
+  def vfx(type)
+    type = getID(PBVFX,type) if type.is_a?(Symbol)
+    @vfx_type = type
   end
   #-----------------------------------------------------------------------------
   # * Frame Update

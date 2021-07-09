@@ -356,85 +356,85 @@ def pbFishingStats(species)
   # passive, normal, aggressive, sudden
   
   case species
-  when PBSpecies::MAGIKARP
+  when :MAGIKARP
     return [0,100,2,"passive"]
-  when PBSpecies::GOLDEEN, PBSpecies::LUVDISC
+  when :GOLDEEN, :LUVDISC
     return [0,150,2,"normal"]
-  when PBSpecies::MANTYKE, PBSpecies::FINNEON
+  when :MANTYKE, :FINNEON
     return [1,150,2,"normal"]
-  when PBSpecies::POLIWAG, PBSpecies::PSYDUCK, PBSpecies::TENTACOOL,
-       PBSpecies::SEEL, PBSpecies::OMANYTE, PBSpecies::KABUTO,
-       PBSpecies::TYMPOLE
+  when :POLIWAG, :PSYDUCK, :TENTACOOL,
+       :SEEL, :OMANYTE, :KABUTO,
+       :TYMPOLE
     return [1,150,3,"normal"]
-  when PBSpecies::FEEBAS
+  when :FEEBAS
     return [1,150,4,"normal"]
-  when PBSpecies::GRIMER, PBSpecies::SHELLDER, PBSpecies::STARYU,
-       PBSpecies::SLOWPOKE, PBSpecies::CLAMPERL
+  when :GRIMER, :SHELLDER, :STARYU,
+       :SLOWPOKE, :CLAMPERL
     return [1,200,3,"passive"]
-  when PBSpecies::KRABBY, PBSpecies::CORPHISH
+  when :KRABBY, :CORPHISH
     return [1,200,3,"aggressive"]
-  when PBSpecies::HORSEA, PBSpecies::REMORAID, PBSpecies::PIPLUP,
-       PBSpecies::OSHAWOTT, PBSpecies::FROAKIE, PBSpecies::SKRELP,
-       PBSpecies::CLAUNCHER, PBSpecies::POPPLIO
+  when :HORSEA, :REMORAID, :PIPLUP,
+       :OSHAWOTT, :FROAKIE, :SKRELP,
+       :CLAUNCHER, :POPPLIO
     return [1,200,4,"sudden"]
-  when PBSpecies::FRILLISH, PBSpecies::FROGADIER
+  when :FRILLISH, :FROGADIER
     return [1,300,3,"sudden"]
-  when PBSpecies::DRATINI
+  when :DRATINI
     return [1,250,4,"normal"]
-  when PBSpecies::SQUIRTLE, PBSpecies::CHINCHOU, PBSpecies::QWILFISH,
-       PBSpecies::MUDKIP, PBSpecies::BARBOACH, PBSpecies::TIRTOUGA
+  when :SQUIRTLE, :CHINCHOU, :QWILFISH,
+       :MUDKIP, :BARBOACH, :TIRTOUGA
     return [1,250,3,"normal"]
-  when PBSpecies::WAILMER, PBSpecies::WHISCASH
+  when :WAILMER, :WHISCASH
     return [1,450,3,"normal"]
-  when PBSpecies::TOTODILE, PBSpecies::MAREANIE
+  when :TOTODILE, :MAREANIE
     return [1,200,3,"aggressive"]
-  when PBSpecies::CARVANHA
+  when :CARVANHA
     return [1,200,4,"aggressive"]
-  when PBSpecies::WARTORTLE, PBSpecies::GOLDUCK, PBSpecies::POLIWHIRL,
-       PBSpecies::TENTACRUEL, PBSpecies::DEWGONG, PBSpecies::SEAKING,
-       PBSpecies::VAPOREON, PBSpecies::MARSHTOMP, PBSpecies::PALPITOAD,
-       PBSpecies::STUNFISK
+  when :WARTORTLE, :GOLDUCK, :POLIWHIRL,
+       :TENTACRUEL, :DEWGONG, :SEAKING,
+       :VAPOREON, :MARSHTOMP, :PALPITOAD,
+       :STUNFISK
     return [1,300,3,"normal"]
-  when PBSpecies::CROCONAW, PBSpecies::HUNTAIL
+  when :CROCONAW, :HUNTAIL
     return [1,300,3,"aggressive"]
-  when PBSpecies::SEADRA, PBSpecies::STARMIE, PBSpecies::GOREBYSS,
-       PBSpecies::WISHIWASHI
+  when :SEADRA, :STARMIE, :GOREBYSS,
+       :WISHIWASHI
     return [1,350,5,"sudden"]
-  when PBSpecies::KINGLER, PBSpecies::CRAWDAUNT
+  when :KINGLER, :CRAWDAUNT
     return [1,400,3,"aggressive"]
-  when PBSpecies::SHARPEDO
+  when :SHARPEDO
     return [1,200,4,"aggressive"]
-  when PBSpecies::GYARADOS, PBSpecies::FERALIGATR, PBSpecies::TOXAPEX,
-       PBSpecies::BRUXISH, PBSpecies::DHELMISE
+  when :GYARADOS, :FERALIGATR, :TOXAPEX,
+       :BRUXISH, :DHELMISE
     return [2,500,3,"aggressive"]
-  when PBSpecies::BLASTOISE, PBSpecies::POLIWRATH, PBSpecies::LAPRAS,
-       PBSpecies::LANTURN, PBSpecies::OCTILLERY, PBSpecies::SWAMPERT,
-       PBSpecies::MILOTIC, PBSpecies::SEISMITOAD
+  when :BLASTOISE, :POLIWRATH, :LAPRAS,
+       :LANTURN, :OCTILLERY, :SWAMPERT,
+       :MILOTIC, :SEISMITOAD
     return [2,600,3,"normal"]
-  when PBSpecies::WAILORD
+  when :WAILORD
     return [2,700,3,"aggressive"]
-  when PBSpecies::DRAGONAIR
+  when :DRAGONAIR
     return [2,500,5,"normal"]
-  when PBSpecies::MUK, PBSpecies::SLOWBRO,
-       PBSpecies::SLOWKING, PBSpecies::RELICANTH
+  when :MUK, :SLOWBRO,
+       :SLOWKING, :RELICANTH
     return [2,500,3,"passive"]
-  when PBSpecies::CLOYSTER, PBSpecies::CARRACOSTA
+  when :CLOYSTER, :CARRACOSTA
     return [2,500,3,"aggressive"]
-  when PBSpecies::MANTINE, PBSpecies::LUMINEON, PBSpecies::ALOMOMOLA
+  when :MANTINE, :LUMINEON, :ALOMOMOLA
     return [2,400,4,"normal"]
-  when PBSpecies::JELLICENT, PBSpecies::DRAGALGE, PBSpecies::CLAWITZER
+  when :JELLICENT, :DRAGALGE, :CLAWITZER
     return [2,500,4,"sudden"]
-  when PBSpecies::KINGDRA, PBSpecies::GRENINJA
+  when :KINGDRA, :GRENINJA
     return [2,400,5,"sudden"]
-  when PBSpecies::KABUTOPS, PBSpecies::OMASTAR
+  when :KABUTOPS, :OMASTAR
     return [2,500,4,"normal"]
-  when PBSpecies::PHIONE
+  when :PHIONE
     return [2,700,7,"sudden"]
-  when PBSpecies::MANAPHY
+  when :MANAPHY
     return [2,800,8,"sudden"]
-  when PBSpecies::TAPUFINI
+  when :TAPUFINI
     return [2,900,5,"normal"]
-  when PBSpecies::LUGIA, PBSpecies::KYOGRE
+  when :LUGIA, :KYOGRE
     return [2,1000,4,"aggressive"]
   end
   

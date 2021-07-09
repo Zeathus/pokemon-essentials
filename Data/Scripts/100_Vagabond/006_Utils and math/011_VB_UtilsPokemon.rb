@@ -1,7 +1,7 @@
 def pbCheckFormEvolutionItem(pokemon)
   ret = -1
-  ret = PBItems::ICESTONE if pokemon.species==PBSpecies::VULPIX && pokemon.form==1
-  ret = PBItems::ICESTONE if pokemon.species==PBSpecies::SANDSHREW && pokemon.form==1
+  ret = :ICESTONE if pokemon.species==:VULPIX && pokemon.form==1
+  ret = :ICESTONE if pokemon.species==:SANDSHREW && pokemon.form==1
   return ret
 end
 
@@ -46,4 +46,15 @@ def pbBST(species)
     bst+=stats[i]
   end
   return bst
+end
+
+def pbArrayToIVs(arr)
+  return {
+    :HP => arr[0],
+    :ATTACK => arr[1],
+    :DEFENSE => arr[2],
+    :SPEED => arr[3],
+    :SPECIAL_ATTACK => arr[4],
+    :SPECIAL_DEFENSE => arr[5]
+  }
 end

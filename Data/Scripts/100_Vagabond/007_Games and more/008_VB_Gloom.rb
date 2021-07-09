@@ -32,8 +32,8 @@ def pbStartGloom
   view = Bitmap.new(512, 384)
   viewsprite.bitmap = view
   
-  tileset = BitmapCache.load_bitmap("Graphics/Tilesets/Ruins3D")
-  bg = BitmapCache.load_bitmap("Graphics/Panoramas/outlookloop")
+  tileset = RPG::Cache.load_bitmap("","Graphics/Tilesets/Ruins3D")
+  bg = RPG::Cache.load_bitmap("","Graphics/Panoramas/outlookloop")
   
   player = GloomPlayer.new(map,mapX,mapY,4.5,4.5)
   hud = GloomHUD.new(viewport,player)
@@ -433,7 +433,7 @@ class GloomEnemy < GloomEntity
     super(map,mapX,mapY,sx,sy)
     @player = player
     @focus = 0
-    @bitmap = BitmapCache.load_bitmap(_INTL("Graphics/Scenes/Gloom/{1}",name))
+    @bitmap = RPG::Cache.load_bitmap("",_INTL("Graphics/Scenes/Gloom/{1}",name))
     @pattern = 0
   end
   
@@ -492,7 +492,7 @@ class GloomHUD < Sprite
     super(viewport)
     self.player = p
     self.mustrefresh = false
-    @hudBitmap = BitmapCache.load_bitmap("Graphics/Scenes/Gloom/hud")
+    @hudBitmap = RPG::Cache.load_bitmap("","Graphics/Scenes/Gloom/hud")
     self.bitmap = Bitmap.new(@hudBitmap.width,@hudBitmap.height)
     self.y = 384 - @hudBitmap.height
     self.z = 9999

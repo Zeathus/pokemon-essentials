@@ -386,6 +386,7 @@ def pbTimingList(canvas)
   cmdEditBG=-1
   cmdNewFO=-1
   cmdEditFO=-1
+  cmdDamage=-1
   for i in canvas.animation.timing
     commands.push(sprintf("%s",i))
   end
@@ -394,6 +395,7 @@ def pbTimingList(canvas)
   commands[cmdEditBG=commands.length]=_INTL("Add: Edit Background Color/Location...")
   commands[cmdNewFO=commands.length]=_INTL("Add: Set Foreground Graphic...")
   commands[cmdEditFO=commands.length]=_INTL("Add: Edit Foreground Color/Location...")
+  commands[cmdDamage=commands.length]=_INTL("Add: Damage Visual...")
   cmdwin=pbListWindow(commands,480)
   cmdwin.x=0
   cmdwin.y=0
@@ -416,7 +418,8 @@ def pbTimingList(canvas)
        cmdwin.index!=cmdNewBG &&
        cmdwin.index!=cmdEditBG &&
        cmdwin.index!=cmdNewFO &&
-       cmdwin.index!=cmdEditFO
+       cmdwin.index!=cmdEditFO &&
+       cmdwin.index!=cmdDamage
       if framewindow.changed?(1) # Set Frame
         canvas.animation.timing[cmdwin.index].frame=framewindow.value(0)-1
         cmdwin.commands[cmdwin.index]=sprintf("%s",canvas.animation.timing[cmdwin.index])
@@ -431,6 +434,7 @@ def pbTimingList(canvas)
         cmdEditBG-=1 if cmdEditBG>=0
         cmdNewFO-=1 if cmdNewFO>=0
         cmdEditFO-=1 if cmdEditFO>=0
+        cmdDamage-=1 if cmdDamage>=0
         cmdwin.refresh
         next
       end
@@ -472,6 +476,12 @@ def pbTimingList(canvas)
           canvas.animation.timing.push(newtiming)
           redrawcmds=true
         end
+      elsif cmdwin.index==cmdDamage
+        newtiming=PBAnimTiming.new(5)
+        newtiming.name="instant"
+        newtiming.frame=framewindow.value(0)-1
+        canvas.animation.timing.push(newtiming)
+        redrawcmds=true
       else
         # Edit a timing here
         case canvas.animation.timing[cmdwin.index].timingType
@@ -481,6 +491,15 @@ def pbTimingList(canvas)
           pbSelectBG(canvas,canvas.animation.timing[cmdwin.index])
         when 2, 4
           pbEditBG(canvas,canvas.animation.timing[cmdwin.index])
+        when 5
+          timing=canvas.animation.timing[cmdwin.index]
+          names = ["instant","gradual","multi2","multi3","multi4","multi5","multi6","instant"]
+          for i in 0...names.length
+            if names[i]==timing.name
+              timing.name=names[i+1]
+              break
+            end
+          end
         end
         cmdwin.commands[cmdwin.index]=sprintf("%s",canvas.animation.timing[cmdwin.index])
         cmdwin.refresh
@@ -491,6 +510,7 @@ def pbTimingList(canvas)
         cmdwin.commands[cmdEditBG]=nil if cmdEditBG>=0
         cmdwin.commands[cmdNewFO]=nil if cmdNewFO>=0
         cmdwin.commands[cmdEditFO]=nil if cmdEditFO>=0
+        cmdwin.commands[cmdDamage]=nil if cmdDamage>=0
         cmdwin.commands.compact!
         cmdwin.commands.push(sprintf("%s",canvas.animation.timing[canvas.animation.timing.length-1]))
         cmdwin.commands[cmdNewSound=cmdwin.commands.length]=_INTL("Add: Play Sound...")
@@ -498,6 +518,7 @@ def pbTimingList(canvas)
         cmdwin.commands[cmdEditBG=cmdwin.commands.length]=_INTL("Add: Edit Background Color/Location...")
         cmdwin.commands[cmdNewFO=cmdwin.commands.length]=_INTL("Add: Set Foreground Graphic...")
         cmdwin.commands[cmdEditFO=cmdwin.commands.length]=_INTL("Add: Edit Foreground Color/Location...")
+        cmdwin.commands[cmdDamage=cmdwin.commands.length]=_INTL("Add: Damage Visual...")
         cmdwin.refresh
       end
     elsif Input.trigger?(Input::BACK)

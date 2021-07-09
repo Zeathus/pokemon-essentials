@@ -51,29 +51,29 @@ def pbMineShards(item, quantity)
     pbCollectNotification(text, text2, title)
     
     loot = []
-    loot.push([500, PBItems::OVALSTONE])
-    loot.push([1365, PBItems::NUGGET])
-    loot.push([4096, PBItems::BIGNUGGET])
-    loot.push([20, PBItems::HEARTSCALE])
-    loot.push([100, PBItems::EVERSTONE])
-    loot.push([80, PBItems::HARDSTONE])
-    loot.push([150, PBItems::IRONBALL])
-    loot.push([500, PBItems::KINGSROCK])
-    loot.push([150, PBItems::METALPOWDER])
-    loot.push([150, PBItems::QUICKPOWDER])
-    loot.push([500, PBItems::PROTECTOR])
-    if item == PBItems::GREENSHARD
-      loot.push([200, PBItems::LEAFSTONE])
-      loot.push([300, PBItems::VELVETYROCK])
-    elsif item == PBItems::REDSHARD
-      loot.push([200, PBItems::FIRESTONE])
-      loot.push([300, PBItems::HEATROCK])
-    elsif item == PBItems::YELLOWSHARD
-      loot.push([200, PBItems::THUNDERSTONE])
-      loot.push([300, PBItems::SMOOTHROCK])
-    elsif item == PBItems::BLUESHARD
-      loot.push([200, PBItems::WATERSTONE])
-      loot.push([300, PBItems::DAMPROCK])
+    loot.push([500, :OVALSTONE])
+    loot.push([1365, :NUGGET])
+    loot.push([4096, :BIGNUGGET])
+    loot.push([20, :HEARTSCALE])
+    loot.push([100, :EVERSTONE])
+    loot.push([80, :HARDSTONE])
+    loot.push([150, :IRONBALL])
+    loot.push([500, :KINGSROCK])
+    loot.push([150, :METALPOWDER])
+    loot.push([150, :QUICKPOWDER])
+    loot.push([500, :PROTECTOR])
+    if item == :GREENSHARD
+      loot.push([200, :LEAFSTONE])
+      loot.push([300, :VELVETYROCK])
+    elsif item == :REDSHARD
+      loot.push([200, :FIRESTONE])
+      loot.push([300, :HEATROCK])
+    elsif item == :YELLOWSHARD
+      loot.push([200, :THUNDERSTONE])
+      loot.push([300, :SMOOTHROCK])
+    elsif item == :BLUESHARD
+      loot.push([200, :WATERSTONE])
+      loot.push([300, :DAMPROCK])
     end
     
     for bonus in loot

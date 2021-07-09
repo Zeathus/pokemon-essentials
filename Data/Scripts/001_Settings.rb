@@ -19,9 +19,9 @@ module Settings
   #=============================================================================
 
   # The default screen width (at a scale of 1.0).
-  SCREEN_WIDTH  = 512
+  SCREEN_WIDTH  = 512*1.0#512
   # The default screen height (at a scale of 1.0).
-  SCREEN_HEIGHT = 384
+  SCREEN_HEIGHT = 384*1.0#384
   # The default screen scale factor. Possible values are 0.5, 1.0, 1.5 and 2.0.
   SCREEN_SCALE  = 1.0
 
@@ -45,7 +45,7 @@ module Settings
   #=============================================================================
 
   # The amount of money the player starts the game with.
-  INITIAL_MONEY        = 3000
+  INITIAL_MONEY        = 5000
   # The maximum amount of money the player can have.
   MAX_MONEY            = 999_999
   # The maximum number of Game Corner coins the player can have.
@@ -57,7 +57,7 @@ module Settings
   # The maximum length, in characters, that the player's name can be.
   MAX_PLAYER_NAME_SIZE = 10
   # The maximum number of Pokémon that can be in the party.
-  MAX_PARTY_SIZE       = 6
+  MAX_PARTY_SIZE       = 3
 
   #=============================================================================
 
@@ -124,14 +124,14 @@ module Settings
   # second badge, etc.
   #   e.g. To require the second badge, put false and 1.
   #        To require at least 2 badges, put true and 2.
-  BADGE_FOR_CUT       = 1
-  BADGE_FOR_FLASH     = 2
-  BADGE_FOR_ROCKSMASH = 3
-  BADGE_FOR_SURF      = 4
-  BADGE_FOR_FLY       = 5
-  BADGE_FOR_STRENGTH  = 6
-  BADGE_FOR_DIVE      = 7
-  BADGE_FOR_WATERFALL = 8
+  BADGE_FOR_CUT       = 0
+  BADGE_FOR_FLASH     = 0
+  BADGE_FOR_ROCKSMASH = 0
+  BADGE_FOR_SURF      = 0
+  BADGE_FOR_FLY       = 0
+  BADGE_FOR_STRENGTH  = 0
+  BADGE_FOR_DIVE      = 0
+  BADGE_FOR_WATERFALL = 0
 
   #=============================================================================
 
@@ -166,21 +166,22 @@ module Settings
       _INTL("Items"),
       _INTL("Medicine"),
       _INTL("Poké Balls"),
-      _INTL("TMs & HMs"),
-      _INTL("Berries"),
-      _INTL("Mail"),
+      _INTL("Held Items"),
+      _INTL("Favorites"),
       _INTL("Battle Items"),
+      _INTL("TMs"),
+      _INTL("Berries"),
       _INTL("Key Items")
     ]
   end
   # The maximum number of slots per pocket (-1 means infinite number). Ignore
   # the first number (0).
-  BAG_MAX_POCKET_SIZE  = [0, -1, -1, -1, -1, -1, -1, -1, -1]
+  BAG_MAX_POCKET_SIZE  = [0, -1, -1, -1, -1, -1, -1, -1, -1, -1]
   # The maximum number of items each slot in the Bag can hold.
   BAG_MAX_PER_SLOT     = 999
   # Whether each pocket in turn auto-sorts itself by item ID number. Ignore the
   # first entry (the 0).
-  BAG_POCKET_AUTO_SORT = [0, false, false, false, true, true, false, false, false]
+  BAG_POCKET_AUTO_SORT = [0, false, false, false, false, false, false, true, false, false]
 
   #=============================================================================
 
@@ -201,9 +202,9 @@ module Settings
   # Dex list, no matter which region the player is currently in.
   def self.pokedex_names
     return [
-      [_INTL("Kanto Pokédex"), 0],
-      [_INTL("Johto Pokédex"), 1],
-      _INTL("National Pokédex")
+      [_INTL("National Pokédex"), 0],
+      [_INTL("Distortion Pokédex"), 1],
+      _INTL("Combined Pokédex")
     ]
   end
   # Whether all forms of a given species will be immediately available to view
@@ -227,8 +228,8 @@ module Settings
   #   * Name of the graphic, found in the Graphics/Pictures folder.
   #   * The graphic will always (true) or never (false) be shown on a wall map.
   REGION_MAP_EXTRAS = [
-    [0, 51, 16, 15, "mapHiddenBerth", false],
-    [0, 52, 20, 14, "mapHiddenFaraday", false]
+    #[0, 51, 16, 15, "mapHiddenBerth", false],
+    #[0, 52, 20, 14, "mapHiddenFaraday", false]
   ]
 
   #=============================================================================
@@ -320,6 +321,7 @@ module Settings
   # ID of the animation played when a berry tree grows a stage while the player
   # is on the map (for new plant growth mechanics only).
   PLANT_SPARKLE_ANIMATION_ID   = 7
+  POOF_ANIMATION_ID            = 12
 
   #=============================================================================
 

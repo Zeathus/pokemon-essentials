@@ -1,4 +1,5 @@
 def pbStairs(xOffset,yOffset)
+  return false
   return false if $game_player.through
   x = $game_player.x + xOffset
   y = $game_player.y + yOffset

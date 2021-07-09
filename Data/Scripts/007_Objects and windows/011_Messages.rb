@@ -704,6 +704,9 @@ def pbMessageDisplay(msgwindow,message,letterbyletter=true,commandProc=nil)
       when "cn"     # Display coins window
         coinwindow.dispose if coinwindow
         coinwindow = pbDisplayCoinsWindow(msgwindow,goldwindow)
+      when "sp"     # Display stadium points window
+        coinwindow.dispose if coinwindow
+        coinwindow = pbDisplayStadiumPointsWindow(msgwindow,goldwindow)
       when "pt"     # Display battle points window
         battlepointswindow.dispose if battlepointswindow
         battlepointswindow = pbDisplayBattlePointsWindow(msgwindow)
@@ -746,6 +749,9 @@ def pbMessageDisplay(msgwindow,message,letterbyletter=true,commandProc=nil)
       end
       controls[i] = nil
     end
+    if $DEBUG && Input.press?(Input::CTRL)
+      msgwindow.textspeed = -1
+    end
     break if !letterbyletter
     Graphics.update
     Input.update
@@ -754,7 +760,7 @@ def pbMessageDisplay(msgwindow,message,letterbyletter=true,commandProc=nil)
       msgwindow.resume if msgwindow.busy?
       break if !msgwindow.busy?
     end
-    if Input.trigger?(Input::USE) || Input.trigger?(Input::BACK)
+    if Input.trigger?(Input::USE) || Input.press?(Input::BACK)
       if msgwindow.busy?
         pbPlayDecisionSE if msgwindow.pausing?
         msgwindow.resume
@@ -764,6 +770,7 @@ def pbMessageDisplay(msgwindow,message,letterbyletter=true,commandProc=nil)
     end
     pbUpdateSceneMap
     msgwindow.update
+    msgwindow.updateEffect
     yield if block_given?
     break if (!letterbyletter || commandProc || commands) && !msgwindow.busy?
   end

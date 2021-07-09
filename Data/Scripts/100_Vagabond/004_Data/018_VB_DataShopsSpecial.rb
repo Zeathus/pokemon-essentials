@@ -19,7 +19,7 @@ def pbBottleCap(type)
       "That stat can't grow any stronger on this Pokémon.")
     else
       pkmn.iv[choice]=31
-      $PokemonBag.pbDeleteItem(PBItems::BOTTLECAP,1)
+      $PokemonBag.pbDeleteItem(:BOTTLECAP,1)
       pbSpeech("James", "none",
       _INTL(".WT.WT.WT .WT.WT.WT That should to the trick!WT {1} is stronger now!",pkmn.name))
     end
@@ -39,7 +39,7 @@ def pbBottleCap(type)
         for i in 0..5
           pkmn.iv[i]=31
         end
-        $PokemonBag.pbDeleteItem(PBItems::GOLDBOTTLECAP,1)
+        $PokemonBag.pbDeleteItem(:GOLDBOTTLECAP,1)
         pbSpeech("James", "none",
         _INTL(".WT.WT.WT .WT.WT.WT That should to the trick!WT {1} is stronger now!",pkmn.name))
       end

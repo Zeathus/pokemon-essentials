@@ -63,41 +63,38 @@ end
 
 def createPartyPokemon(id,species,level,moves,ability,nature,gender,ivs=nil)
   id = getID(PBParty,id) if id.is_a?(Symbol)
-  species = getID(PBSpecies,species) if species.is_a?(Symbol)
-  nature = getID(PBNatures,nature) if nature.is_a?(Symbol)
   
-  poke = PokeBattle_Pokemon.new(species,level)
+  poke = Pokemon.new(species,level)
   
   # Trainer fields
-  poke.ot        = PBParty.getName(id)
-  poke.trainerID = PBParty.getTrainerID(id)
-  poke.otgender  = PBParty.getGender(id)
+  poke.owner.name   = PBParty.getName(id)
+  poke.owner.id     = PBParty.getTrainerID(id)
+  poke.owner.gender = PBParty.getGender(id)
   
   # Set Moves
   for i in moves
-    i = getID(PBMoves,i) if i.is_a?(Symbol)
-    poke.pbLearnMove(i)
+    #i = getID(PBMoves,i) if i.is_a?(Symbol)
+    poke.learn_move(i)
   end
-  poke.pbRecordFirstMoves
+  poke.record_first_moves
   
   # Ability
-  poke.abilityflag = ability
+  poke.ability_index = ability
   
   # Gender
-  poke.genderflag = gender
+  poke.gender = gender
   
   # Nature
-  poke.natureflag = nature
+  poke.nature = nature
   
   # IVs
   if ivs
     for i in 0...6
-      poke.oiv[i] = ivs[i]
       poke.iv[i] = ivs[i]
     end
   end
   
-  poke.calcStats
+  poke.calc_stats
   
   return poke
 end

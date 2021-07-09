@@ -7,7 +7,7 @@ def pbStartEditMoveset
        chosen=screen.pbChoosePokemon
        if chosen>=0
          pokemon=$Trainer.party[chosen]
-         if pokemon.isEgg?
+         if pokemon.egg?
            Kernel.pbMessage(_INTL("{1} can't be taught to an Egg.",movename))
          elsif (pokemon.isShadow? rescue false)
            Kernel.pbMessage(_INTL("Shadow Pokémon can't be taught any moves."))
@@ -35,7 +35,7 @@ class EditMovesetMove < Sprite
   def initialize(viewport,x,y,buttonBitmap)
     super(viewport)
     @buttonBitmap = buttonBitmap
-    @chipBitmap = BitmapCache.load_bitmap("Graphics/Pictures/editMovesetChip")
+    @chipBitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/editMovesetChip")
     self.bitmap = Bitmap.new(224,46)
     @move = nil
     @selected = false
@@ -206,7 +206,7 @@ class EditMovesetScreen
     @viewport.z = 99999
     @sprites = {}
     
-    @buttonBitmap = BitmapCache.load_bitmap("Graphics/Pictures/editMovesetButtons")
+    @buttonBitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/editMovesetButtons")
     
     @sprites["bg"] = IconSprite.new(0,0,@viewport)
     @sprites["bg"].setBitmap("Graphics/Pictures/editMovesetBG")

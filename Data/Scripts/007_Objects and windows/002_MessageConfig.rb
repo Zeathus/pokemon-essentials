@@ -409,20 +409,27 @@ end
 #===============================================================================
 # Sets a bitmap's font to the system font.
 def pbSetSystemFont(bitmap)
-  bitmap.font.name = MessageConfig.pbGetSystemFontName
-  bitmap.font.size = MessageConfig::FONT_SIZE
+  fontname="System"
+  bitmap.font.name=fontname
+  bitmap.font.size=32
 end
 
 # Sets a bitmap's font to the system small font.
 def pbSetSmallFont(bitmap)
-  bitmap.font.name = MessageConfig.pbGetSmallFontName
-  bitmap.font.size = MessageConfig::SMALL_FONT_SIZE
+  bitmap.font.name="Small"
+  bitmap.font.size=32
+end
+
+# Sets a bitmap's font to the system small font.
+def pbSetSmallestFont(bitmap)
+  bitmap.font.name="Smallest"
+  bitmap.font.size=32
 end
 
 # Sets a bitmap's font to the system narrow font.
 def pbSetNarrowFont(bitmap)
-  bitmap.font.name = MessageConfig.pbGetNarrowFontName
-  bitmap.font.size = MessageConfig::NARROW_FONT_SIZE
+  bitmap.font.name="System"
+  bitmap.font.size=32
 end
 
 #===============================================================================

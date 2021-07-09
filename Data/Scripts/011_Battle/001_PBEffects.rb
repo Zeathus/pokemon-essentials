@@ -116,6 +116,8 @@ begin
     WaterSport          = 110
     WeightChange        = 111
     Yawn                = 112
+    CorrosiveAcid       = 113
+    EverlastingFainted  = 114
 
     #===========================================================================
     # These effects apply to a battler position

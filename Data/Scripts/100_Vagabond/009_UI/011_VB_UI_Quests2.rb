@@ -41,7 +41,7 @@ def pbShowQuests2(show_quest=nil)
   file = _INTL("Graphics/Pictures/quests_1") if questtab==0
   file = _INTL("Graphics/Pictures/quests_2") if questtab==1
   sprites["bg"] = Sprite.new(viewport)
-  sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+  sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
   
   sprites["tabs"]=Sprite.new(viewport)
   sprites["tabs"].bitmap=BitmapWrapper.new(Graphics.width,Graphics.height)
@@ -54,14 +54,14 @@ def pbShowQuests2(show_quest=nil)
   
   sprites["cursor"]=Sprite.new(viewport)
   file = _INTL("Graphics/Scenes/Quests/cursor2")
-  sprites["cursor"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["cursor"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["cursor"].x=228
   sprites["cursor"].y=100
   sprites["cursor"].z=3
   
   sprites["scrollbar"]=Sprite.new(viewport)
   file = _INTL("Graphics/Pictures/questsScrollbar")
-  sprites["scrollbar"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["scrollbar"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["scrollbar"].x=470
   sprites["scrollbar"].y=100
   sprites["scrollbar"].z=3
@@ -69,7 +69,7 @@ def pbShowQuests2(show_quest=nil)
   for i in 0..6
     file = _INTL("Graphics/Pictures/quests_available")
     sprites[_INTL("status{1}",i)]=Sprite.new(viewport)
-    sprites[_INTL("status{1}",i)].bitmap=BitmapCache.load_bitmap(file)
+    sprites[_INTL("status{1}",i)].bitmap=RPG::Cache.load_bitmap("",file)
     sprites[_INTL("status{1}",i)].x=24
     sprites[_INTL("status{1}",i)].y=101+(i*30)
     sprites[_INTL("status{1}",i)].z=3
@@ -85,17 +85,17 @@ def pbShowQuests2(show_quest=nil)
       textpos += [[quest_list[i].name,60,102+offset,false,text_color1,text_color4]]
       if quest_list[i].status==2
         file = _INTL("Graphics/Pictures/quests_complete")
-        sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+        sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
       elsif quest_list[i].status==1
         file = _INTL("Graphics/Pictures/quests_active")
-        sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+        sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
       else
         file = _INTL("Graphics/Pictures/quests_available")
-        sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+        sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
       end
     else
       file = _INTL("Graphics/Pictures/quests_empty")
-      sprites[_INTL("status{1}",i)].bitmap=BitmapCache.load_bitmap(file)
+      sprites[_INTL("status{1}",i)].bitmap=RPG::Cache.load_bitmap("",file)
     end
   end
   pbDrawTextPositions(sprites["quests"].bitmap,textpos)
@@ -107,13 +107,13 @@ def pbShowQuests2(show_quest=nil)
   sprites["queststep"].z=3
   sprites["questmap"] = Sprite.new(viewport)
   file = _INTL("Graphics/Pictures/quests_map")
-  sprites["questmap"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["questmap"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["questmap"].z=3
   sprites["questmap"].x=285
   sprites["questmap"].y=204
   sprites["questflag"] = Sprite.new(viewport)
   file = _INTL("Graphics/Pictures/quest_marker/marker_0")
-  sprites["questflag"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["questflag"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["questflag"].z=3
   if quest_list[selected]
     quest = quest_list[selected]
@@ -278,17 +278,17 @@ def pbShowQuests2(show_quest=nil)
       if newtab == 0
         questtab = newtab
         file = _INTL("Graphics/Pictures/quests_1")
-        sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+        sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
         quest_list = main_quests
       elsif newtab == 1
         questtab = newtab
         file = _INTL("Graphics/Pictures/quests_2")
-        sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+        sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
         quest_list = side_quests
       elsif newtab == 2
         questtab = newtab
         file = _INTL("Graphics/Pictures/quests_3")
-        sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+        sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
         quest_list = spec_quests
       end
       sprites["cursor"].x = 228
@@ -317,20 +317,20 @@ def pbShowQuests2(show_quest=nil)
           end
           if quest_list[i].status==2
             file = _INTL("Graphics/Pictures/quests_complete")
-            sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+            sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
           elsif quest_list[i].status==1
             file = _INTL("Graphics/Pictures/quests_active")
-            sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+            sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
           elsif quest_list[i].status==0
             file = _INTL("Graphics/Pictures/quests_available")
-            sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+            sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
           elsif quest_list[i].status==-1
             file = _INTL("Graphics/Pictures/quests_unavailable")
-            sprites[_INTL("status{1}",i-scroll)].bitmap=BitmapCache.load_bitmap(file)
+            sprites[_INTL("status{1}",i-scroll)].bitmap=RPG::Cache.load_bitmap("",file)
           end
         else
           file = _INTL("Graphics/Pictures/quests_empty")
-          sprites[_INTL("status{1}",i)].bitmap=BitmapCache.load_bitmap(file)
+          sprites[_INTL("status{1}",i)].bitmap=RPG::Cache.load_bitmap("",file)
         end
       end
       pbDrawTextPositions(sprites["quests"].bitmap,textpos)
@@ -351,7 +351,7 @@ def pbShowQuests2(show_quest=nil)
           if flag_timer>=0 && flag_timer<6
             file = _INTL("Graphics/Pictures/quest_marker/marker_{1}",flag_timer.to_s)
           end
-          sprites["questflag"].bitmap=BitmapCache.load_bitmap(file)
+          sprites["questflag"].bitmap=RPG::Cache.load_bitmap("",file)
         else
           sprites["questmap"].visible=false
           sprites["questflag"].visible=false

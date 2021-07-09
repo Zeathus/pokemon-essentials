@@ -68,7 +68,7 @@ class Game_Map
     end
     @scroll_direction     = 2
     @scroll_rest          = 0
-    @scroll_speed         = 4
+    @scroll_speed         = 3
   end
 
   def updateTileset
@@ -107,7 +107,9 @@ class Game_Map
   #-----------------------------------------------------------------------------
   def autoplayAsCue
     if @map.autoplay_bgm
-      if PBDayNight.isNight? && FileTest.audio_exist?("Audio/BGM/"+ @map.bgm.name+ "_n")
+      if $game_variables[BGM_OVERRIDE]!=0
+        pbBGMPlay($game_variables[BGM_OVERRIDE],@map.bgm.volume,@map.bgm.pitch)
+      elsif PBDayNight.isNight? && FileTest.audio_exist?("Audio/BGM/"+ @map.bgm.name+ "_n")
         pbCueBGM(@map.bgm.name+"_n",1.0,@map.bgm.volume,@map.bgm.pitch)
       else
         pbCueBGM(@map.bgm,1.0)
@@ -123,7 +125,9 @@ class Game_Map
   #-----------------------------------------------------------------------------
   def autoplay
     if @map.autoplay_bgm
-      if PBDayNight.isNight? && FileTest.audio_exist?("Audio/BGM/"+ @map.bgm.name+ "_n")
+      if $game_variables[BGM_OVERRIDE]!=0
+        pbBGMPlay($game_variables[BGM_OVERRIDE],@map.bgm.volume,@map.bgm.pitch)
+      elsif PBDayNight.isNight? && FileTest.audio_exist?("Audio/BGM/"+ @map.bgm.name+ "_n")
         pbBGMPlay(@map.bgm.name+"_n",@map.bgm.volume,@map.bgm.pitch)
       else
         pbBGMPlay(@map.bgm)
@@ -287,6 +291,66 @@ class Game_Map
     return false
   end
 
+  def waterEdge?(x,y)
+    for i in [2, 1, 0]
+      tile_id = data[x, y, i]
+      terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
+      return false if terrain.bridge && $PokemonGlobal.bridge > 0
+      return true if terrain.water_edge
+    end
+    return false
+  end
+
+  def swamp?(x,y)
+    for i in [2, 1, 0]
+      tile_id = data[x, y, i]
+      terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
+      return false if terrain.bridge && $PokemonGlobal.bridge > 0
+      return true if terrain.swamp_wild_encounters
+    end
+    return false
+  end
+
+  def stairs?(x,y)
+    for i in [2, 1, 0]
+      tile_id = data[x, y, i]
+      terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
+      return false if terrain.bridge && $PokemonGlobal.bridge > 0
+      return true if terrain.stair_left || terrain.stair_right
+    end
+    return false
+  end
+
+  def stairsRight?(x,y)
+    for i in [2, 1, 0]
+      tile_id = data[x, y, i]
+      terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
+      return false if terrain.bridge && $PokemonGlobal.bridge > 0
+      return true if terrain.stair_right
+    end
+    return false
+  end
+
+  def stairsLeft?(x,y)
+    for i in [2, 1, 0]
+      tile_id = data[x, y, i]
+      terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
+      return false if terrain.bridge && $PokemonGlobal.bridge > 0
+      return true if terrain.stair_left
+    end
+    return false
+  end
+
+  def stairsUp?(x,y)
+    for i in [2, 1, 0]
+      tile_id = data[x, y, i]
+      terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
+      return false if terrain.bridge && $PokemonGlobal.bridge > 0
+      return true if terrain.stair_up
+    end
+    return false
+  end
+
   def counter?(x,y)
     for i in [2, 1, 0]
       tile_id = data[x, y, i]
@@ -303,6 +367,7 @@ class Game_Map
         terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
         next if terrain.id == :None || terrain.ignore_passability
         next if !countBridge && terrain.bridge && $PokemonGlobal.bridge == 0
+        next if tile_id && @priorities[tile_id] && @priorities[tile_id]>=3
         return terrain
       end
     end
@@ -416,6 +481,8 @@ class Game_Map
     for event in @events.values
       event.update
     end
+    pbUpdateUI
+    pbGetTimeNow.update
     # Update common events
     for common_event in @common_events.values
       common_event.update

@@ -18,6 +18,14 @@ class Game_Player < Game_Character
     @lastdir=0
     @lastdirframe=0
     @bump_se=0
+    @sprite=nil
+  end
+  
+  def sprite
+    if $scene.is_a?(Scene_Map) && $scene.spriteset
+      return $scene.spritesetGlobal.playersprite
+    end
+    return nil
   end
 
   def map
@@ -41,6 +49,10 @@ class Game_Player < Game_Character
       if can_move_in_direction?(dir)
         x_offset = (dir == 4) ? -1 : (dir == 6) ? 1 : 0
         y_offset = (dir == 8) ? -1 : (dir == 2) ? 1 : 0
+        if pbStairs(x_offset,y_offset)
+          check_event_trigger_touch(dir)
+          return
+        end
         return if pbLedge(x_offset, y_offset)
         return if pbEndSurf(x_offset, y_offset)
         turn_generic(dir, true)
@@ -51,6 +63,7 @@ class Game_Player < Game_Character
           increase_steps
         end
       elsif !check_event_trigger_touch(dir)
+        return if $PokemonSystem.autosurf==0 && pbStartSurf(false)
         bump_into_object
       end
     end
@@ -146,6 +159,22 @@ class Game_Player < Game_Character
     return $MapFactory.getFacingTerrainTag(dir, self) if $MapFactory
     facing = pbFacingTile(dir, self)
     return $game_map.terrain_tag(facing[1], facing[2])
+  end
+
+  def pbFacingSecondTerrainTag(dir=nil)
+    dir = self.direction if !dir
+    facing=pbFacingTile(dir, self)
+    case dir
+      when 2 # down
+        return $game_map.terrain_tag(facing[1],facing[2]+1)
+      when 4 # left
+        return $game_map.terrain_tag(facing[1]-1,facing[2])
+      when 6 # right
+        return $game_map.terrain_tag(facing[1]+1,facing[2])
+      when 8 # up
+        return $game_map.terrain_tag(facing[1],facing[2]-1)
+      end
+    return 0
   end
 
   #-----------------------------------------------------------------------------
@@ -381,6 +410,22 @@ end
 
 
 def pbGetPlayerCharset(meta,charset,trainer=nil,force=false)
+  if $game_switches != nil
+    if $game_switches[POKEPLAYER]
+      picture_name = "pkmn"
+      if $game_variables[POKEPLAYERID] > 99
+        picture_name = picture_name + $game_variables[POKEPLAYERID].to_s
+      elsif $game_variables[POKEPLAYERID] > 9
+        picture_name = picture_name + "0" + $game_variables[POKEPLAYERID].to_s
+      else
+        picture_name = picture_name + "00" + $game_variables[POKEPLAYERID].to_s
+      end
+      if pbResolveBitmap("Graphics/Characters/"+picture_name)
+        ret=picture_name
+        return ret
+      end
+    end
+  end
   trainer = $Trainer if !trainer
   outfit = (trainer) ? trainer.outfit : 0
   if $game_player && $game_player.charsetData && !force

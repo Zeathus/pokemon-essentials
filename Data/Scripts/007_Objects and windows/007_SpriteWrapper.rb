@@ -125,7 +125,7 @@ class AnimatedSprite < SpriteWrapper
   def initializeLong(animname,framecount,framewidth,frameheight,frameskip)
     @animname=pbBitmapName(animname)
     @realframes=0
-    @frameskip=[1,frameskip].max
+    @frameskip=[1,(frameskip*1.5).floor].max
     @frameskip *= Graphics.frame_rate/20
     raise _INTL("Frame width is 0") if framewidth==0
     raise _INTL("Frame height is 0") if frameheight==0

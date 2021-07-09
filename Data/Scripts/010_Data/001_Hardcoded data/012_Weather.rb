@@ -161,3 +161,9 @@ GameData::Weather.register({
   :tile_delta_y     => 0,
   :graphics         => [nil, ["fog_tile"]]
 })
+
+GameData::Weather.register({
+  :id               => :Winds,
+  :category         => :Winds,
+  :id_number        => 9
+})

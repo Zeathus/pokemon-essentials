@@ -31,6 +31,9 @@ class Player < Trainer
   # @return [Array<Array>] downloaded Mystery Gift data
   attr_accessor :mystery_gifts
 
+  attr_accessor :playerstats
+  attr_accessor :mailbox
+
   def trainer_type
     if @trainer_type.is_a?(Integer)
       @trainer_type = GameData::Metadata.get_player(@character_ID || 0)[0]
@@ -69,7 +72,7 @@ class Player < Trainer
 
   # @return [Integer] the number of Gym Badges owned by the player
   def badge_count
-    return @badges.count { |badge| badge == true }
+    return @badges.length
   end
 
   #=============================================================================
@@ -85,6 +88,42 @@ class Player < Trainer
   def owned?(species)
     return @pokedex.owned?(species)
   end
+  
+  def stats
+    $game_switches[TAKEN_STEP]=true
+    if @playerstats == nil
+      @playerstats=PlayerStats.new()
+    end
+    return @playerstats
+  end
+  
+  def mail
+    if @mailbox == nil
+      @mailbox = MailBox.new()
+      @mailbox.personal.push(GearMail.new(
+        "Instructions","Welcome to your Mailbox",
+        "Welcome to your own mailbox!\n\n" + 
+        "Here you can receive and view your mail " + 
+        "at any time. You get alerted whenever new " + 
+        "mail arrive as well. There are two mail tabs:\n" + 
+        "-The 'personal' tab for private mail.\n" +
+        "-The 'global' tab for news and such.\n\n" +
+        "Please enjoy your mailbox! "))
+      @mailbox.global.push(GearMail.new(
+        "Rokk News","Global News",
+        "Hello Reader,\n\n" +
+        "Any important news from us will find their " + 
+        "way to your mailbox as soon as possible.\n\n" + 
+        "Always stay up to date!\n -The Rokk News Department"))
+      @mailbox.global.push(GearMail.new(
+        "G.P.O.","East Andes Isle",
+        "Important!\n\n" +
+        "A burst of energy has been registered at the East Andes Isle. " + 
+        "Please refrain from visitting the area until further notice.\n\n" + 
+        "Always stay up to date!\n -The Rokk News Department"))
+    end
+    return @mailbox
+  end
 
   #=============================================================================
 
@@ -92,7 +131,7 @@ class Player < Trainer
     super
     @character_ID          = -1
     @outfit                = 0
-    @badges                = [false] * 8
+    @badges                = []
     @money                 = Settings::INITIAL_MONEY
     @coins                 = 0
     @battle_points         = 0
@@ -104,5 +143,7 @@ class Player < Trainer
     @seen_storage_creator  = false
     @mystery_gift_unlocked = false
     @mystery_gifts         = []
+    @playerstats           = PlayerStats.new()
+    @mailbox               = nil
   end
 end

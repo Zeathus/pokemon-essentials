@@ -459,6 +459,8 @@ module Compiler
           :pokedex_entry         => contents["Pokedex"],
           :type1                 => contents["Type1"],
           :type2                 => contents["Type2"],
+          :type3                 => contents["Type3"],
+          :type4                 => contents["Type4"],
           :base_stats            => contents["BaseStats"],
           :evs                   => contents["EffortPoints"],
           :base_exp              => contents["BaseEXP"],
@@ -658,6 +660,8 @@ module Compiler
           :pokedex_form          => contents["PokedexForm"],
           :type1                 => contents["Type1"] || base_data.type1,
           :type2                 => contents["Type2"] || base_data.type2,
+          :type3                 => contents["Type3"] || base_data.type1,
+          :type4                 => contents["Type4"] || base_data.type1,
           :base_stats            => contents["BaseStats"] || base_data.base_stats,
           :evs                   => contents["EffortPoints"] || base_data.evs,
           :base_exp              => contents["BaseEXP"] || base_data.base_exp,
@@ -697,6 +701,8 @@ module Compiler
         }
         # If form is single-typed, ensure it remains so if base species is dual-typed
         species_hash[:type2] = contents["Type1"] if contents["Type1"] && !contents["Type2"]
+        species_hash[:type3] = contents["Type1"] if contents["Type1"] && !contents["Type3"]
+        species_hash[:type4] = contents["Type1"] if contents["Type1"] && !contents["Type4"]
         # If form has any wild items, ensure none are inherited from base species
         if contents["WildItemCommon"] || contents["WildItemUncommon"] || contents["WildItemRare"]
           species_hash[:wild_item_common]   = contents["WildItemCommon"]

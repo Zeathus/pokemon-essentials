@@ -332,3 +332,55 @@ class PokemonSpeciesIconSprite < SpriteWrapper
     self.src_rect.x = self.src_rect.width*@currentFrame
   end
 end
+
+#===============================================================================
+# Sprite position adjustments
+#===============================================================================
+def getBattleSpriteMetricOffset(species,index,metrics=nil)
+  metrics=load_data("Data/metrics.dat") if !metrics
+  ret=0
+  if index==1 || index==3   # Foe Pokémon
+    ret+=(metrics[1][species] || 0)*2 # enemy Y
+    ret-=(metrics[2][species] || 0)*2 # altitude
+  else                      # Player's Pokémon
+    ret+=(metrics[0][species] || 0)*2
+  end
+  return ret
+end
+
+def adjustBattleSpriteY(sprite,species,index,metrics=nil)
+  ret=0
+  spriteheight=(sprite.bitmap &&
+     !sprite.bitmap.disposed?) ? sprite.bitmap.height : 128
+  ret-=spriteheight
+  ret+=getBattleSpriteMetricOffset(species,index,metrics)
+  return ret
+end
+
+def pbPositionPokemonSprite(sprite,left,top)
+  if sprite.bitmap && !sprite.bitmap.disposed?
+    sprite.x=left+(128-sprite.bitmap.width)/2
+    sprite.y=top+(128-sprite.bitmap.height)/2
+  else
+    sprite.x=left
+    sprite.y=top
+  end
+end
+
+def pbSpriteSetCenter(sprite,cx,cy)
+  return if !sprite
+  if !sprite.bitmap
+    sprite.x=cx
+    sprite.y=cy
+    return
+  end
+  realwidth=sprite.bitmap.width*sprite.zoom_x
+  realheight=sprite.bitmap.height*sprite.zoom_y
+  sprite.x=cx-(realwidth/2)
+  sprite.y=cy-(realheight/2)
+end
+
+def showShadow?(species)
+  metrics=load_data("Data/metrics.dat")
+  return metrics[2][species]>0
+end

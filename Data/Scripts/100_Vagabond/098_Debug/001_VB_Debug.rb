@@ -64,7 +64,7 @@ def pbDisableOverlays
 end
 
 def pbTestBattle
-  pbTrainerBattle(PBTrainers::YOUNGSTER, "Test", _I("..."))
+  pbTrainerBattle(:YOUNGSTER, "Test", _I("..."))
 end
 
 

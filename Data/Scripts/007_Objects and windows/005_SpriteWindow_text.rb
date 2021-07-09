@@ -117,8 +117,9 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
   attr_reader   :shadowColor
   attr_accessor :letterbyletter
   attr_reader   :waitcount
+  attr_reader   :lineHeight
 
-  def initialize(text="")
+  def initialize(text="",font=0)
     @cursorMode       = MessageConfig::CURSOR_POSITION
     @endOfText        = nil
     @scrollstate      = 0
@@ -126,6 +127,8 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     @scrollY          = 0
     @nodraw           = false
     @lineHeight       = 32
+    @lineHeight       = 30 if font == 1
+    @lineHeight       = 24 if font == 2
     @linesdrawn       = 0
     @bufferbitmap     = nil
     @letterbyletter   = false
@@ -134,12 +137,15 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     @lastDrawnChar    = -1
     @fmtchars         = []
     @frameskipChanged = false
-    @frameskip        = MessageConfig.pbGetTextSpeed()
+    @frameskip        = (MessageConfig.pbGetTextSpeed()*1.5).floor
     super(0,0,33,33)
     @pausesprite      = nil
     @text             = ""
     self.contents = Bitmap.new(1,1)
+    @font             = font
     pbSetSystemFont(self.contents)
+    pbSetSmallFont(self.contents) if font == 1
+    pbSetSmallestFont(self.contents) if font == 2
     self.resizeToFit(text,Graphics.width)
     colors = getDefaultTextColors(self.windowskin)
     @baseColor        = colors[0]
@@ -176,7 +182,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     moveCursor
   end
 
-  def lineHeight(value)
+  def lineHeight=(value)
     @lineHeight = value
     self.text = self.text
   end
@@ -197,7 +203,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
 
   def textspeed=(value)
     @frameskipChanged = true if @frameskip!=value
-    @frameskip = value
+    @frameskip = (value*1.5).floor
   end
 
   def width=(value)
@@ -299,7 +305,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     width  = 1
     height = 1
     numlines = 0
-    visiblelines = (self.height-self.borderY)/32
+    visiblelines = (self.height-self.borderY)/@lineHeight
     if value.length==0
       @fmtchars     = []
       @bitmapwidth  = width
@@ -310,7 +316,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
         @fmtchars = []
         fmt = getFormattedText(self.contents,0,0,
            self.width-self.borderX-SpriteWindow_Base::TEXTPADDING,-1,
-           shadowctag(@baseColor,@shadowColor)+value,32,true)
+           shadowctag(@baseColor,@shadowColor)+value,@lineHeight,true)
         @oldfont = self.contents.font.clone
         for ch in fmt
           chx = ch[1]+ch[3]
@@ -338,7 +344,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
       else
         @fmtchars = getFormattedText(self.contents,0,0,
            self.width-self.borderX-SpriteWindow_Base::TEXTPADDING,-1,
-           shadowctag(@baseColor,@shadowColor)+value,32,true)
+           shadowctag(@baseColor,@shadowColor)+value,@lineHeight,true)
         @oldfont = self.contents.font.clone
         for ch in @fmtchars
           chx = ch[1]+ch[3]
@@ -386,6 +392,140 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     return @numtextchars if @lastDrawnChar>=@fmtchars.length
     # index after the last character's index
     return @fmtchars[@lastDrawnChar][14]+1
+  end
+
+  
+  def updateEffect
+    
+    #@fmtchar elements:
+    #      0    1 2 3     4      5       6    7      8
+    #ch = [char,x,y,width,height,graphic,bold,italic,color,
+    #      shadow,underline,strikeout,font,fontSize,?,graphicRect,outline]
+    #      9      10        11        12   13         15          16
+    if $game_system && $game_system.message_effect && $game_system.message_effect.is_a?(Array)
+      numchars=@numtextchars
+      numchars=[@curchar,@numtextchars].min if self.letterbyletter
+    
+      effect = $game_system.message_effect
+      @ef_frame = 0 if !@ef_frame
+      @ef_frame += 1
+      if @ef_frame % 2 == 0
+        speed = effect[3] ? (effect[3] * 1.0) : 6.0
+        if effect[0]=="wave" || effect[0]=="wavebow"
+          if effect.length == 1
+            self.contents.clear
+            for i in 0..numchars
+              next if i>=@fmtchars.length
+              if !self.letterbyletter
+                next if @fmtchars[i][1]>=maxX
+                next if @fmtchars[i][2]>=maxY
+              end
+              old_y = @fmtchars[i][2]
+              add = Math.sin(i/2.0 + @ef_frame/speed)*3.0
+              add = add.floor if add > 0
+              add = add.ceil if add < 0
+              if effect[0]=="wavebow"
+                if i==0
+                  @firstcolors = []
+                  @firstcolors = [@fmtchars[0][8],@fmtchars[0][9]]
+                end
+                if @fmtchars[i+1]
+                  @fmtchars[i][8] = @fmtchars[i+1][8]
+                  @fmtchars[i][9] = @fmtchars[i+1][9]
+                else
+                  @fmtchars[i][8] = @firstcolors[0]
+                  @fmtchars[i][9] = @firstcolors[1]
+                end
+              end
+              @fmtchars[i][2] += add
+              drawSingleFormattedChar(self.contents,@fmtchars[i])
+              @fmtchars[i][2] = old_y
+              @lastDrawnChar=i
+            end
+          elsif effect.length > 1
+            e_start = effect[1] ? effect[1] : 0
+            e_start = 0 if e_start < 0
+            e_end = effect[2] ? effect[2] : numchars
+            e_end = numchars if effect[2] && (numchars < effect[2] || effect[2] <= 0)
+            for i in e_start..e_end
+              next if i>=@fmtchars.length
+              if !self.letterbyletter
+                next if @fmtchars[i][1]>=maxX
+                next if @fmtchars[i][2]>=maxY
+              end
+              self.contents.fill_rect(
+                @fmtchars[i][1],@fmtchars[i][2],
+                @fmtchars[i][3]-2,@fmtchars[i][4],
+                Color.new(0,0,0,0))
+              old_y = @fmtchars[i][2]
+              add = Math.sin(i/2.0 + @ef_frame/speed)*3.0
+              add = add.floor if add > 0
+              add = add.ceil if add < 0
+              @fmtchars[i][2] += add
+              drawSingleFormattedChar(self.contents,@fmtchars[i])
+              @fmtchars[i][2] = old_y
+              @lastDrawnChar=i
+            end
+          end
+        elsif effect[0] == "shake"
+          if effect.length == 1
+            self.contents.clear
+            for i in 0..numchars
+              next if i>=@fmtchars.length
+              if !self.letterbyletter
+                next if @fmtchars[i][1]>=maxX
+                next if @fmtchars[i][2]>=maxY
+              end
+              old_x = @fmtchars[i][1]
+              old_y = @fmtchars[i][2]
+              addx = Math.sin(@ef_frame*12.0/speed)*1.0 + 1
+              addx = addx.floor if addx > 0
+              addx = addx.ceil if addx < 0
+              addy = Math.cos(@ef_frame*9.0/speed)*1.0 + 1
+              addy = addy.floor if addy > 0
+              addy = addy.ceil if addy < 0
+              @fmtchars[i][1] += addx
+              @fmtchars[i][2] += addy
+              drawSingleFormattedChar(self.contents,@fmtchars[i])
+              @fmtchars[i][1] = old_x
+              @fmtchars[i][2] = old_y
+              @lastDrawnChar=i
+            end
+          elsif effect.length > 1
+            e_start = effect[1] ? effect[1] : 0
+            e_start = 0 if e_start < 0
+            e_end = effect[2] ? effect[2] : numchars
+            e_end = numchars if effect[2] && (numchars < effect[2] || effect[2] <= 0)
+            for i in e_start..e_end
+              next if i>=@fmtchars.length
+              if !self.letterbyletter
+                next if @fmtchars[i][1]>=maxX
+                next if @fmtchars[i][2]>=maxY
+              end
+              self.contents.fill_rect(
+                @fmtchars[i][1],@fmtchars[i][2],
+                @fmtchars[i][3]-2,@fmtchars[i][4],
+                Color.new(0,0,0,0))
+              old_x = @fmtchars[i][1]
+              old_y = @fmtchars[i][2]
+              addx = Math.sin(@ef_frame*12.0/speed)*1.0 + 1
+              addx = addx.floor if addx > 0
+              addx = addx.ceil if addx < 0
+              addy = Math.cos(@ef_frame*9.0/speed)*1.0 + 1
+              addy = addy.floor if addy > 0
+              addy = addy.ceil if addy < 0
+              @fmtchars[i][1] += addx
+              @fmtchars[i][2] += addy
+              drawSingleFormattedChar(self.contents,@fmtchars[i])
+              @fmtchars[i][1] = old_x
+              @fmtchars[i][2] = old_y
+              @lastDrawnChar=i
+            end
+          end
+        end
+      end
+    end
+    
   end
 
   def maxPosition

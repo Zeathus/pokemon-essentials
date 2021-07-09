@@ -1,66 +1,66 @@
 def pbAllDataChipMoves
   moves = [
-    [PBMoves::AERIALACE,1],
-    [PBMoves::FALSESWIPE,1],
-    [PBMoves::FORESIGHT,1],
-    [PBMoves::MAGICALLEAF,1],
-    [PBMoves::SHOCKWAVE,1],
-    [PBMoves::SMACKDOWN,1],
-    [PBMoves::WORKUP,1],
-    [PBMoves::ANCIENTPOWER,2],
-    [PBMoves::BRICKBREAK,2],
-    [PBMoves::CHARGEBEAM,2],
-    [PBMoves::CLEARSMOG,2],
-    [PBMoves::FIREPLEDGE,2],
-    [PBMoves::GRASSPLEDGE,2],
-    [PBMoves::HELPINGHAND,2],
-    [PBMoves::POWERUPPUNCH,2],
-    [PBMoves::THIEF,2],
-    [PBMoves::WATERPLEDGE,2],
-    [PBMoves::CURSE,3],
-    [PBMoves::DEFOG,3],
-    [PBMoves::DRAGONCLAW,3],
-    [PBMoves::ELECTRICTERRAIN,3],
-    [PBMoves::FLY,3],
-    [PBMoves::GRASSYTERRAIN,3],
-    [PBMoves::HIGHHORSEPOWER,3],
-    [PBMoves::MISTYTERRAIN,3],
-    [PBMoves::PSYCHUP,3],
-    [PBMoves::PSYCHICTERRAIN,3],
-    [PBMoves::SHADOWFORCE,3],
-    [PBMoves::STRENGTH,3],
-    [PBMoves::ICYWIND,4],
-    [PBMoves::POLLENPUFF,4],
-    [PBMoves::STEALTHROCK,4],
-    [PBMoves::SUBSTITUTE,4],
-    [PBMoves::THROATCHOP,4],
-    [PBMoves::WILDCHARGE,4]
+    [:AERIALACE,1],
+    [:FALSESWIPE,1],
+    [:FORESIGHT,1],
+    [:MAGICALLEAF,1],
+    [:SHOCKWAVE,1],
+    [:SMACKDOWN,1],
+    [:WORKUP,1],
+    [:ANCIENTPOWER,2],
+    [:BRICKBREAK,2],
+    [:CHARGEBEAM,2],
+    [:CLEARSMOG,2],
+    [:FIREPLEDGE,2],
+    [:GRASSPLEDGE,2],
+    [:HELPINGHAND,2],
+    [:POWERUPPUNCH,2],
+    [:THIEF,2],
+    [:WATERPLEDGE,2],
+    [:CURSE,3],
+    [:DEFOG,3],
+    [:DRAGONCLAW,3],
+    [:ELECTRICTERRAIN,3],
+    [:FLY,3],
+    [:GRASSYTERRAIN,3],
+    [:HIGHHORSEPOWER,3],
+    [:MISTYTERRAIN,3],
+    [:PSYCHUP,3],
+    [:PSYCHICTERRAIN,3],
+    [:SHADOWFORCE,3],
+    [:STRENGTH,3],
+    [:ICYWIND,4],
+    [:POLLENPUFF,4],
+    [:STEALTHROCK,4],
+    [:SUBSTITUTE,4],
+    [:THROATCHOP,4],
+    [:WILDCHARGE,4]
   ]
   
   if $PokemonBag.pbQuantity(:DATARECOVERYDEVICE)>0
     moves += [
-      [PBMoves::ROOST,3],
-      #[PBMoves::TERRAINPULSE,3],
-      [PBMoves::WEATHERBALL,3],
-      [PBMoves::FREEZEDRY,4],
-      [PBMoves::FUTURESIGHT,4],
-      [PBMoves::GIGADRAIN,4],
-      [PBMoves::LIQUIDATION,4],
-      [PBMoves::PLAYROUGH,4],
-      [PBMoves::SEISMICTOSS,4],
-      [PBMoves::SURF,4],
-      #[PBMoves::BODYPRESS,5],
-      [PBMoves::DYNAMICPUNCH,5],
-      [PBMoves::EXPLOSION,5],
-      [PBMoves::FLAREBLITZ,5],
-      [PBMoves::HURRICANE,5],
-      [PBMoves::INFERNO,5],
-      [PBMoves::MEGAHORN,5],
-      #[PBMoves::STEELBEAM,5],
-      [PBMoves::ZAPCANNON,5],
-      [PBMoves::DRACOMETEOR,6],
-      [PBMoves::SKYATTACK,6],
-      [PBMoves::METRONOME,10],
+      [:ROOST,3],
+      #[:TERRAINPULSE,3],
+      [:WEATHERBALL,3],
+      [:FREEZEDRY,4],
+      [:FUTURESIGHT,4],
+      [:GIGADRAIN,4],
+      [:LIQUIDATION,4],
+      [:PLAYROUGH,4],
+      [:SEISMICTOSS,4],
+      [:SURF,4],
+      #[:BODYPRESS,5],
+      [:DYNAMICPUNCH,5],
+      [:EXPLOSION,5],
+      [:FLAREBLITZ,5],
+      [:HURRICANE,5],
+      [:INFERNO,5],
+      [:MEGAHORN,5],
+      #[:STEELBEAM,5],
+      [:ZAPCANNON,5],
+      [:DRACOMETEOR,6],
+      [:SKYATTACK,6],
+      [:METRONOME,10],
     ]
   end
   
@@ -80,7 +80,7 @@ def pbHasDataChipMove(move)
 end
 
 def pbGetDataChipMoves(pokemon)
-  return [] if !pokemon || pokemon.isEgg? || (pokemon.isShadow? rescue false)
+  return [] if !pokemon || pokemon.egg? || (pokemon.isShadow? rescue false)
   allMoves = pbAllDataChipMoves
   chipMoves=[]
   # First add unlocked moves
@@ -111,7 +111,7 @@ def pbGetDataChipMoves(pokemon)
 end
 
 def pbGetTMMoves(pokemon)
-  return [] if !pokemon || pokemon.isEgg? || (pokemon.isShadow? rescue false)
+  return [] if !pokemon || pokemon.egg? || (pokemon.isShadow? rescue false)
   #itemdata=readItemList("Data/items.dat")
   moves=[]
   for i in 0...$ItemData.length

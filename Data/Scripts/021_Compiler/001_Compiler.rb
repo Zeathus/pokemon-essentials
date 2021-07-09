@@ -627,8 +627,8 @@ module Compiler
     clonspecies = species.upcase
     clonspecies.gsub!(/^\s*/, "")
     clonspecies.gsub!(/\s*$/, "")
-    clonspecies = "NIDORANmA" if clonspecies == "NIDORANMA"
-    clonspecies = "NIDORANfE" if clonspecies == "NIDORANFE"
+    #clonspecies = "NIDORANmA" if clonspecies == "NIDORANMA"
+    #clonspecies = "NIDORANfE" if clonspecies == "NIDORANFE"
     spec = GameData::Species.try_get(clonspecies)
     if !spec
       raise _INTL("Undefined species constant name: {1}\r\nMake sure the species is defined in PBS/pokemon.txt.\r\n{2}", species, FileLineData.linereport)
@@ -722,6 +722,8 @@ module Compiler
     compile_animations
     yield(_INTL("Converting events"))
     compile_trainer_events(mustCompile)
+    yield(_INTL("Converting markers"))
+    pbLoadMarkerComments
     yield(_INTL("Saving messages"))
     pbSetTextMessages
     MessageTypes.saveMessages

@@ -82,13 +82,13 @@ class PokeBattle_Pokemon
         end
       end
       @name = mod.name if mod.name
-      @abilityflag = mod.ability if mod.ability
-      @genderflag = mod.gender if mod.gender
+      @ability_index = mod.ability if mod.ability
+      @gender = mod.gender if mod.gender
       @item = mod.item if mod.item
       @natureflag = mod.nature if mod.nature
       @shinyflag = mod.shiny if mod.shiny
       @status = mod.status if mod.status
-      calcStats
+      calc_stats
       @hp = @totalhp
       @hp = mod.hp if mod.hp
       $game_variables[WILD_MODIFIER] = 0

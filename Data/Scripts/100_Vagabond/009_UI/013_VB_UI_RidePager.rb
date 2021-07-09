@@ -18,11 +18,11 @@ module PBRides
   
   def PBRides.getSpecies(id)
     species=[0,
-      PBSpecies::ZEBSTRIKA,
-      PBSpecies::WAILMER,
-      PBSpecies::LAPRAS,
-      PBSpecies::SCRAFTY,
-      PBSpecies::DONPHAN]
+      :ZEBSTRIKA,
+      :WAILMER,
+      :LAPRAS,
+      :SCRAFTY,
+      :DONPHAN]
     return species[id]
   end
   
@@ -101,7 +101,7 @@ def pbRidePager
 end
 
 def pbRegisteredRides
-  return if $PokemonBag.pbQuantity(PBItems::RIDEPAGER)<=0
+  return if $PokemonBag.pbQuantity(:RIDEPAGER)<=0
   return if $game_player.moving?
   if $game_variables[RIDE_CURRENT]>0 &&
      $game_variables[RIDE_CURRENT]!=PBRides::Surf
@@ -119,7 +119,7 @@ def pbRegisteredRides
     sprites={}
     sprites["select"]=Sprite.new(viewport)
     file="Graphics/Pictures/ridepager_qs"
-    sprites["select"].bitmap=BitmapCache.load_bitmap(file)
+    sprites["select"].bitmap=RPG::Cache.load_bitmap("",file)
     sprites["select"].x=midx-sprites["select"].bitmap.width/2
     sprites["select"].y=midy-sprites["select"].bitmap.height/2+8
     if $game_variables[RIDE_REGISTERED][Input::UP]

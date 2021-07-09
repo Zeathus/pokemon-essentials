@@ -1,7 +1,6 @@
 def pbHarvestBerry(item, quantity)
-  item = getID(PBItems,item) if item.is_a?(Symbol)
   Kernel.pbMessage(_INTL("It's a bush blooming of {1}. Do you want to pick them?{2}",
-    PBItems.getNamePlural(item),"\\ch[1,2,Yes,No]"))
+    GameData::Item.get(item).name_plural,"\\ch[1,2,Yes,No]"))
   quantity += 1 if $game_screen.weather_type==PBFieldWeather::Sun
   if pbGet(1)==0
     realqnt = quantity
@@ -56,72 +55,72 @@ def pbHarvestBerry(item, quantity)
     pbCollectNotification(text, text2, title)
     
     loot = []
-    loot.push([32, PBItems::TINYMUSHROOM])
-    loot.push([128, PBItems::BIGMUSHROOM])
-    loot.push([256, PBItems::BALMMUSHROOM])
-    loot.push([1365, PBItems::REVIVALHERB])
-    loot.push([96, PBItems::MENTALHERB])
-    loot.push([128, PBItems::POWERHERB])
-    loot.push([128, PBItems::WHITEHERB])
+    loot.push([32, :TINYMUSHROOM])
+    loot.push([128, :BIGMUSHROOM])
+    loot.push([256, :BALMMUSHROOM])
+    loot.push([1365, :REVIVALHERB])
+    loot.push([96, :MENTALHERB])
+    loot.push([128, :POWERHERB])
+    loot.push([128, :WHITEHERB])
     
     # Ability Dependant drops
-    loot.push([32, PBItems::HONEY]) if pbPartyAbilityCount(:HONEYGATHER)>0
-    loot.push([pbPartyMoveCount(:ROTOTILLER) ? 48 : 128, PBItems::ENERGYROOT])
-    loot.push([pbPartyMoveCount(:ROTOTILLER) ? 64 : 256, PBItems::BIGROOT])
-    loot.push([pbPartyMoveCount(:WATERSPORT) ? 64 : 256, PBItems::ABSORBBULB])
+    loot.push([32, :HONEY]) if pbPartyAbilityCount(:HONEYGATHER)>0
+    loot.push([pbPartyMoveCount(:ROTOTILLER) ? 48 : 128, :ENERGYROOT])
+    loot.push([pbPartyMoveCount(:ROTOTILLER) ? 64 : 256, :BIGROOT])
+    loot.push([pbPartyMoveCount(:WATERSPORT) ? 64 : 256, :ABSORBBULB])
     
     # Nectars (4x the chance if the player has an Oricorio)
     case item
-    when PBItems::APICOTBERRY, PBItems::BELUEBERRY, PBItems::BLUKBERRY,
-         PBItems::CHESTOBERRY, PBItems::CORNNBERRY, PBItems::GANLONBERRY,
-         PBItems::PAMTREBERRY, PBItems::PAYAPABERRY, PBItems::RAWSTBERRY,
-         PBItems::WIKIBERRY
-      loot.push([pbHasInParty?(PBSpecies::ORICORIO) ? 32 : 128, PBItems::PURPLENECTAR])
-    when PBItems::COLBURBERRY, PBItems::KASIBBERRY, PBItems::KEEBERRY,
-         PBItems::LANSATBERRY, PBItems::MAGOBERRY, PBItems::MAGOSTBERRY,
-         PBItems::NANABBERRY, PBItems::PECHABERRY, PBItems::PERSIMBERRY,
-         PBItems::PETAYABERRY, PBItems::QUALOTBERRY, PBItems::SPELONBERRY
-      loot.push([pbHasInParty?(PBSpecies::ORICORIO) ? 32 : 128, PBItems::PINKNECTAR])
-    when PBItems::CHERIBERRY, PBItems::CHOPLEBERRY, PBItems::CUSTAPBERRY,
-         PBItems::HABANBERRY, PBItems::LEPPABERRY, PBItems::OCCABERRY,
-         PBItems::POMEGBERRY, PBItems::RAZZBERRY, PBItems::ROSELIBERRY,
-         PBItems::TAMATOBERRY
-      loot.push([pbHasInParty?(PBSpecies::ORICORIO) ? 32 : 128, PBItems::REDNECTAR])
-    when PBItems::ASPEARBERRY, PBItems::CHARTIBERRY, PBItems::GREPABERRY,
-         PBItems::HONDEWBERRY, PBItems::JABOCABERRY, PBItems::NOMELBERRY,
-         PBItems::PINAPBERRY, PBItems::SHUCABERRY, PBItems::SITRUSBERRY,
-         PBItems::WACANBERRY
-      loot.push([pbHasInParty?(PBSpecies::ORICORIO) ? 32 : 128, PBItems::YELLOWNECTAR])
+    when :APICOTBERRY, :BELUEBERRY, :BLUKBERRY,
+         :CHESTOBERRY, :CORNNBERRY, :GANLONBERRY,
+         :PAMTREBERRY, :PAYAPABERRY, :RAWSTBERRY,
+         :WIKIBERRY
+      loot.push([pbHasInParty?(:ORICORIO) ? 32 : 128, :PURPLENECTAR])
+    when :COLBURBERRY, :KASIBBERRY, :KEEBERRY,
+         :LANSATBERRY, :MAGOBERRY, :MAGOSTBERRY,
+         :NANABBERRY, :PECHABERRY, :PERSIMBERRY,
+         :PETAYABERRY, :QUALOTBERRY, :SPELONBERRY
+      loot.push([pbHasInParty?(:ORICORIO) ? 32 : 128, :PINKNECTAR])
+    when :CHERIBERRY, :CHOPLEBERRY, :CUSTAPBERRY,
+         :HABANBERRY, :LEPPABERRY, :OCCABERRY,
+         :POMEGBERRY, :RAZZBERRY, :ROSELIBERRY,
+         :TAMATOBERRY
+      loot.push([pbHasInParty?(:ORICORIO) ? 32 : 128, :REDNECTAR])
+    when :ASPEARBERRY, :CHARTIBERRY, :GREPABERRY,
+         :HONDEWBERRY, :JABOCABERRY, :NOMELBERRY,
+         :PINAPBERRY, :SHUCABERRY, :SITRUSBERRY,
+         :WACANBERRY
+      loot.push([pbHasInParty?(:ORICORIO) ? 32 : 128, :YELLOWNECTAR])
     end
     
     # Seeds
     case item
-    when PBItems::APICOTBERRY, PBItems::COBABERRY, PBItems::CORNNBERRY,
-         PBItems::KELPSYBERRY, PBItems::ROSELIBERRY, PBItems::ROWAPBERRY,
-         PBItems::YACHEBERRY, PBItems::WIKIBERRY
-      loot.push([64, PBItems::MISTYSEED])
-    when PBItems::COLBURBERRY, PBItems::KASIBBERRY, PBItems::KEEBERRY,
-         PBItems::LANSATBERRY, PBItems::MAGOBERRY, PBItems::MAGOSTBERRY,
-         PBItems::NANABBERRY, PBItems::PECHABERRY, PBItems::PERSIMBERRY,
-         PBItems::PETAYABERRY, PBItems::QUALOTBERRY, PBItems::SPELONBERRY
-      loot.push([64, PBItems::PSYCHICSEED])
-    when PBItems::AGUAVBERRY, PBItems::BABIRIBERRY, PBItems::DURINBERRY,
-         PBItems::HONDEWBERRY, PBItems::KEBIABERRY, PBItems::LUMBERRY,
-         PBItems::MICLEBERRY, PBItems::RABUTABERRY, PBItems::RINDOBERRY,
-         PBItems::SALACBERRY, PBItems::STARFBERRY, PBItems::WEPEARBERRY,
-         PBItems::TANGABERRY
-      loot.push([64, PBItems::GRASSYSEED])
-    when PBItems::ASPEARBERRY, PBItems::CHARTIBERRY, PBItems::GREPABERRY,
-         PBItems::JABOCABERRY, PBItems::NOMELBERRY, PBItems::PINAPBERRY,
-         PBItems::SHUCABERRY, PBItems::SITRUSBERRY, PBItems::WACANBERRY
-      loot.push([64, PBItems::ELECTRICSEED])
+    when :APICOTBERRY, :COBABERRY, :CORNNBERRY,
+         :KELPSYBERRY, :ROSELIBERRY, :ROWAPBERRY,
+         :YACHEBERRY, :WIKIBERRY
+      loot.push([64, :MISTYSEED])
+    when :COLBURBERRY, :KASIBBERRY, :KEEBERRY,
+         :LANSATBERRY, :MAGOBERRY, :MAGOSTBERRY,
+         :NANABBERRY, :PECHABERRY, :PERSIMBERRY,
+         :PETAYABERRY, :QUALOTBERRY, :SPELONBERRY
+      loot.push([64, :PSYCHICSEED])
+    when :AGUAVBERRY, :BABIRIBERRY, :DURINBERRY,
+         :HONDEWBERRY, :KEBIABERRY, :LUMBERRY,
+         :MICLEBERRY, :RABUTABERRY, :RINDOBERRY,
+         :SALACBERRY, :STARFBERRY, :WEPEARBERRY,
+         :TANGABERRY
+      loot.push([64, :GRASSYSEED])
+    when :ASPEARBERRY, :CHARTIBERRY, :GREPABERRY,
+         :JABOCABERRY, :NOMELBERRY, :PINAPBERRY,
+         :SHUCABERRY, :SITRUSBERRY, :WACANBERRY
+      loot.push([64, :ELECTRICSEED])
     end
     
     for bonus in loot
       rng = rand(bonus[0])
       if rng < realqnt
         $PokemonBag.pbStoreItem(bonus[1], 1)
-        pbCollectNotification(PBItems.getName(bonus[1]).upcase, "BONUS ITEM!")
+        pbCollectNotification(GameData::Item.get(item).name, "BONUS ITEM!")
       end
     end
     

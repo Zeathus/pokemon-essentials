@@ -30,151 +30,139 @@ GameData::EncounterType.register({
   :id             => :Land,
   :type           => :land,
   :trigger_chance => 21,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :LandDay,
   :type           => :land,
   :trigger_chance => 21,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :LandNight,
   :type           => :land,
   :trigger_chance => 21,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :LandMorning,
   :type           => :land,
   :trigger_chance => 21,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :LandAfternoon,
   :type           => :land,
   :trigger_chance => 21,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :LandEvening,
   :type           => :land,
   :trigger_chance => 21,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :Cave,
   :type           => :cave,
   :trigger_chance => 5,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [20, 20, 20, 10, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :CaveDay,
   :type           => :cave,
   :trigger_chance => 5,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [20, 20, 20, 10, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :CaveNight,
   :type           => :cave,
   :trigger_chance => 5,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [20, 20, 20, 10, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :CaveMorning,
   :type           => :cave,
   :trigger_chance => 5,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [20, 20, 20, 10, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :CaveAfternoon,
   :type           => :cave,
   :trigger_chance => 5,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [20, 20, 20, 10, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :CaveEvening,
   :type           => :cave,
   :trigger_chance => 5,
-  :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+  :old_slots      => [20, 20, 20, 10, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :Water,
   :type           => :water,
   :trigger_chance => 2,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :WaterDay,
   :type           => :water,
   :trigger_chance => 2,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :WaterNight,
   :type           => :water,
   :trigger_chance => 2,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :WaterMorning,
   :type           => :water,
   :trigger_chance => 2,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :WaterAfternoon,
   :type           => :water,
   :trigger_chance => 2,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :WaterEvening,
   :type           => :water,
   :trigger_chance => 2,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
-  :id             => :OldRod,
+  :id             => :FishingRod,
   :type           => :fishing,
-  :old_slots      => [70, 30]
-})
-
-GameData::EncounterType.register({
-  :id             => :GoodRod,
-  :type           => :fishing,
-  :old_slots      => [60, 20, 20]
-})
-
-GameData::EncounterType.register({
-  :id             => :SuperRod,
-  :type           => :fishing,
-  :old_slots      => [40, 40, 15, 4, 1]
+  :old_slots      => [40, 30, 15, 10, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :RockSmash,
   :type           => :none,
   :trigger_chance => 50,
-  :old_slots      => [60, 30, 5, 4, 1]
+  :old_slots      => [60, 30, 10]
 })
 
 GameData::EncounterType.register({
@@ -194,4 +182,39 @@ GameData::EncounterType.register({
   :type           => :contest,
   :trigger_chance => 21,
   :old_slots      => [20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1]
+})
+
+GameData::EncounterType.register({
+  :id             => :Land2,
+  :type           => :land,
+  :trigger_chance => 21,
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
+})
+
+GameData::EncounterType.register({
+  :id             => :Land3,
+  :type           => :land,
+  :trigger_chance => 21,
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
+})
+
+GameData::EncounterType.register({
+  :id             => :Land4,
+  :type           => :land,
+  :trigger_chance => 21,
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
+})
+
+GameData::EncounterType.register({
+  :id             => :Flowers,
+  :type           => :land,
+  :trigger_chance => 21,
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
+})
+
+GameData::EncounterType.register({
+  :id             => :Swamp,
+  :type           => :land,
+  :trigger_chance => 21,
+  :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })

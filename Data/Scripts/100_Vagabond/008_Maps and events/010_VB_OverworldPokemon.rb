@@ -362,6 +362,7 @@ end
 class Spriteset_Map
   
   def initSpawnAreas
+    return
     $PokemonEncounters.setup(@map.map_id)
     count=0
     for y in 0...@map.height
@@ -428,6 +429,7 @@ class Spriteset_Map
   end
   
   def updateOverworldPokemon
+    return
     return if $game_temp.in_menu
     if $game_system.map_interpreter.running? ||
            $game_player.move_route_forcing ||

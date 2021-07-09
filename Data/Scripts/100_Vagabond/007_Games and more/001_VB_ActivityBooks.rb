@@ -4,7 +4,7 @@ def pbReadBook(name)
   file = _INTL("Graphics/Scenes/School/{1}_{2}",name,page)
   book = Sprite.new(viewport)
   if pbResolveBitmap(file)
-    book.bitmap=BitmapCache.load_bitmap(file)
+    book.bitmap=RPG::Cache.load_bitmap("",file)
   end
   viewport.z = 200
   loop do
@@ -15,7 +15,7 @@ def pbReadBook(name)
       page = page + 1
       file = _INTL("Graphics/Scenes/School/{1}_{2}",name,page)
       if pbResolveBitmap(file)
-        book.bitmap=BitmapCache.load_bitmap(file)
+        book.bitmap=RPG::Cache.load_bitmap("",file)
       else
         page = page - 1
       end
@@ -23,7 +23,7 @@ def pbReadBook(name)
       page = page - 1
       file = _INTL("Graphics/Scenes/School/{1}_{2}",name,page)
       if pbResolveBitmap(file)
-        book.bitmap=BitmapCache.load_bitmap(file)
+        book.bitmap=RPG::Cache.load_bitmap("",file)
       else
         page = page + 1
       end
@@ -37,7 +37,7 @@ end
 
 def pbHasBook?
   books = [
-  PBItems::EEVEEBOOK]
+  :EEVEEBOOK]
   book = 0
   for i in books
     if $PokemonBag.pbQuantity(i)>=1

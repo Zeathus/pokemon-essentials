@@ -129,3 +129,8 @@ GameData::Environment.register({
   :id   => :UltraSpace,
   :name => _INTL("Ultra Space")
 })
+
+GameData::Environment.register({
+  :id   => :DistortionWorld,
+  :name => _INTL("Distortion World")
+})

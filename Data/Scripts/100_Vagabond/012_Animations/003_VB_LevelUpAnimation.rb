@@ -21,7 +21,7 @@ def pbLevelUpAnimation(pokemon,battler,oldtotalhp,oldattack,olddefense,oldspeed,
     sprites["icon"].z = 5
     
     sprites["display"]=Sprite.new(viewport)
-    sprites["display"].bitmap = BitmapCache.load_bitmap("Graphics/Pictures/levelup")
+    sprites["display"].bitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/levelup")
     sprites["display"].x = 512
     sprites["display"].y = 42
     sprites["display"].z = 1

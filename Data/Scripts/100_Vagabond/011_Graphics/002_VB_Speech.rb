@@ -221,10 +221,10 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
     face=Sprite.new(viewport)
     if pbResolveBitmap(file)
       #Showing the portrait
-      face.bitmap=BitmapCache.load_bitmap(file)
+      face.bitmap=RPG::Cache.load_bitmap("",file)
     elsif pbResolveBitmap(backup) && emotion != "none"
       #Showing neutral portrait if emotion isn't found
-      face.bitmap=BitmapCache.load_bitmap(backup)
+      face.bitmap=RPG::Cache.load_bitmap("",backup)
     end
     face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 10 : 302
   end
@@ -235,7 +235,7 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
     #Showing the box for the name
     name_box=Sprite.new(viewport)
     file="Graphics/Messages/name_box"
-    name_box.bitmap=BitmapCache.load_bitmap(file)
+    name_box.bitmap=RPG::Cache.load_bitmap("",file)
     name_box.x = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 326 : 30
     name_box.y = 108
     
@@ -333,10 +333,10 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
   face=Sprite.new(viewport)
   if pbResolveBitmap(file)
     #Showing the portrait
-    face.bitmap=BitmapCache.load_bitmap(file)
+    face.bitmap=RPG::Cache.load_bitmap("",file)
   elsif pbResolveBitmap(backup) && emotion != "none"
     #Showing neutral portrait if emotion isn't found
-    face.bitmap=BitmapCache.load_bitmap(backup)
+    face.bitmap=RPG::Cache.load_bitmap("",backup)
   end
   face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 10 : 302
   
@@ -345,7 +345,7 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
     #Showing the box for the name
     name_box=Sprite.new(viewport)
     file="Graphics/Messages/name_box"
-    name_box.bitmap=BitmapCache.load_bitmap(file)
+    name_box.bitmap=RPG::Cache.load_bitmap("",file)
     name_box.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 326 : 30
     name_box.y = 108
   

@@ -1,11 +1,11 @@
 def pbShopScoriaStatBerries
   items = [
-    PBItems::POMEGBERRY,
-    PBItems::KELPSYBERRY,
-    PBItems::QUALOTBERRY,
-    PBItems::HONDEWBERRY,
-    PBItems::GREPABERRY,
-    PBItems::TAMATOBERRY
+    :POMEGBERRY,
+    :KELPSYBERRY,
+    :QUALOTBERRY,
+    :HONDEWBERRY,
+    :GREPABERRY,
+    :TAMATOBERRY
   ]
   for i in items
     setPrice(i,200)
@@ -15,13 +15,13 @@ end
 
 def pbShopScoriaSeeds
   items = [
-    PBItems::ELECTRICSEED,
-    PBItems::GRASSYSEED,
-    PBItems::MISTYSEED,
-    PBItems::PSYCHICSEED,
-    PBItems::MIRACLESEED,
-    PBItems::ABSORBBULB,
-    #PBItems::LUMINOUSMOSS
+    :ELECTRICSEED,
+    :GRASSYSEED,
+    :MISTYSEED,
+    :PSYCHICSEED,
+    :MIRACLESEED,
+    :ABSORBBULB,
+    #:LUMINOUSMOSS
   ]
   for i in items
     setPrice(i,400)
@@ -33,24 +33,24 @@ end
 
 def pbShopScoriaBerries
   items = [
-    PBItems::BABIRIBERRY,
-    PBItems::CHARTIBERRY,
-    PBItems::CHILANBERRY,
-    PBItems::CHOPLEBERRY,
-    PBItems::COBABERRY,
-    PBItems::COLBURBERRY,
-    PBItems::HABANBERRY,
-    PBItems::KASIBBERRY,
-    PBItems::KEBIABERRY,
-    PBItems::OCCABERRY,
-    PBItems::PASSHOBERRY,
-    PBItems::PAYAPABERRY,
-    PBItems::RINDOBERRY,
-    PBItems::ROSELIBERRY,
-    PBItems::SHUCABERRY,
-    PBItems::TANGABERRY,
-    PBItems::WACANBERRY,
-    PBItems::YACHEBERRY
+    :BABIRIBERRY,
+    :CHARTIBERRY,
+    :CHILANBERRY,
+    :CHOPLEBERRY,
+    :COBABERRY,
+    :COLBURBERRY,
+    :HABANBERRY,
+    :KASIBBERRY,
+    :KEBIABERRY,
+    :OCCABERRY,
+    :PASSHOBERRY,
+    :PAYAPABERRY,
+    :RINDOBERRY,
+    :ROSELIBERRY,
+    :SHUCABERRY,
+    :TANGABERRY,
+    :WACANBERRY,
+    :YACHEBERRY
   ]
   for i in items
     setPrice(i,400)
@@ -60,13 +60,13 @@ end
 
 def pbShopScoriaHerbs
   return [
-    PBItems::ENERGYPOWDER,
-    PBItems::ENERGYROOT,
-    PBItems::HEALPOWDER,
-    PBItems::REVIVALHERB,
-    PBItems::MENTALHERB,
-    PBItems::POWERHERB,
-    PBItems::WHITEHERB
+    :ENERGYPOWDER,
+    :ENERGYROOT,
+    :HEALPOWDER,
+    :REVIVALHERB,
+    :MENTALHERB,
+    :POWERHERB,
+    :WHITEHERB
   ]
 end
 

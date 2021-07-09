@@ -15,6 +15,7 @@ class Game_System
   attr_accessor :encounter_disabled       # encounter forbidden
   attr_accessor :message_position         # text option: positioning
   attr_accessor :message_frame            # text option: window frame
+  attr_accessor :message_effect           # contains wave-text, etc [type,start,end]
   attr_accessor :save_count               # save count
   attr_accessor :magic_number             # magic number
   attr_accessor :autoscroll_x_speed
@@ -31,6 +32,7 @@ class Game_System
     @encounter_disabled = false
     @message_position   = 2
     @message_frame      = 0
+    @message_effect     = false
     @save_count         = 0
     @magic_number       = 0
     @autoscroll_x_speed = 0
@@ -282,5 +284,16 @@ class Game_System
       @map_interpreter.command_end
       event.start
     end
+  end
+  
+  def self.message_effect
+    if !@message_effect
+      return false
+    end
+    return @message_effect
+  end
+  
+  def self.message_effect=(value)
+    @message_effect = value
   end
 end

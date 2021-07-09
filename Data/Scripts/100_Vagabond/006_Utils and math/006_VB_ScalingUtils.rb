@@ -16,7 +16,7 @@ def pbTrainerAverageLevel
   total = 0
   highest = 0
   for pkmn in party
-    if !pkmn.isEgg?
+    if !pkmn.egg?
       party_size += 1
       total += pkmn.level
       highest = pkmn.level if pkmn.level > highest
@@ -32,7 +32,7 @@ def pbTrainerHighestLevel
   party = $Trainer.party
   highest = 0
   for pkmn in party
-    if !pkmn.isEgg?
+    if !pkmn.egg?
       highest = pkmn.level if pkmn.level > highest
     end
   end

@@ -93,13 +93,46 @@ class Scene_Map
   end
 
   def call_menu
+    if Input.press?(Input::CTRL) && $DEBUG
+      event_id = pbNumericUpDown("Set selfswitch of [Event ID]")
+      event_name = "NULL"
+      for event in $game_map.events.values
+        if event.id == event_id
+          event_name = event.name
+        end
+      end
+      if event_name == "NULL"
+        Kernel.pbMessage("No event with that ID")
+      else
+        Kernel.pbMessage("The event is named \"" + event_name + "\"" +
+          "\nWhat switch to toggle?\\ch[1,5,A,B,C,D,Cancel]")
+        if pbGet(1)<4
+          letters = ["A","B","C","D"]
+          state = $game_self_switches[[$game_map.map_id,event_id,letters[pbGet(1)]]]
+          $game_self_switches[[$game_map.map_id,event_id,letters[pbGet(1)]]]=!state
+          Kernel.pbMessage("Switch " + letters[pbGet(1)] + " set to " + (!state).to_s)
+        end
+      end
+      $game_temp.menu_calling = false
+      return
+    elsif $game_variables[UI_ARRAY].is_a?(Array) && $game_variables[UI_ARRAY].length>0
+      if $game_variables[UI_ARRAY][0][0]==UIType::QUESTDISCOVER ||
+        $game_variables[UI_ARRAY][0][0]==UIType::QUESTPROGRESS
+        $game_temp.menu_calling = false
+        $game_temp.in_menu = true
+        quest=$game_variables[UI_ARRAY][0][2]
+        $game_variables[UI_ARRAY][0][1]=300
+        pbWait(1)
+        pbShowQuests(quest)
+        $game_temp.in_menu = false
+        return
+      end
+    end
     $game_temp.menu_calling = false
     $game_temp.in_menu = true
     $game_player.straighten
     $game_map.update
-    sscene = PokemonPauseMenu_Scene.new
-    sscreen = PokemonPauseMenu.new(sscene)
-    sscreen.pbStartPokemonMenu
+    pbPauseMenu
     $game_temp.in_menu = false
   end
 

@@ -24,20 +24,20 @@ end
 def pbGetHabitatListReward(area)
   
   rewards = [
-    ["Andes Isles", PBMoves::AQUATAIL],
-    ["Breccia Area", PBMoves::GIGADRAIN],
-    ["Canjon Valley", PBMoves::DOUBLEEDGE],
-    ["Crosswoods", PBMoves::ELECTROWEB],
-    ["Evergone Mangrove", PBMoves::AMNESIA],
-    ["Lazuli Area", PBMoves::WATERPULSE],
-    ["Mica Quarry", PBMoves::ENDURE],
-    ["Mica Quarry Deep", PBMoves::CURSE],
-    ["Mt. Pegma Area", PBMoves::IRONDEFENSE],
-    ["Mt. Pegma Interior", PBMoves::IRONTAIL],
-    ["Quartz Area", PBMoves::BOUNCE],
-    ["Shale Area", PBMoves::DESTINYBOND],
-    ["Smokey Forest", PBMoves::DEFOG],
-    ["Tuff Area", PBMoves::COUNTER]
+    ["Andes Isles", :AQUATAIL],
+    ["Breccia Area", :GIGADRAIN],
+    ["Canjon Valley", :DOUBLEEDGE],
+    ["Crosswoods", :ELECTROWEB],
+    ["Evergone Mangrove", :AMNESIA],
+    ["Lazuli Area", :WATERPULSE],
+    ["Mica Quarry", :ENDURE],
+    ["Mica Quarry Deep", :CURSE],
+    ["Mt. Pegma Area", :IRONDEFENSE],
+    ["Mt. Pegma Interior", :IRONTAIL],
+    ["Quartz Area", :BOUNCE],
+    ["Shale Area", :DESTINYBOND],
+    ["Smokey Forest", :DEFOG],
+    ["Tuff Area", :COUNTER]
   ]
     
   for i in rewards

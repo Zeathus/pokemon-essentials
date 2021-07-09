@@ -5,7 +5,7 @@ class QuestHeaderSprite < Sprite
     @text = text
     self.x = x
     self.y = y
-    @buttonBitmap = BitmapCache.load_bitmap("Graphics/Pictures/quests_header")
+    @buttonBitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_header")
     @selected = false
     self.bitmap = Bitmap.new(236,40)
     refresh
@@ -221,8 +221,8 @@ class QuestScrollSprite < Sprite
     super(viewport)
     self.x = x
     self.y = y
-    @scrollbitmap = BitmapCache.load_bitmap("Graphics/Pictures/quests_scroll")
-    @barbitmap = BitmapCache.load_bitmap("Graphics/Pictures/quests_scrollbar")
+    @scrollbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_scroll")
+    @barbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_scrollbar")
     @mustrefresh = true
     @scrollpos = 0
     @scrollmax = 254 - @scrollbitmap.height
@@ -312,8 +312,8 @@ def pbShowQuests(show_quest=nil)
     (sprites["tab1"].selected = true) :
     (sprites["tab2"].selected = true)
   
-  barbitmap = BitmapCache.load_bitmap("Graphics/Pictures/quests_bar")
-  infobitmap = BitmapCache.load_bitmap("Graphics/Pictures/quests_details")
+  barbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_bar")
+  infobitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_details")
   for i in 0...7
     sprites[_INTL("quest{1}",i)] = QuestBarSprite.new(
       viewport,barbitmap,infobitmap,8,92+i*36,quest_list[i])

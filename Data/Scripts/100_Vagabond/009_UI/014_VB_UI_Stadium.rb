@@ -900,33 +900,33 @@ end
 def pbStadiumTrainerOffset(type)
   
   case type
-  when PBTrainers::BLACKBELT, PBTrainers::CRUSHGIRL
+  when :BLACKBELT, :CRUSHGIRL
     return [  0,-10]
-  when PBTrainers::JANITOR
+  when :JANITOR
     return [ -6,-10]
-  when PBTrainers::NURSERYAID, PBTrainers::BUGCATCHER, PBTrainers::TAMER
+  when :NURSERYAID, :BUGCATCHER, :TAMER
     return [  0,-14]
-  when PBTrainers::YOUNGSTER, PBTrainers::SCHOOLBOY, PBTrainers::SCHOOLGIRL,
-       PBTrainers::LIBRARIAN, PBTrainers::DOCTOR, PBTrainers::ROUGHNECK,
-       PBTrainers::CHANNELER, PBTrainers::ENGINEER, PBTrainers::BURGLAR
+  when :YOUNGSTER, :SCHOOLBOY, :SCHOOLGIRL,
+       :LIBRARIAN, :DOCTOR, :ROUGHNECK,
+       :CHANNELER, :ENGINEER, :BURGLAR
     return [  0,-28]
-  when PBTrainers::RUINMANIAC
+  when :RUINMANIAC
     return [ 10,-24]
-  when PBTrainers::PRESCHOOLER_M, PBTrainers::PRESCHOOLER_F,
-       PBTrainers::SWIMMER_M
+  when :PRESCHOOLER_M, :PRESCHOOLER_F,
+       :SWIMMER_M
     return [  0,-44]
-  when PBTrainers::TWINS
+  when :TWINS
     return [  4,-44]
-  when PBTrainers::PKMNRANGER_M, PBTrainers::MINER, PBTrainers::GUITARIST,
-       PBTrainers::PKMNFAN_M, PBTrainers::MAID
+  when :PKMNRANGER_M, :MINER, :GUITARIST,
+       :PKMNFAN_M, :MAID
     return [  8,  0]
-  when PBTrainers::GAMBLER
+  when :GAMBLER
     return [ -8,  0]
-  when PBTrainers::BACKPACKER_F, PBTrainers::CYCLIST_F
+  when :BACKPACKER_F, :CYCLIST_F
     return [-14,  0]
-  when PBTrainers::FISHERMAN
+  when :FISHERMAN
     return [-36, -6]
-  when PBTrainers::ACETRAINER_M
+  when :ACETRAINER_M
     return [  0,  4]
   end
   

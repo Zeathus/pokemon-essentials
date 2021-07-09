@@ -25,6 +25,8 @@ class Game_Character
   attr_reader   :move_speed
   attr_accessor :walk_anime
   attr_writer   :bob_height
+  attr_accessor :step_anime
+  attr_accessor :direction_fix
 
   def initialize(map=nil)
     @map                       = map
@@ -75,6 +77,10 @@ class Game_Character
     @moved_this_frame          = false
     @locked                    = false
     @prelock_direction         = 0
+  end
+  
+  def step_anime
+    return @step_anime
   end
 
   def at_coordinate?(check_x, check_y)
@@ -204,10 +210,12 @@ class Game_Character
       xbehind = @x + (@direction == 4 ? 1 : @direction == 6 ? -1 : 0)
       ybehind = @y + (@direction == 8 ? 1 : @direction == 2 ? -1 : 0)
       this_map = (self.map.valid?(@x, @y)) ? [self.map, @x, @y] : $MapFactory.getNewMap(@x, @y)
-      if this_map[0].deepBush?(this_map[1], this_map[2]) && self.map.deepBush?(xbehind, ybehind)
+      if this_map[0].swamp?(this_map[1], this_map[2])
+        return 14
+      elsif this_map[0].deepBush?(this_map[1], this_map[2]) && self.map.deepBush?(xbehind, ybehind)
         @bush_depth = Game_Map::TILE_HEIGHT
       elsif !moving? && this_map[0].bush?(this_map[1], this_map[2])
-        @bush_depth = 12
+        @bush_depth = 16
       else
         @bush_depth = 0
       end
@@ -301,6 +309,10 @@ class Game_Character
 
   def screen_y
     ret = screen_y_ground
+    this_map = (self.map.valid?(@x, @y)) ? [self.map, @x, @y] : $MapFactory.getNewMap(@x, @y)
+    if this_map[0].swamp?(this_map[1], this_map[2])
+      y += 6
+    end
     if jumping?
       if @jump_count > 0
         jump_fraction = ((@jump_count * jump_speed_real / Game_Map::REAL_RES_X) - 0.5).abs   # 0.5 to 0 to 0.5
@@ -944,7 +956,8 @@ class Game_Character
     # game uses square tiles.
     real_speed = (jumping?) ? jump_speed_real : move_speed_real
     frames_per_pattern = Game_Map::REAL_RES_X / (real_speed * 2.0)
-    frames_per_pattern *= 2 if move_speed >= 5   # Cycling speed or faster
+    frames_per_pattern *= 2 if move_speed >= 5 # Cycling speed or faster
+    frames_per_pattern *= 2 if move_speed == 4 && self == $game_player # Slower running animation
     return if @anime_count < frames_per_pattern
     # Advance to the next animation frame
     @pattern = (@pattern + 1) % 4

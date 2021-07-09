@@ -13,7 +13,7 @@ class PokeBarSmallSprite < SpriteWrapper
     @pokemon=pokemon
     @trainerid = trainerid
     @index=index
-    @barbitmap=AnimatedBitmap.new("Graphics/Pictures/partyBarSmall")
+    @barbitmap=AnimatedBitmap.new("Graphics/Pictures/Party/bar_small")
     @other = (index % 2) == 1
     @spriteXOffset=@other ? 70 : 2
     @spriteYOffset=0
@@ -31,7 +31,7 @@ class PokeBarSmallSprite < SpriteWrapper
         @yvalues.push(@ystart + 27 * (i - 1) + 20)
       end
     end
-    @statuses=AnimatedBitmap.new(_INTL("Graphics/Pictures/partyStatusesSmall"))
+    @statuses=AnimatedBitmap.new(_INTL("Graphics/Pictures/Party/statuses_small"))
     @pkmnsprite=PokemonIconSprite.new(pokemon,viewport)
     @pkmnsprite.active=false
     @pkmnsprite.zoom_x = 0.5
@@ -86,7 +86,7 @@ class PokeBarSmallSprite < SpriteWrapper
     self.bitmap.clear if self.bitmap
     return if !@pokemon
     self.bitmap.blt(0,0,@barbitmap.bitmap,Rect.new(@other ? 106 : 0,36 * @trainerid,106,36))
-    if @pokemon && !@pokemon.isEgg?
+    if @pokemon && !@pokemon.egg?
       tothp=@pokemon.totalhp
       hpgauge=@pokemon.totalhp==0 ? 0 : (self.hp*54/@pokemon.totalhp)
       hpgauge=1 if hpgauge==0 && self.hp>0
@@ -102,8 +102,8 @@ class PokeBarSmallSprite < SpriteWrapper
       self.bitmap.fill_rect(@gaugeX,@gaugeY,hpgauge,2,hpcolors[hpzone*2])
       self.bitmap.fill_rect(@gaugeX,@gaugeY+2,hpgauge,2,hpcolors[hpzone*2+1])
       self.bitmap.fill_rect(@gaugeX,@gaugeY+4,hpgauge,2,hpcolors[hpzone*2])
-      if @pokemon.hp==0 || @pokemon.status>0
-        status=(@pokemon.hp==0) ? 5 : @pokemon.status-1
+      if @pokemon.hp==0 || @pokemon.status != :None
+        status=(@pokemon.hp==0) ? 5 : (GameData::Status.get(@pokemon.status).id_number - 1)
         statusrect=Rect.new(0,14*status,14,14)
         self.bitmap.blt(@statusX,@statusY,@statuses.bitmap,statusrect)
       else
@@ -127,7 +127,6 @@ end
 
 def pbPauseMenu
   return if !$game_switches || $game_switches[LOCK_PAUSE_MENU]
-  pbSetViableDexes
   viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
   viewport.z=99999
   midx=Graphics.width/2
@@ -135,7 +134,7 @@ def pbPauseMenu
   sprites={}
   sprites["topDisplay"]=Sprite.new(viewport)
   file="Graphics/Pictures/Pause/topDisplay"
-  sprites["topDisplay"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["topDisplay"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["topDisplay"].x=0
   sprites["topDisplay"].y=-128
   sprites["topDisplay"].z=0
@@ -157,8 +156,8 @@ def pbPauseMenu
   
   # Party Summary
   sprites["partyHeader"]=Sprite.new(viewport)
-  file="Graphics/Pictures/partyHeaderSmall"
-  sprites["partyHeader"].bitmap=BitmapCache.load_bitmap(file)
+  file="Graphics/Pictures/Party/header_small"
+  sprites["partyHeader"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["partyHeader"].x=-130
   sprites["partyHeader"].y=120
   trainerid = getPartyActive(0)
@@ -217,7 +216,7 @@ def pbPauseMenu
   bitmaps={}
   for i in commands
     file=_INTL("Graphics/Pictures/Pause/icon{1}",i)
-    bitmap=BitmapCache.load_bitmap(file)
+    bitmap=RPG::Cache.load_bitmap("",file)
     bitmaps[i]=bitmap
   end
   pbPauseMenuDrawOverlay(
@@ -572,7 +571,6 @@ def pbPauseMenuItems
   commands.push("Card") if !commands.include?("Card")
   commands.push("Save") if !commands.include?("Save")
   commands.push("Options") if !commands.include?("Options")
-  commands.push("Rides") if pbHasRide(PBRides::Strength) && !commands.include?("Rides")
   return commands
 end
 
@@ -584,39 +582,42 @@ def pbPauseCommandSelect(command,toDispose)
     screen=PokemonBagScreen.new(scene,$PokemonBag)
     pbFadeOutIn(99999) { 
        item=screen.pbStartScreen 
-       if item>0
+       if item && item > 0
          pbPauseMenuClose(toDispose)
        end
     }
-    if item>0
+    if item && item > 0
       pbUseKeyItemInField(item)
       return 1
     end
   when "Dex"
-    if DEXDEPENDSONLOCATION
-      pbFadeOutIn(99999) {
-         scene=PokemonPokedexScene.new
-         screen=PokemonPokedex.new(scene)
-         screen.pbStartScreen
-         @scene.pbRefresh
+    if Settings::USE_CURRENT_REGION_DEX
+      pbFadeOutIn {
+        scene = PokemonPokedex_Scene.new
+        screen = PokemonPokedexScreen.new(scene)
+        screen.pbStartScreen
       }
     else
-      if $PokemonGlobal.pokedexViable.length==1 &&
-          (!$game_switches || !$game_switches[HAS_HABITAT_DEX])
-        $PokemonGlobal.pokedexDex=$PokemonGlobal.pokedexViable[0]
-        $PokemonGlobal.pokedexDex=-1 if $PokemonGlobal.pokedexDex==$PokemonGlobal.pokedexUnlocked.length-1
-        pbFadeOutIn(99999) {
-           scene=PokemonPokedexScene.new
-           screen=PokemonPokedex.new(scene)
-           screen.pbStartScreen
+      if $Trainer.pokedex.accessible_dexes.length == 1
+        $PokemonGlobal.pokedexDex = $Trainer.pokedex.accessible_dexes[0]
+        pbFadeOutIn {
+          scene = PokemonPokedex_Scene.new
+          screen = PokemonPokedexScreen.new(scene)
+          screen.pbStartScreen
         }
       else
-        pbLoadRpgxpScene(Scene_PokedexMenu.new)
+        pbFadeOutIn {
+          scene = PokemonPokedexMenu_Scene.new
+          screen = PokemonPokedexMenuScreen.new(scene)
+          screen.pbStartScreen
+        }
       end
     end
   when "Gear"
-    pbFadeOutIn(99999) {
-      pbLoadRpgxpScene(Scene_Pokegear.new)
+    pbFadeOutIn {
+      scene = PokemonPokegear_Scene.new
+      screen = PokemonPokegearScreen.new(scene)
+      screen.pbStartScreen
     }
   when "Party"
     sscene=PokemonScreen_Scene.new
@@ -635,28 +636,24 @@ def pbPauseCommandSelect(command,toDispose)
   when "Quests"
     pbShowQuests
   when "Card"
-    scene=PokemonTrainerCardScene.new
-    screen=PokemonTrainerCard.new(scene)
-    pbFadeOutIn(99999) { 
-       screen.pbStartScreen
+    pbFadeOutIn {
+      scene = PokemonTrainerCard_Scene.new
+      screen = PokemonTrainerCardScreen.new(scene)
+      screen.pbStartScreen
     }
   when "Options"
-    scene=PokemonOptionScene.new
-    screen=PokemonOption.new(scene)
-    pbFadeOutIn(99999) {
-       screen.pbStartScreen
-       pbUpdateSceneMap
+    pbFadeOutIn {
+      scene = PokemonOption_Scene.new
+      screen = PokemonOptionScreen.new(scene)
+      screen.pbStartScreen
+      pbUpdateSceneMap
     }
   when "Save"
     pbPauseMenuClose(toDispose)
-    scene=PokemonSaveScene.new
-    screen=PokemonSave.new(scene)
+    scene = PokemonSave_Scene.new
+    screen = PokemonSaveScreen.new(scene)
     screen.pbSaveScreen
     return 2
-  when "Rides"
-    pbPauseMenuClose(toDispose)
-    pbRidePager
-    return 1
   end
   return 0
 end

@@ -1,13 +1,13 @@
 def pbAmphiWoodsEncounter
   amphi_pos = $game_variables[AMPHIWOODSPOS]
   if amphi_pos < 8
-    directions = [PBSpecies::GOLETT,
-                  PBSpecies::CUTIEFLY,
-                  PBSpecies::SALANDIT,
-                  PBSpecies::BRIONNE]
+    directions = [:GOLETT,
+                  :CUTIEFLY,
+                  :SALANDIT,
+                  :BRIONNE]
     return directions[pbAmphiWoodsRoute[amphi_pos]]
   end
-  return PBSpecies::RATTATA
+  return :RATTATA
 end
 
 def pbAmphiWoodsRoute

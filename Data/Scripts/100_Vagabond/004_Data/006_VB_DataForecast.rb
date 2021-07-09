@@ -13,28 +13,28 @@ def pbGenerateForecast
   ]
   
   weathers = [
-    PBFieldWeather::None,
-    PBFieldWeather::None,
-    PBFieldWeather::Rain,
-    PBFieldWeather::Sun,
-    PBFieldWeather::Winds
+    :None,
+    :None,
+    :Rain,
+    :Sun,
+    :Winds
   ]
   
   desert_weathers = [
-    PBFieldWeather::None,
-    PBFieldWeather::None,
-    PBFieldWeather::None,
-    PBFieldWeather::Sun,
-    PBFieldWeather::Sun,
-    PBFieldWeather::Sandstorm,
-    PBFieldWeather::Sandstorm,
-    PBFieldWeather::Sandstorm,
-    PBFieldWeather::Winds
+    :None,
+    :None,
+    :None,
+    :Sun,
+    :Sun,
+    :Sandstorm,
+    :Sandstorm,
+    :Sandstorm,
+    :Winds
   ]
   
-  weathers.push(PBFieldWeather::Sun) if pbGetTimeNow.wday=="Sunday"
-  weathers.push(PBFieldWeather::Rain) if pbGetTimeNow.wday=="Wednesday"
-  weathers.push(PBFieldWeather::Winds) if pbGetTimeNow.wday=="Friday"
+  weathers.push(:Sun) if pbGetTimeNow.wday=="Sunday"
+  weathers.push(:Rain) if pbGetTimeNow.wday=="Wednesday"
+  weathers.push(:Winds) if pbGetTimeNow.wday=="Friday"
   
   forecast=[]
   forecast[0]=[] # Array for map ids and weather
@@ -78,7 +78,12 @@ def pbGenerateForecast
 end
 
 def pbUpdateWeather
-  if pbGetMetadata($game_map.map_id,MetadataOutdoor)
+  map_metadata = GameData::MapMetadata.try_get($game_map.map_id)
+  if !map_metadata
+    PBDebug.log("pbUpdateWeather: Could not find map metadata")
+    return
+  end
+  if map_metadata.outdoor_map
     if $game_switches[WEATHER_RAIN]
       if $game_screen.weather_type != PBFieldWeather::Rain
         $game_screen.weather(PBFieldWeather::Rain,9,200)
@@ -102,7 +107,7 @@ def pbUpdateWeather
     end
   end
   forecast = pbGetForecast
-  if forecast[$game_map.map_id] && pbGetMetadata($game_map.map_id,MetadataOutdoor)
+  if forecast[$game_map.map_id] && map_metadata.outdoor_map
     if $game_screen.weather_type != forecast[$game_map.map_id]
       weather=forecast[$game_map.map_id]
       if weather==PBFieldWeather::None

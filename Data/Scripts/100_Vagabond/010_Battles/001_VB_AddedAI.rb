@@ -9,13 +9,13 @@ def pbCustomAIModifier(move,attacker,opponent,skill,score,field)
   case code
   when "raphael" # Fire-type Gym leader
     case attacker.species
-    when PBSpecies::ROTOM
+    when :ROTOM
       
-    when PBSpecies::TORKOAL
+    when :TORKOAL
       
-    when PBSpecies::RHYPERIOR
+    when :RHYPERIOR
       
-    when PBSpecies::KOMMOO
+    when :KOMMOO
       
     end
   end
@@ -34,13 +34,13 @@ def pbCustomAISwitchModifier(battlers,index,alwaysSwitch)
   case code
   when "raphael" # Fire-type Gym leader
     case attacker.species
-    when PBSpecies::ROTOM
+    when :ROTOM
       
-    when PBSpecies::TORKOAL
+    when :TORKOAL
       
-    when PBSpecies::RHYPERIOR
+    when :RHYPERIOR
       
-    when PBSpecies::KOMMOO
+    when :KOMMOO
       
     end
   end
@@ -93,7 +93,7 @@ end
 def pbCustomAIShouldWithdraw(battlers,index,alwaysSwitch)
   move_order = $game_variables[BATTLE_SIM_AI][0][battlers[index].pokemonIndex]
   move_status = $game_variables[BATTLE_SIM_AI][1][battlers[index].pokemonIndex]
-  if move_order[move_status]==PBMoves::BATONPASS
+  if move_order[move_status]==:BATONPASS
     return true
   end
   return false

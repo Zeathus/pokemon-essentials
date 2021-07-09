@@ -1469,8 +1469,8 @@ class Bitmap
     
       if c != ' '
         rects = charRects(c,self.font.name)
-        
         for r in rects
+          r[1] -= 2
           self.fill_rect(cx+r[0]*sp,cy+r[1]*sp,(r[2]*sp).ceil,(r[3]*sp).ceil,self.font.color)
         end
       end

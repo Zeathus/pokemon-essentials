@@ -24,8 +24,8 @@ class PokeBattle_Pokemon
     
     if !self.hasAbility?(:KLUTZ)
       if self.hasItem?(:THICKCLUB)
-        if self.species==PBSpecies::CUBONE ||
-           self.species==PBSpecies::MAROWAK
+        if self.species==:CUBONE ||
+           self.species==:MAROWAK
           mult*=2.0
         end
       elsif self.hasItem?(:MUSCLEBAND)
@@ -55,7 +55,7 @@ class PokeBattle_Pokemon
     
     if !self.hasAbility?(:KLUTZ)
       if self.hasItem?(:METALPOWDER)
-        if self.species==PBSpecies::DITTO
+        if self.species==:DITTO
           mult*=1.5
         end
       elsif self.hasItem?(:EVIOLITE)
@@ -104,7 +104,7 @@ class PokeBattle_Pokemon
     
     if !self.hasAbility?(:KLUTZ)
       if self.hasItem?(:METALPOWDER)
-        if self.species==PBSpecies::DITTO
+        if self.species==:DITTO
           mult*=1.5
         end
       elsif self.hasItem?(:ASSAULTVEST)
@@ -150,7 +150,7 @@ class PokeBattle_Pokemon
     
     if !self.hasAbility?(:KLUTZ)
       if self.hasItem?(:QUICKPOWDER)
-        if self.species==PBSpecies::DITTO
+        if self.species==:DITTO
           mult*=2.0
         end
       elsif self.hasItem?(:MACHOBRACE) ||

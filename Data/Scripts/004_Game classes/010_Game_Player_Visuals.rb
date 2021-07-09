@@ -23,10 +23,18 @@ class Game_Player < Game_Character
     return false if $game_temp.in_menu || $game_temp.in_battle ||
                     @move_route_forcing || $game_temp.message_window_showing ||
                     pbMapInterpreterRunning?
+    return true if ($game_switches && $game_switches[FORCED_RUNNING])
     input = ($PokemonSystem.runstyle == 1) ^ Input.press?(Input::ACTION)
     return input && $Trainer.has_running_shoes && !jumping? &&
        !$PokemonGlobal.diving && !$PokemonGlobal.surfing &&
        !$PokemonGlobal.bicycle && !$game_player.pbTerrainTag.must_walk
+  end
+
+  def step_anime
+    if $PokemonGlobal.diving || $PokemonGlobal.surfing
+      return true
+    end
+    return @step_anime
   end
 
   def pbIsRunning?
@@ -36,15 +44,23 @@ class Game_Player < Game_Character
   def character_name
     @defaultCharacterName = "" if !@defaultCharacterName
     return @defaultCharacterName if @defaultCharacterName!=""
+    player = 0
+    if $game_variables
+      player = getPartyActive(0)
+    end
+    charsets = ["walk", "run", "surf"]
     if !@move_route_forcing && $Trainer.character_ID>=0
       meta = GameData::Metadata.get_player($Trainer.character_ID)
       if meta && !$PokemonGlobal.bicycle && !$PokemonGlobal.diving && !$PokemonGlobal.surfing
-        charset = 1   # Display normal character sprite
+        charset = 0   # Display normal character sprite
         if pbCanRun? && (moving? || @wasmoving) && Input.dir4!=0 && meta[4] && meta[4]!=""
-          charset = 4   # Display running character sprite
+          charset = 1   # Display running character sprite
         end
-        newCharName = pbGetPlayerCharset(meta,charset)
-        @character_name = newCharName if newCharName
+        if $game_variables && $game_variables[POKEPLAYERID] > 0
+          @character_name = _INTL("pkmn%03d", $game_variables[POKEPLAYERID])
+        else
+          @character_name = _INTL("member{1}_{2}", player, charsets[charset])
+        end
         @wasmoving = moving?
       end
     end
@@ -59,6 +75,8 @@ class Game_Player < Game_Character
         self.move_speed = 5   # Cycling
       elsif pbCanRun? || $PokemonGlobal.surfing
         self.move_speed = 4   # Running, surfing
+      elsif $game_player.pbTerrainTag.stair_up
+        self.move_speed = 2   # Walking down stairs (perspective)
       else
         self.move_speed = 3   # Walking, diving
       end

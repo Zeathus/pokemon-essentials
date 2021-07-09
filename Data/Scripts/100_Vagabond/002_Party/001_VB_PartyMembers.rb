@@ -39,21 +39,21 @@ module PBParty
     id = getID(PBParty,id) if id.is_a?(Symbol)
     case id
     when PBParty::Player
-      return PBTrainers::POKEMONTRAINER_Male
+      return :PROTAGONIST
     when PBParty::Merrick
-      return PBTrainers::FORETELLER
+      return :FORETELLER
     when PBParty::Amethyst
-      return PBTrainers::AMETHYST
+      return :AMETHYST
     when PBParty::Kira
-      return PBTrainers::RIVAL
+      return :RIVAL
     when PBParty::Eliana
-      return PBTrainers::DAO_Eliana
+      return :DAO_Eliana
     when PBParty::Fintan
-      return PBTrainers::DAO_Fintan
+      return :DAO_Fintan
     when PBParty::Nekane
-      return PBTrainers::NEKANE
+      return :NEKANE
     when PBParty::Ziran
-      return PBTrainers::DAO_Ziran
+      return :DAO_Ziran
     end
     return -1
   end

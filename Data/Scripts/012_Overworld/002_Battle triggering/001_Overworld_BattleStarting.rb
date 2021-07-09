@@ -119,6 +119,8 @@ def pbPrepareBattle(battle)
       battle.defaultWeather = :Sandstorm
     when :Sun
       battle.defaultWeather = :Sun
+    when :Winds
+      battle.defaultWeather = :Winds
     end
   else
     battle.defaultWeather = battleRules["defaultWeather"]
@@ -217,9 +219,13 @@ def pbWildBattleCore(*args)
     $PokemonGlobal.nextBattleME        = nil
     $PokemonGlobal.nextBattleCaptureME = nil
     $PokemonGlobal.nextBattleBack      = nil
+    # Reset battle vars
+    $game_variables[BOSS_BATTLE]=0
+    $game_variables[WILD_MODIFIER]=0
     pbMEStop
     return 1   # Treat it as a win
   end
+  $Trainer.stats.wild_battles += 1
   # Record information about party Pokémon to be used at the end of battle (e.g.
   # comparing levels for an evolution check)
   Events.onStartBattle.trigger(nil)

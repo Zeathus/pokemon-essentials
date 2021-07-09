@@ -40,14 +40,12 @@ ItemHandlers::UseFromBag.add(:BICYCLE,proc { |item|
 
 ItemHandlers::UseFromBag.copy(:BICYCLE,:MACHBIKE,:ACROBIKE)
 
-ItemHandlers::UseFromBag.add(:OLDROD,proc { |item|
+ItemHandlers::UseFromBag.add(:FISHINGROD,proc { |item|
   notCliff = $game_map.passable?($game_player.x,$game_player.y,$game_player.direction,$game_player)
   next 2 if $game_player.pbFacingTerrainTag.can_fish && ($PokemonGlobal.surfing || notCliff)
   pbMessage(_INTL("Can't use that here."))
   next 0
 })
-
-ItemHandlers::UseFromBag.copy(:OLDROD,:GOODROD,:SUPERROD)
 
 ItemHandlers::UseFromBag.add(:ITEMFINDER,proc { |item|
   next 2
@@ -229,41 +227,15 @@ ItemHandlers::UseInField.add(:BICYCLE,proc { |item|
 
 ItemHandlers::UseInField.copy(:BICYCLE,:MACHBIKE,:ACROBIKE)
 
-ItemHandlers::UseInField.add(:OLDROD,proc { |item|
+ItemHandlers::UseInField.add(:FISHINGROD,proc { |item|
   notCliff = $game_map.passable?($game_player.x,$game_player.y,$game_player.direction,$game_player)
   if !$game_player.pbFacingTerrainTag.can_fish || (!$PokemonGlobal.surfing && !notCliff)
     pbMessage(_INTL("Can't use that here."))
     next 0
   end
-  encounter = $PokemonEncounters.has_encounter_type?(:OldRod)
+  encounter = $PokemonEncounters.has_encounter_type?(:FishingRod)
   if pbFishing(encounter,1)
-    pbEncounter(:OldRod)
-  end
-  next 1
-})
-
-ItemHandlers::UseInField.add(:GOODROD,proc { |item|
-  notCliff = $game_map.passable?($game_player.x,$game_player.y,$game_player.direction,$game_player)
-  if !$game_player.pbFacingTerrainTag.can_fish || (!$PokemonGlobal.surfing && !notCliff)
-    pbMessage(_INTL("Can't use that here."))
-    next 0
-  end
-  encounter = $PokemonEncounters.has_encounter_type?(:GoodRod)
-  if pbFishing(encounter,2)
-    pbEncounter(:GoodRod)
-  end
-  next 1
-})
-
-ItemHandlers::UseInField.add(:SUPERROD,proc { |item|
-  notCliff = $game_map.passable?($game_player.x,$game_player.y,$game_player.direction,$game_player)
-  if !$game_player.pbFacingTerrainTag.can_fish || (!$PokemonGlobal.surfing && !notCliff)
-    pbMessage(_INTL("Can't use that here."))
-    next 0
-  end
-  encounter = $PokemonEncounters.has_encounter_type?(:SuperRod)
-  if pbFishing(encounter,3)
-    pbEncounter(:SuperRod)
+    pbEncounter(:FishingRod)
   end
   next 1
 })

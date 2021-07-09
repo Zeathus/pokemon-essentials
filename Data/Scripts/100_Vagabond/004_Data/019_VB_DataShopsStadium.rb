@@ -45,14 +45,14 @@ def pbStadiumShop2
   items.push(:OVALCHARM)
   setPrice(:OVALCHARM,800)
   # DNA Splicers
-  if $Trainer.owned[PBSpecies::KYUREM]
+  if $Trainer.owned[:KYUREM]
     items.push(:DNASPLICERS)
     setPrice(:DNASPLICERS,1600)
   end
   # Reveal Glass
-  if $Trainer.owned[PBSpecies::TORNADUS] ||
-     $Trainer.owned[PBSpecies::THUNDURUS] ||
-     $Trainer.owned[PBSpecies::LANDORUS]
+  if $Trainer.owned[:TORNADUS] ||
+     $Trainer.owned[:THUNDURUS] ||
+     $Trainer.owned[:LANDORUS]
     items.push(:REVEALGLASS)
     setPrice(:REVEALGLASS,1600)
   end

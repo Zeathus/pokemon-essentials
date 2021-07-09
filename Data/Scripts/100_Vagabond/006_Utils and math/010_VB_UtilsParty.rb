@@ -96,10 +96,10 @@ end
 
 def pbHasJewelPokemon
   pokemon = [
-    PBSpecies::SPOINK,
-    PBSpecies::DRAGONAIR,
-    PBSpecies::CLAMPERL,
-    PBSpecies::PALKIA
+    :SPOINK,
+    :DRAGONAIR,
+    :CLAMPERL,
+    :PALKIA
   ]
   
   for i in pokemon

@@ -276,7 +276,7 @@ class TradeScene
         itemid = itemwindow.item[1][i * 2]
         quantity = itemwindow.item[1][i * 2 + 1]
         if itemid
-          if itemid == PBItems::PAY
+          if itemid == :PAY
             @sprites[_INTL("item{1}text",i+1)].text = 
               _INTL("${1}", pbFormatNumber(quantity))
           else
@@ -292,7 +292,7 @@ class TradeScene
         itemid = itemwindow.item[2][i * 2]
         quantity = itemwindow.item[2][i * 2 + 1]
         if itemid
-          if itemid == PBItems::GET
+          if itemid == :GET
             @sprites[_INTL("item{1}text",i+4)].text = 
               _INTL("${1}", pbFormatNumber(quantity))
           else
@@ -506,7 +506,7 @@ class TradeScene
             quantity = itemwindow.item[1][i * 2 + 1]
             if itemid
               @sprites[_INTL("icon{1}",i+1)].item = itemid
-              if itemid == PBItems::PAY
+              if itemid == :PAY
                 @sprites[_INTL("item{1}text",i+1)].text = 
                   _INTL("${1}", pbFormatNumber(quantity))
               else
@@ -527,7 +527,7 @@ class TradeScene
             quantity = itemwindow.item[2][i * 2 + 1]
             if itemid
               @sprites[_INTL("icon{1}",i+4)].item = itemid
-              if itemid == PBItems::GET
+              if itemid == :GET
                 @sprites[_INTL("item{1}text",i+4)].text = 
                   _INTL("${1}", pbFormatNumber(quantity))
               else
@@ -595,11 +595,11 @@ class TradeScreen
         it = item[1][i*2]
         qt = item[1][i*2+1]
         if it
-          if it == PBItems::PAY
+          if it == :PAY
             if $Trainer.money < qt
               hasitems = false
             end
-          elsif it == PBItems::EXP
+          elsif it == :EXP
             if $game_variables[BONUS_EXP] < qt
               hasitems = false
             end
@@ -619,7 +619,7 @@ class TradeScreen
           it = item[1][i*2]
           qt = item[1][i*2+1]
           if it
-            if it == PBItems::PAY
+            if it == :PAY
               $Trainer.money -= qt
             else
                $PokemonBag.pbDeleteItem(it,qt)
@@ -630,7 +630,7 @@ class TradeScreen
           it = item[2][i*2]
           qt = item[2][i*2+1]
           if it
-            if it == PBItems::GET
+            if it == :GET
               $Trainer.money += qt
               Kernel.pbMessage(_INTL("\\se[ItemGet]Obtained \\c[1]${1}\\c[0]!\\wtnp[30]",qt))
             else

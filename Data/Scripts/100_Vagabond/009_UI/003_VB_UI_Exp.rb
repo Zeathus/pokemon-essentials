@@ -416,7 +416,7 @@ def pbEXPScreen(expgain,sharedexp,fulltoall=false)
       
       for member in active + inactive
         for i in getPartyPokemon(member)
-          i.calcStats
+          i.calc_stats
         end
       end
       
@@ -471,14 +471,14 @@ def pbGrantExpScreen(exp)
   sprites={}
   file = _INTL("Graphics/Scenes/expgrant")
   sprites["bg"] = Sprite.new(viewport)
-  sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+  sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
   
   slot_file = "Graphics/Scenes/expgrant_auto"
   slot_file = "Graphics/Scenes/expgrant_manual" if $PokemonSystem.expmode==2
   
   for i in 0...$Trainer.party.length
     sprites[_INTL("slot{1}",i)] = Sprite.new(viewport)
-    sprites[_INTL("slot{1}",i)].bitmap = BitmapCache.load_bitmap(slot_file)
+    sprites[_INTL("slot{1}",i)].bitmap = RPG::Cache.load_bitmap("",slot_file)
     sprites[_INTL("slot{1}",i)].x = 80
     sprites[_INTL("slot{1}",i)].y = 2 + 60 * i
     
@@ -495,7 +495,7 @@ def pbGrantExpScreen(exp)
   if $PokemonSystem.expmode==2
     sprites["cursor"] = Sprite.new(viewport)
     slot_file = "Graphics/Scenes/expgrant_selected"
-    sprites["cursor"].bitmap = BitmapCache.load_bitmap(slot_file)
+    sprites["cursor"].bitmap = RPG::Cache.load_bitmap("",slot_file)
     sprites["cursor"].x = 80
     sprites["cursor"].y = 2
     sprites["cursor"].z = 2
@@ -630,7 +630,7 @@ def pbGrantExpScreen(exp)
   slot_file = "Graphics/Scenes/expgrant_auto"
   
   for i in 0...$Trainer.party.length
-    sprites[_INTL("slot{1}",i)].bitmap = BitmapCache.load_bitmap(slot_file)
+    sprites[_INTL("slot{1}",i)].bitmap = RPG::Cache.load_bitmap("",slot_file)
     sprites[_INTL("slot{1}",i)].x = 80
     sprites[_INTL("slot{1}",i)].y = 2 + 60 * i
   end
@@ -726,7 +726,7 @@ def pbGrantExpScreen(exp)
           startexp=PBExperience.pbGetStartExperience(pokemon.level,growthrate)
           exp_gained-=(pokemon.exp-startexp)
           pokemon.changeHappiness("level up")
-          pokemon.calcStats
+          pokemon.calc_stats
           pbSEPlay("expfull",100,100)
           Kernel.pbMessage(_INTL("{1} was elevated to Level {2}!",pokemon.name,pokemon.level))
           movelist=pokemon.getMoveList

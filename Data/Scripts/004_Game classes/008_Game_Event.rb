@@ -31,6 +31,10 @@ class Game_Event < Game_Character
   def id;   return @event.id;   end
   def name; return @event.name; end
 
+  def setname(string)
+    @event.name=string
+  end
+
   def set_starting
     @starting = true
   end
@@ -274,5 +278,9 @@ class Game_Event < Game_Character
       end
       @interpreter.update
     end
+  end
+  
+  def pageNum
+    return @event.pages.index(@page)
   end
 end

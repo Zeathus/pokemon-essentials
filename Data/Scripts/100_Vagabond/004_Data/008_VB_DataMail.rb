@@ -1,5 +1,5 @@
 def pbCheckMail
-  return if !$Trainer.pokegear
+  return if !$Trainer.has_pokegear
   
   if rand(8192)==1
     mail = GearMail.new("???", "Ancestor", "Blah blah blah blah blah.\n" +

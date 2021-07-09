@@ -5,6 +5,7 @@ class PokemonSystem
   attr_accessor :textspeed
   attr_accessor :battlescene
   attr_accessor :battlestyle
+  attr_accessor :critanim
   attr_accessor :frame
   attr_accessor :textskin
   attr_accessor :screensize
@@ -13,19 +14,58 @@ class PokemonSystem
   attr_accessor :bgmvolume
   attr_accessor :sevolume
   attr_accessor :textinput
+  attr_accessor :difficulty
+  attr_accessor :lockdif
+  attr_accessor :lockeddif
+  attr_accessor :expmode
+  attr_accessor :levelup
+  attr_accessor :statstages
+  attr_accessor :battleflow
+  # Mechanics
+  attr_accessor :damagerolls
+  attr_accessor :sleepturns
+  attr_accessor :freezeturns
+  attr_accessor :oldpara
+  # Other
+  attr_accessor :genderid
+  attr_accessor :bagmode
+  attr_accessor :autosurf
+  # System
+  attr_accessor :old_fps
+  attr_accessor :lock_fps
 
   def initialize
     @textspeed   = 1     # Text speed (0=slow, 1=normal, 2=fast)
     @battlescene = 0     # Battle effects (animations) (0=on, 1=off)
     @battlestyle = 0     # Battle style (0=switch, 1=set)
+    @critanim    = 0   # Critical animations (0=on, 1=off)
     @frame       = 0     # Default window frame (see also Settings::MENU_WINDOWSKINS)
     @textskin    = 0     # Speech frame
     @screensize  = (Settings::SCREEN_SCALE * 2).floor - 1   # 0=half size, 1=full size, 2=full-and-a-half size, 3=double size
     @language    = 0     # Language (see also Settings::LANGUAGES in script PokemonSystem)
     @runstyle    = 0     # Default movement speed (0=walk, 1=run)
-    @bgmvolume   = 100   # Volume of background music and ME
-    @sevolume    = 100   # Volume of sound effects
+    @bgmvolume   = 50   # Volume of background music and ME
+    @sevolume    = 50   # Volume of sound effects
     @textinput   = 0     # Text input mode (0=cursor, 1=keyboard)
+    @difficulty  = 1   # Difficulty (0=easy, 1=normal, 2=hard)
+    @lockdif     = 0   # Difficulty lock (0=off, 1=lock)
+    @lockeddif   = -1  # The difficulty the game is locked to
+    @expmode     = -1  # Exp. Mode (-1=none, 0=smart, 1=even, 2=manual)
+    @levelup     = 0
+    @statstages  = 0
+    @battleflow  = 0
+    # Mechanics
+    @damagerolls = 0
+    @sleepturns  = 0
+    @freezeturns = 0
+    @oldpara     = 0
+    # Other
+    @genderid    = 0
+    @bagmode     = 0
+    @autosurf    = 0
+    # System
+    @old_fps     = Graphics.frame_rate
+    @lock_fps    = false
   end
 end
 

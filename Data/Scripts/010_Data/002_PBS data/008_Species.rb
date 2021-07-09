@@ -79,6 +79,8 @@ module GameData
         "Pokedex"           => [0, "q"],
         "Type1"             => [0, "e", :Type],
         "Type2"             => [0, "e", :Type],
+        "Type3"             => [0, "e", :Type],
+        "Type4"             => [0, "e", :Type],
         "BaseStats"         => [0, "vvvvvv"],
         "EffortPoints"      => [0, "uuuuuu"],
         "BaseEXP"           => [0, "v"],
@@ -138,6 +140,8 @@ module GameData
       @pokedex_form          = hash[:pokedex_form]          || @form
       @type1                 = hash[:type1]                 || :NORMAL
       @type2                 = hash[:type2]                 || @type1
+      @type3                 = hash[:type3]                 || :NORMAL
+      @type4                 = hash[:type4]                 || @type3
       @base_stats            = hash[:base_stats]            || {}
       @evs                   = hash[:evs]                   || {}
       GameData::Stat.each_main do |s|
@@ -193,6 +197,14 @@ module GameData
     # @return [String] the translated Pokédex category of this species
     def category
       return pbGetMessage(MessageTypes::Kinds, @id_number)
+    end
+
+    def affinity1
+      return @type3
+    end
+
+    def affinity2
+      return @type4
     end
 
     # @return [String] the translated Pokédex entry of this species

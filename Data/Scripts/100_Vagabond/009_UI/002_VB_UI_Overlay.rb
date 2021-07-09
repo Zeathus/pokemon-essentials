@@ -376,14 +376,14 @@ def pbUI_QuestProgressFull(anim)
     anim[5]+=1
     if !sprites["checkbox"]
       sprites["checkbox"] = Sprite.new(viewport)
-      sprites["checkbox"].bitmap = BitmapCache.load_bitmap("Graphics/Messages/checkmark/checkbox_0")
+      sprites["checkbox"].bitmap = RPG::Cache.load_bitmap("","Graphics/Messages/checkmark/checkbox_0")
       sprites["checkbox"].x = 364
       sprites["checkbox"].y = 384/2 - 20
       sprites["checkbox"].z = 100000
     end
     if anim[5] > 8 && anim[5] < 22
       checkfile = _INTL("Graphics/Messages/checkmark/checkbox_{1}",anim[5]-8)
-      sprites["checkbox"].bitmap = BitmapCache.load_bitmap(checkfile)
+      sprites["checkbox"].bitmap = RPG::Cache.load_bitmap("",checkfile)
     end
   elsif frame >= 60 && frame < 70
     anim[5]=0 if frame == 60
@@ -465,13 +465,13 @@ def pbUI_QuestCompletion(anim)
     frame+=1
     if !sprites["shadowl"]
       sprites["shadowl"] = Sprite.new(viewport)
-      sprites["shadowl"].bitmap=BitmapCache.load_bitmap("Graphics/Messages/ui_shadow_left")
+      sprites["shadowl"].bitmap=RPG::Cache.load_bitmap("","Graphics/Messages/ui_shadow_left")
       sprites["shadowl"].y=Graphics.height/2-sprites["shadowl"].bitmap.height/2
       sprites["shadowl"].x=-Graphics.width
     end
     if !sprites["shadowr"]
       sprites["shadowr"] = Sprite.new(viewport)
-      sprites["shadowr"].bitmap=BitmapCache.load_bitmap("Graphics/Messages/ui_shadow_right")
+      sprites["shadowr"].bitmap=RPG::Cache.load_bitmap("","Graphics/Messages/ui_shadow_right")
       sprites["shadowr"].y=Graphics.height/2-sprites["shadowl"].bitmap.height/2
       sprites["shadowr"].x=Graphics.width
     end
@@ -785,13 +785,13 @@ def pbTitleDisplay(title, subtitle=nil)
     frame+=1
     if !sprites["shadowl"]
       sprites["shadowl"] = Sprite.new(viewport)
-      sprites["shadowl"].bitmap=BitmapCache.load_bitmap("Graphics/Messages/ui_shadow_left")
+      sprites["shadowl"].bitmap=RPG::Cache.load_bitmap("","Graphics/Messages/ui_shadow_left")
       sprites["shadowl"].y=Graphics.height/2-sprites["shadowl"].bitmap.height/2
       sprites["shadowl"].x=-Graphics.width
     end
     if !sprites["shadowr"]
       sprites["shadowr"] = Sprite.new(viewport)
-      sprites["shadowr"].bitmap=BitmapCache.load_bitmap("Graphics/Messages/ui_shadow_right")
+      sprites["shadowr"].bitmap=RPG::Cache.load_bitmap("","Graphics/Messages/ui_shadow_right")
       sprites["shadowr"].y=Graphics.height/2-sprites["shadowl"].bitmap.height/2
       sprites["shadowr"].x=Graphics.width
     end

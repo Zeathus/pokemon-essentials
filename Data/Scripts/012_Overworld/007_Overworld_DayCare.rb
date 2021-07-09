@@ -176,9 +176,9 @@ def pbDayCareGenerateEgg
   case babyspecies
   when :MANAPHY
     babyspecies = :PHIONE if GameData::Species.exists?(:PHIONE)
-  when :NIDORANfE, :NIDORANmA
-    if GameData::Species.exists?(:NIDORANfE) && GameData::Species.exists?(:NIDORANmA)
-      babyspecies = [:NIDORANfE, :NIDORANmA][rand(2)]
+  when :NIDORANFE, :NIDORANMA
+    if GameData::Species.exists?(:NIDORANFE) && GameData::Species.exists?(:NIDORANMA)
+      babyspecies = [:NIDORANFE, :NIDORANMA][rand(2)]
     end
   when :VOLBEAT, :ILLUMISE
     if GameData::Species.exists?(:VOLBEAT) && GameData::Species.exists?(:ILLUMISE)

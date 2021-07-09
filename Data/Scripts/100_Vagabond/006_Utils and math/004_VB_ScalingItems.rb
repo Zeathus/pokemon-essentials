@@ -1,14 +1,14 @@
 def pbScaledItem(item, boost=0)
   item = getID(PBItems,item) if item.is_a?(Symbol)
   case item
-  when PBItems::POTION
+  when :POTION
     level = pbPreferredLevel
     items = [
-      PBItems::POTION,
-      PBItems::SUPERPOTION,
-      PBItems::HYPERPOTION,
-      PBItems::MAXPOTION,
-      PBItems::FULLRESTORE]
+      :POTION,
+      :SUPERPOTION,
+      :HYPERPOTION,
+      :MAXPOTION,
+      :FULLRESTORE]
     index = 0
     if level >= 65
       index = 3
@@ -23,12 +23,12 @@ def pbScaledItem(item, boost=0)
     index = items.length - 1 if index >= items.length
     index = 0 if index < 0
     return items[index]
-  when PBItems::POKEBALL
+  when :POKEBALL
     level = pbPreferredLevel
     items = [
-      PBItems::POKEBALL,
-      PBItems::GREATBALL,
-      PBItems::ULTRABALL]
+      :POKEBALL,
+      :GREATBALL,
+      :ULTRABALL]
     index = 0
     if level >= 40
       index = 2

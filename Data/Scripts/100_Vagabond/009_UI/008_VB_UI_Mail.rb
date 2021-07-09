@@ -27,7 +27,7 @@ def pbShowMail(forceopen=false,global=false)
   file = _INTL("Graphics/Pictures/mailbox_1")
   file = _INTL("Graphics/Pictures/mailbox_2") if global
   sprites["bg"] = Sprite.new(viewport)
-  sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+  sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
   pbFadeInAndShow(sprites)
   
   sprites["tabs"]=Sprite.new(viewport)
@@ -40,13 +40,13 @@ def pbShowMail(forceopen=false,global=false)
   
   sprites["cursor"]=Sprite.new(viewport)
   file = _INTL("Graphics/Scenes/Quests/cursor")
-  sprites["cursor"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["cursor"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["cursor"].x=14
   sprites["cursor"].y=99
   
   sprites["scrollbar"]=Sprite.new(viewport)
   file = _INTL("Graphics/Pictures/mailboxScrollbar")
-  sprites["scrollbar"].bitmap=BitmapCache.load_bitmap(file)
+  sprites["scrollbar"].bitmap=RPG::Cache.load_bitmap("",file)
   sprites["scrollbar"].x=470
   sprites["scrollbar"].y=100
   sprites["scrollbar"].z=2
@@ -103,7 +103,7 @@ def pbShowMail(forceopen=false,global=false)
       sprites["message"].visible = true
       info = "Graphics/Pictures/mailbox_o1"
       info = "Graphics/Pictures/mailbox_o2" if mailtab==1
-      sprites["overlay"].bitmap = BitmapCache.load_bitmap(info)
+      sprites["overlay"].bitmap = RPG::Cache.load_bitmap("",info)
       pbSetSystemFont(sprites["tabs"].bitmap)
       sprites["tabs"].bitmap.clear
       textpos=[["Personal",94,62,false,text_color1,text_color2],
@@ -150,18 +150,18 @@ def pbShowMail(forceopen=false,global=false)
       total_lines = line + 1
       pbDrawTextPositions(sprites["message"].bitmap,textpos)
       #file = _INTL("Graphics/Pictures/mailboxScrollbar")
-      #sprites["scrollbar"].bitmap=BitmapCache.load_bitmap(file)
+      #sprites["scrollbar"].bitmap=RPG::Cache.load_bitmap("",file)
       sprites["scrollbar"].x=470
       sprites["scrollbar"].y=100
       if mail.picture != nil
         sprites["picture"]=Sprite.new(viewport)
-        sprites["picture"].bitmap=BitmapCache.load_bitmap(mail.picture)
+        sprites["picture"].bitmap=RPG::Cache.load_bitmap("",mail.picture)
         sprites["picture"].x=36
         sprites["picture"].y=130+(line+1)*28
       end
       sprites["bottom"] = Sprite.new(viewport)
       file = "Graphics/Pictures/mailbox_bottom"
-      sprites["bottom"].bitmap = BitmapCache.load_bitmap(file)
+      sprites["bottom"].bitmap = RPG::Cache.load_bitmap("",file)
       linescroll = 0
       loop do
         Graphics.update
@@ -248,7 +248,7 @@ def pbShowMail(forceopen=false,global=false)
         file = _INTL("Graphics/Pictures/mailbox_1")
         #sprites["bg"].dispose
         #sprites["bg"] = Sprite.new(viewport)
-        sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+        sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
         mail_list = personal_mail
         newtab = -1
         scroll = 0
@@ -258,7 +258,7 @@ def pbShowMail(forceopen=false,global=false)
         file = _INTL("Graphics/Pictures/mailbox_2")
         #sprites["bg"].dispose
         #sprites["bg"] = Sprite.new(viewport)
-        sprites["bg"].bitmap = BitmapCache.load_bitmap(file)
+        sprites["bg"].bitmap = RPG::Cache.load_bitmap("",file)
         mail_list = global_mail
         newtab = -1
         scroll = 0

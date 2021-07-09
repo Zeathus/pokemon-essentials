@@ -50,19 +50,19 @@ def pbScaleTrainer(trainer, trainerparty, modifier)
   difficulty = $PokemonSystem.difficulty
   
   low_trainers = [
-    PBTrainers::YOUNGSTER, PBTrainers::LASS,
-    PBTrainers::BUGCATCHER,
-    PBTrainers::SCHOOLBOY, PBTrainers::SCHOOLGIRL,
-    PBTrainers::PRESCHOOLER_M, PBTrainers::PRESCHOOLER_F,
-    PBTrainers::JANITOR,
-    PBTrainers::TWINS]
+    :YOUNGSTER, :LASS,
+    :BUGCATCHER,
+    :SCHOOLBOY, :SCHOOLGIRL,
+    :PRESCHOOLER_M, :PRESCHOOLER_F,
+    :JANITOR,
+    :TWINS]
   high_trainers = [
-    PBTrainers::ACETRAINER_M, PBTrainers::ACETRAINER_F,
-    PBTrainers::VETERAN_M, PBTrainers::VETERAN_F,
-    PBTrainers::GENTLEMAN, PBTrainers::LADY,
-    PBTrainers::PKMNRANGER_M, PBTrainers::PKMNRANGER_F,
-    PBTrainers::GAMBLER, PBTrainers::ROUGHNECK,
-    PBTrainers::DAO_Eliana, PBTrainers::DAO_Fintan]
+    :ACETRAINER_M, :ACETRAINER_F,
+    :VETERAN_M, :VETERAN_F,
+    :GENTLEMAN, :LADY,
+    :PKMNRANGER_M, :PKMNRANGER_F,
+    :GAMBLER, :ROUGHNECK,
+    :DAO_Eliana, :DAO_Fintan]
     
   # Calculate level_base
   level_base = pbPreferredLevel
@@ -108,7 +108,7 @@ def pbScaleTrainer(trainer, trainerparty, modifier)
   
   # Change pokemon levels
   for pkmn in trainer[2]
-    next if trainer[0].name=="Klaus" && pkmn.species==PBSpecies::VULPIX
+    next if trainer[0].name=="Klaus" && pkmn.species==:VULPIX
     other_level = pkmn.level
     level_dif = other_level - highestlevel
     if level_base > other_level
@@ -128,7 +128,7 @@ def pbScaleTrainer(trainer, trainerparty, modifier)
       end
       pkmn.name = PBSpecies.getName(pkmn.species) if original_species != pkmn.species
       pkmn.resetMoves if new_level - other_level > 20 and other_level < 30
-      pkmn.calcStats
+      pkmn.calc_stats
     end
   end
   
@@ -139,16 +139,14 @@ def pbScaleTrainer(trainer, trainerparty, modifier)
       pkmn.level -= 1
       pkmn.item = 0
       pkmn.natureflag = PBNatures::SERIOUS
-      pkmn.iv = [0,0,0,0,0,0]
-      pkmn.oiv = [0,0,0,0,0,0] if pkmn.oiv
-      pkmn.calcStats
+      pkmn.iv = pbArrayToIVs([0,0,0,0,0,0])
+      pkmn.calc_stats
     end
   elsif difficulty == 2
     # HARD
     for pkmn in trainer[2]
-      pkmn.iv = [31,31,31,31,31,31]
-      pkmn.oiv = [31,31,31,31,31,31] if pkmn.oiv
-      pkmn.calcStats
+      pkmn.iv = pbArrayToIVs([31,31,31,31,31,31])
+      pkmn.calc_stats
     end
   end
   
@@ -158,83 +156,83 @@ end
 
 def pbCustomEvolutionLevel(species, level)
   list = [
-    [PBSpecies::AIPOM,PBSpecies::AMBIPOM,32],
-    [PBSpecies::AMAURA,PBSpecies::AURORUS,39],
-    [PBSpecies::BUDEW,PBSpecies::ROSELIA,18],
-    [PBSpecies::BOLDORE,PBSpecies::GIGALITH,40],
-    [PBSpecies::BONSLY,PBSpecies::SUDOWOODO,15],
-    [PBSpecies::CHANSEY,PBSpecies::BLISSEY,32],
-    [PBSpecies::CHINGLING,PBSpecies::CHIMECHO,26],
-    [PBSpecies::COTTONEE,PBSpecies::WHIMSICOTT,28],
-    [PBSpecies::CLEFAIRY,PBSpecies::CLEFABLE,32],
-    [PBSpecies::DUSCLOPS,PBSpecies::DUSKNOIR,45],
-    [PBSpecies::DOUBLADE,PBSpecies::AEGISLASH,42],
-    [PBSpecies::EELEKTRIK,PBSpecies::EELEKTROSS,46],
-    [PBSpecies::LICKITUNG,PBSpecies::LICKILICKY,33],
-    [PBSpecies::ELECTABUZZ,PBSpecies::ELECTIVIRE,42],
-    [PBSpecies::EXEGGCUTE,PBSpecies::EXEGGUTOR,32],
-    [PBSpecies::FEEBAS,PBSpecies::MILOTIC,20],
-    [PBSpecies::FLOETTE,PBSpecies::FLORGES,32],
-    [PBSpecies::FOMANTIS,PBSpecies::LURANTIS,34],
-    [PBSpecies::GLIGAR,PBSpecies::GLISCOR,37],
-    [PBSpecies::GRAVELER,PBSpecies::GOLEM,36],
-    [PBSpecies::GROWLITHE,PBSpecies::ARCANINE,27],
-    [PBSpecies::GLOOM,PBSpecies::VILEPLUME,34],
-    [PBSpecies::GURDURR,PBSpecies::CONKELDURR,36],
-    [PBSpecies::HAPPINY,PBSpecies::CHANSEY,16],
-    [PBSpecies::HAUNTER,PBSpecies::GENGAR,32],
-    [PBSpecies::HELIOPTILE,PBSpecies::HELIOLISK,30],
-    [PBSpecies::JIGGLYPUFF,PBSpecies::WIGGLYTUFF,32],
-    [PBSpecies::KADABRA,PBSpecies::ALAKAZAM,38],
-    [PBSpecies::KARRABLAST,PBSpecies::ESCAVALIER,32],
-    [PBSpecies::LAMPENT,PBSpecies::CHANDELURE,47],
-    [PBSpecies::LOMBRE,PBSpecies::LUDICOLO,32],
-    [PBSpecies::MACHOKE,PBSpecies::MACHAMP,36],
-    [PBSpecies::MAGMAR,PBSpecies::MAGMORTAR,42],
-    [PBSpecies::MINCCINO,PBSpecies::CINCCINO,26],
-    [PBSpecies::MIMEJR,PBSpecies::MRMIME,22],
-    [PBSpecies::MISDREAVUS,PBSpecies::MISMAGIUS,28],
-    [PBSpecies::MUNNA,PBSpecies::MUSHARNA,27],
-    [PBSpecies::MURKROW,PBSpecies::HONCHKROW,34],
-    [PBSpecies::NUZLEAF,PBSpecies::SHIFTRY,32],
-    [PBSpecies::NIDORINA,PBSpecies::NIDOQUEEN,36],
-    [PBSpecies::NIDORINO,PBSpecies::NIDOKING,36],
-    [PBSpecies::ONIX,PBSpecies::STEELIX,30],
-    [PBSpecies::PANSAGE,PBSpecies::SIMISAGE,24],
-    [PBSpecies::PANSEAR,PBSpecies::SIMISEAR,24],
-    [PBSpecies::PANPOUR,PBSpecies::SIMIPOUR,24],
-    [PBSpecies::PETILIL,PBSpecies::LILLIGANT,28],
-    [PBSpecies::PICHU,PBSpecies::PIKACHU,14],
-    [PBSpecies::PIKACHU,PBSpecies::RAICHU,25],
-    [PBSpecies::PILOSWINE,PBSpecies::MAMOSWINE,44],
-    [PBSpecies::PHANTUMP,PBSpecies::TREVENANT,32],
-    [PBSpecies::PUMPKABOO,PBSpecies::GOURGEIST,32],
-    [PBSpecies::POLIWHIRL,PBSpecies::POLIWRATH,34],
-    [PBSpecies::PORYGON,PBSpecies::PORYGON2,16],
-    [PBSpecies::PORYGON2,PBSpecies::PORYGONZ,32],
-    [PBSpecies::RHYDON,PBSpecies::RHYPERIOR,50],
-    [PBSpecies::RIOLU,PBSpecies::LUCARIO,28],
-    [PBSpecies::ROSELIA,PBSpecies::ROSERADE,36],
-    [PBSpecies::SANDSHREW,PBSpecies::SANDSLASH,22],
-    [PBSpecies::SCYTHER,PBSpecies::SCIZOR,36],
-    [PBSpecies::SEADRA,PBSpecies::KINGDRA,36],
-    [PBSpecies::SHELLDER,PBSpecies::CLOYSTER,32],
-    [PBSpecies::SHELMET,PBSpecies::ACCELGOR,32],
-    [PBSpecies::SKITTY,PBSpecies::DELCATTY,22],
-    [PBSpecies::SUNKERN,PBSpecies::SUNFLORA,20],
-    [PBSpecies::SNEASEL,PBSpecies::WEAVILE,35],
-    [PBSpecies::STARYU,PBSpecies::STARMIE,32],
-    [PBSpecies::STEENEE,PBSpecies::TSAREENA,34],
-    [PBSpecies::SPRITZEE,PBSpecies::AROMATISSE,30],
-    [PBSpecies::SWADLOON,PBSpecies::LEAVANNY,32],
-    [PBSpecies::SWIRLIX,PBSpecies::SLURPUFF,30],
-    [PBSpecies::TANGELA,PBSpecies::TANGROWTH,38],
-    [PBSpecies::TOGETIC,PBSpecies::TOGEKISS,42],
-    [PBSpecies::TYRUNT,PBSpecies::TYRANTRUM,39],
-    [PBSpecies::VULPIX,PBSpecies::NINETALES,27],
-    [PBSpecies::WEEPINBELL,PBSpecies::VICTREEBEL,34],
-    [PBSpecies::YANMA,PBSpecies::YANMEGA,30],
-    [PBSpecies::YUNGOOS,PBSpecies::GUMSHOOS,20]
+    [:AIPOM,:AMBIPOM,32],
+    [:AMAURA,:AURORUS,39],
+    [:BUDEW,:ROSELIA,18],
+    [:BOLDORE,:GIGALITH,40],
+    [:BONSLY,:SUDOWOODO,15],
+    [:CHANSEY,:BLISSEY,32],
+    [:CHINGLING,:CHIMECHO,26],
+    [:COTTONEE,:WHIMSICOTT,28],
+    [:CLEFAIRY,:CLEFABLE,32],
+    [:DUSCLOPS,:DUSKNOIR,45],
+    [:DOUBLADE,:AEGISLASH,42],
+    [:EELEKTRIK,:EELEKTROSS,46],
+    [:LICKITUNG,:LICKILICKY,33],
+    [:ELECTABUZZ,:ELECTIVIRE,42],
+    [:EXEGGCUTE,:EXEGGUTOR,32],
+    [:FEEBAS,:MILOTIC,20],
+    [:FLOETTE,:FLORGES,32],
+    [:FOMANTIS,:LURANTIS,34],
+    [:GLIGAR,:GLISCOR,37],
+    [:GRAVELER,:GOLEM,36],
+    [:GROWLITHE,:ARCANINE,27],
+    [:GLOOM,:VILEPLUME,34],
+    [:GURDURR,:CONKELDURR,36],
+    [:HAPPINY,:CHANSEY,16],
+    [:HAUNTER,:GENGAR,32],
+    [:HELIOPTILE,:HELIOLISK,30],
+    [:JIGGLYPUFF,:WIGGLYTUFF,32],
+    [:KADABRA,:ALAKAZAM,38],
+    [:KARRABLAST,:ESCAVALIER,32],
+    [:LAMPENT,:CHANDELURE,47],
+    [:LOMBRE,:LUDICOLO,32],
+    [:MACHOKE,:MACHAMP,36],
+    [:MAGMAR,:MAGMORTAR,42],
+    [:MINCCINO,:CINCCINO,26],
+    [:MIMEJR,:MRMIME,22],
+    [:MISDREAVUS,:MISMAGIUS,28],
+    [:MUNNA,:MUSHARNA,27],
+    [:MURKROW,:HONCHKROW,34],
+    [:NUZLEAF,:SHIFTRY,32],
+    [:NIDORINA,:NIDOQUEEN,36],
+    [:NIDORINO,:NIDOKING,36],
+    [:ONIX,:STEELIX,30],
+    [:PANSAGE,:SIMISAGE,24],
+    [:PANSEAR,:SIMISEAR,24],
+    [:PANPOUR,:SIMIPOUR,24],
+    [:PETILIL,:LILLIGANT,28],
+    [:PICHU,:PIKACHU,14],
+    [:PIKACHU,:RAICHU,25],
+    [:PILOSWINE,:MAMOSWINE,44],
+    [:PHANTUMP,:TREVENANT,32],
+    [:PUMPKABOO,:GOURGEIST,32],
+    [:POLIWHIRL,:POLIWRATH,34],
+    [:PORYGON,:PORYGON2,16],
+    [:PORYGON2,:PORYGONZ,32],
+    [:RHYDON,:RHYPERIOR,50],
+    [:RIOLU,:LUCARIO,28],
+    [:ROSELIA,:ROSERADE,36],
+    [:SANDSHREW,:SANDSLASH,22],
+    [:SCYTHER,:SCIZOR,36],
+    [:SEADRA,:KINGDRA,36],
+    [:SHELLDER,:CLOYSTER,32],
+    [:SHELMET,:ACCELGOR,32],
+    [:SKITTY,:DELCATTY,22],
+    [:SUNKERN,:SUNFLORA,20],
+    [:SNEASEL,:WEAVILE,35],
+    [:STARYU,:STARMIE,32],
+    [:STEENEE,:TSAREENA,34],
+    [:SPRITZEE,:AROMATISSE,30],
+    [:SWADLOON,:LEAVANNY,32],
+    [:SWIRLIX,:SLURPUFF,30],
+    [:TANGELA,:TANGROWTH,38],
+    [:TOGETIC,:TOGEKISS,42],
+    [:TYRUNT,:TYRANTRUM,39],
+    [:VULPIX,:NINETALES,27],
+    [:WEEPINBELL,:VICTREEBEL,34],
+    [:YANMA,:YANMEGA,30],
+    [:YUNGOOS,:GUMSHOOS,20]
   ]
   for i in 0..2
     for i in 0...list.length

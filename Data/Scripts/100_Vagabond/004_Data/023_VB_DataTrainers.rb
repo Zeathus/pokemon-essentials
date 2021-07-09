@@ -29,7 +29,7 @@ def pbInitTrainers
   
   horton = pbTrainer("Horton")
   if !horton
-    horton = TrainerData.new(PBTrainers::HIKER, "Horton",
+    horton = TrainerData.new(:HIKER, "Horton",
       PBMaps::MtPegmaHillside)
     $game_variables[TRAINER_ARRAY].push(horton)
   end
@@ -179,7 +179,7 @@ def pbIssueCmd(person, cmd = 1)
       "...I am deeply grateful to you for giving me the chance to speak with Celebi again.WT When I was in the future with Celebi, we found this, you can have it.WT I will hold on to the memories.")
       person.talk_city = "Seeing Celebi again has given me renewed motivation to find the path to the future we were in.WT I think that is what Celebi wished for when he first met me all those years ago."
       person.talk_city2 = person.talk_city
-      Kernel.pbReceiveItem(PBItems::MEADOWPLATE)
+      Kernel.pbReceiveItem(:MEADOWPLATE)
       pbFinishQuest(A_TRAVELERS_SEARCH)
     end
   end
@@ -188,7 +188,7 @@ def pbIssueCmd(person, cmd = 1)
     if pbHasSpecies?(:PORYGON) or pbHasSpecies?(:PORYGON2) or pbHasSpecies?(:PORYGONZ)
       pbSpeech(person.name, "none",
       "That's the one, that's the Pokémon Silph. Co was looking for. Now I can report back to my superiors. Please accept this.")
-      Kernel.pbReceiveItem(PBItems::COMETSHARD)
+      Kernel.pbReceiveItem(:COMETSHARD)
       person.talk_city2 = "Now that you have shown me the Porygon, our research will be progressing further!"
       person.switch = true
     end
@@ -198,11 +198,11 @@ def pbIssueCmd(person, cmd = 1)
     if pbHasSpecies?(:EEVEE)
       pbSpeech(person.name, "none",
       "Oh, that's an Eevee you have there isn't it?WT Can I see it please?WT ...Thank you for going through the effort of showing me this.WT Here, you can have these.")
-      Kernel.pbReceiveItem(PBItems::LIECHIBERRY)
-      Kernel.pbReceiveItem(PBItems::GANLONBERRY)
-      Kernel.pbReceiveItem(PBItems::SALACBERRY)
-      Kernel.pbReceiveItem(PBItems::PETAYABERRY)
-      Kernel.pbReceiveItem(PBItems::APICOTBERRY)
+      Kernel.pbReceiveItem(:LIECHIBERRY)
+      Kernel.pbReceiveItem(:GANLONBERRY)
+      Kernel.pbReceiveItem(:SALACBERRY)
+      Kernel.pbReceiveItem(:PETAYABERRY)
+      Kernel.pbReceiveItem(:APICOTBERRY)
       person.switch = true
       person.talk_city2 = "Getting to see that Eevee made up for not having one.WT Thank you."
     end

@@ -23,7 +23,7 @@ class BattleSim
       for i in 0..5
         pokemon.iv[i]=31
       end
-      pokemon.calcStats
+      pokemon.calc_stats
       self.player_team.push(pokemon)
     end
     self.opponent = opponent

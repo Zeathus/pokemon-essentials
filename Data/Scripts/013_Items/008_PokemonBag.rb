@@ -22,6 +22,32 @@ class PokemonBag
     end
     @registeredItems = []
     @registeredIndex = [0, 0, 1]
+    @favorites=[]
+  end
+  
+  def favorites
+    @favorites=[] if !@favorites
+    return @favorites
+  end
+  
+  def addFavorite(item)
+    @favorites=[] if !@favorites
+    @favorites.push(item) if !@favorites.include?(item)
+  end
+  
+  def removeFavorite(item)
+    @favorites=[] if !@favorites
+    @favorites -= [item] if @favorites.include?(item)
+  end
+  
+  def favoritesPocket
+    ret=[]
+    for i in [1,2,3,4,6,7,8,9]
+      for j in pockets[i]
+        ret.push(j) if favorites.include?(j[0])
+      end
+    end
+    return ret
   end
 
   def rearrange

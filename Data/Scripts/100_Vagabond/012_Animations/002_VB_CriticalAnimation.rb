@@ -9,7 +9,7 @@ class CriticalSprite < SpriteWrapper
     @simple = user.is_a?(Numeric)
     @type = @simple ? 1 : user.type1
     @opponent = @simple ? true : ((user.index % 2) == 1)
-    @src_bitmap = BitmapCache.load_bitmap(
+    @src_bitmap = RPG::Cache.load_bitmap("",
       _INTL("Graphics/Pictures/Battle/critical_{1}",type.to_s))
     self.bitmap = Bitmap.new(1024,128)
     self.x = 0
@@ -75,7 +75,7 @@ class CriticalSpritePokemon < SpriteWrapper
         @src_bitmap.width,@src_bitmap.height))
     else
       self.bitmap.blt(0, 0, @src_bitmap,
-        Rect.new(0,@species==PBSpecies::HOOH ? 40 : 0,
+        Rect.new(0,@species==:HOOH ? 40 : 0,
         @src_bitmap.width,128))
     end
     self.x = @opponent ? 512 : -192
@@ -144,7 +144,7 @@ end
 def pbLoadPokemonStaticBitmap(pokemon, back=false)
   species = pokemon.species
   ret=nil
-  if pokemon.isEgg?
+  if pokemon.egg?
     bitmapFileName=sprintf("Graphics/Battlers/%segg",getConstantName(PBSpecies,species)) rescue nil
     if !pbResolveBitmap(bitmapFileName)
       bitmapFileName=sprintf("Graphics/Battlers/%03degg",species)
@@ -163,7 +163,7 @@ def pbLoadPokemonStaticBitmap(pokemon, back=false)
     alterBitmap=(MultipleForms.getFunction(species,"alterBitmap") rescue nil)
   end
   if bitmapFileName && alterBitmap
-    animatedBitmap=BitmapCache.load_bitmap(bitmapFileName)
+    animatedBitmap=RPG::Cache.load_bitmap("",bitmapFileName)
     copiedBitmap=animatedBitmap.copy
     animatedBitmap.dispose
     copiedBitmap.each {|bitmap|
@@ -171,7 +171,7 @@ def pbLoadPokemonStaticBitmap(pokemon, back=false)
     }
     ret=copiedBitmap
   elsif bitmapFileName
-    ret=BitmapCache.load_bitmap(bitmapFileName)
+    ret=RPG::Cache.load_bitmap("",bitmapFileName)
   end
   return ret
 end

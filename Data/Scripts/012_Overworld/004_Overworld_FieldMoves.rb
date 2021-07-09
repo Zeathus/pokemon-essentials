@@ -695,36 +695,36 @@ HiddenMoveHandlers::UseMove.add(:STRENGTH,proc { |move,pokemon|
 #===============================================================================
 # Surf
 #===============================================================================
-def pbSurf
+def pbSurf(confirm=true, edge=false, down=false)
   return false if $game_player.pbFacingEvent
   return false if $game_player.pbHasDependentEvents?
-  move = :SURF
-  movefinder = $Trainer.get_pokemon_with_move(move)
-  if !pbCheckHiddenMoveBadge(Settings::BADGE_FOR_SURF,false) || (!$DEBUG && !movefinder)
-    return false
-  end
-  if pbConfirmMessage(_INTL("The water is a deep blue...\nWould you like to surf on it?"))
-    speciesname = (movefinder) ? movefinder.name : $Trainer.name
-    pbMessage(_INTL("{1} used {2}!",speciesname,GameData::Move.get(move).name))
+  if !confirm || pbConfirmMessage(_INTL("The water is a deep blue...\nWould you like to surf on it?"))
+    pbMessage(_INTL("Starmie used Surf!")) if confirm
     pbCancelVehicles
-    pbHiddenMoveAnimation(movefinder)
     surfbgm = GameData::Metadata.get.surf_BGM
     pbCueBGM(surfbgm,0.5) if surfbgm
-    pbStartSurfing
+    pbStartSurfing(edge, down)
     return true
   end
   return false
 end
 
-def pbStartSurfing
+def pbStartSurfing(edge=false, down=false)
   pbCancelVehicles
   $PokemonEncounters.reset_step_count
   $PokemonGlobal.surfing = true
   pbUpdateVehicle
   $PokemonTemp.surfJump = $MapFactory.getFacingCoords($game_player.x,$game_player.y,$game_player.direction)
-  pbJumpToward
+  pbJumpToward(edge ? 2 : 1, false, false, down ? 1 : 0)
   $PokemonTemp.surfJump = nil
   $game_player.check_event_trigger_here([1,2])
+end
+
+def pbStartSurfingSimple
+  pbCancelVehicles
+  $PokemonEncounters.clearStepCount
+  $PokemonGlobal.surfing=true
+  pbUpdateVehicle
 end
 
 def pbEndSurf(_xOffset,_yOffset)
@@ -732,12 +732,52 @@ def pbEndSurf(_xOffset,_yOffset)
   x = $game_player.x
   y = $game_player.y
   if $game_map.terrain_tag(x,y).can_surf && !$game_player.pbFacingTerrainTag.can_surf
+    up = false
     $PokemonTemp.surfJump = [x,y]
-    if pbJumpToward(1,false,true)
+    if $game_player.direction == 4
+      up = !$game_map.terrain_tag(x-1,y-1).can_surf
+    elsif $game_player.direction == 6
+      up = !$game_map.terrain_tag(x+1,y-1).can_surf
+    end
+    $game_player.direction_fix = true
+    if up && pbJumpToward(1,false,true,-1)
       $game_map.autoplayAsCue
       $game_player.increase_steps
       result = $game_player.check_event_trigger_here([1,2])
       pbOnStepTaken(result)
+    else
+      if pbJumpToward(1,false,true)
+        pbCancelVehicles
+        $game_map.autoplayAsCue
+        $game_player.increase_steps
+        result=$game_player.check_event_trigger_here([1,2])
+        pbOnStepTaken(result)
+      end
+    end
+    $game_player.direction_fix = false
+    return true
+  elsif $game_map.terrain_tag(x,y).can_surf && $game_player.pbFacingTerrainTag.water_edge
+    up = false
+    if $game_player.direction == 4
+      up = !$game_map.terrain_tag(x-2,y-1).can_surf
+    elsif $game_player.direction == 6
+      up = !$game_map.terrain_tag(x+2,y-1).can_surf
+    end
+    if up && pbJumpToward(2,false,true,-1)
+      $game_map.autoplayAsCue
+      $game_player.increase_steps
+      result=$game_player.check_event_trigger_here([1,2])
+      pbOnStepTaken(result)
+    else
+      if !$game_player.pbFacingSecondTerrainTag.can_surf
+        if pbJumpToward(2,false,true)
+          pbCancelVehicles
+          $game_map.autoplayAsCue
+          $game_player.increase_steps
+          result=$game_player.check_event_trigger_here([1,2])
+          pbOnStepTaken(result)
+        end
+      end
     end
     $PokemonTemp.surfJump = nil
     return true
@@ -758,13 +798,55 @@ def pbTransferSurfing(mapid,xcoord,ycoord,direction=$game_player.direction)
 end
 
 Events.onAction += proc { |_sender,_e|
-  next if $PokemonGlobal.surfing
-  next if GameData::MapMetadata.exists?($game_map.map_id) &&
-          GameData::MapMetadata.get($game_map.map_id).always_bicycle
-  next if !$game_player.pbFacingTerrainTag.can_surf_freely
-  next if !$game_map.passable?($game_player.x,$game_player.y,$game_player.direction,$game_player)
-  pbSurf
+  pbStartSurf(true)
 }
+
+def pbStartSurf(confirm=true)
+  return false if $PokemonGlobal.surfing
+  terrain=$game_player.pbFacingTerrainTag
+  notCliff=$game_map.passable?($game_player.x,$game_player.y,$game_player.direction)
+  if terrain.can_surf && !$PokemonGlobal.surfing && notCliff
+    if terrain.water_edge
+      down = false
+      if $game_player.direction == 4
+        terrain2 = $game_map.terrain_tag($game_player.x-2,$game_player.y+1)
+        down = terrain2.can_surf && !terrain2.water_edge
+      elsif $game_player.direction == 6
+        terrain2 = $game_map.terrain_tag($game_player.x+2,$game_player.y+1)
+        down = terrain2.can_surf && !terrain2.water_edge
+      end
+      if down
+        pbSurf(confirm,true,true)
+        return true
+      else
+        terrain2=$game_player.pbFacingSecondTerrainTag
+        if terrain2.can_surf && !terrain2.water_edge
+          pbSurf(confirm,true)
+          return true
+        end
+      end
+    else
+      down = false
+      if $game_player.direction == 4
+        terrain2 = $game_map.terrain_tag($game_player.x-1,$game_player.y+1)
+        down = terrain2.can_surf && !terrain2.water_edge
+      elsif $game_player.direction == 6
+        terrain2 = $game_map.terrain_tag($game_player.x+1,$game_player.y+1)
+        down = terrain2.can_surf && !terrain2.water_edge
+      end
+      if down
+        $game_player.direction_fix = true
+        pbSurf(confirm,false,true)
+        $game_player.direction_fix = false
+        return true
+      else
+        pbSurf(confirm)
+        return true
+      end
+    end
+  end
+  return false
+end
 
 HiddenMoveHandlers::CanUseMove.add(:SURF,proc { |move,pkmn,showmsg|
   next false if !pbCheckHiddenMoveBadge(Settings::BADGE_FOR_SURF,showmsg)
@@ -859,7 +941,8 @@ HiddenMoveHandlers::UseMove.add(:SWEETSCENT,proc { |move,pokemon|
 #===============================================================================
 HiddenMoveHandlers::CanUseMove.add(:TELEPORT,proc { |move,pkmn,showmsg|
   if !GameData::MapMetadata.exists?($game_map.map_id) ||
-     !GameData::MapMetadata.get($game_map.map_id).outdoor_map
+     !GameData::MapMetadata.get($game_map.map_id).outdoor_map ||
+     $game_switches[NO_TELEPORT]
     pbMessage(_INTL("Can't use that here.")) if showmsg
     next false
   end

@@ -9,10 +9,10 @@ def pbBossGiratina1
   pbModifier.hpmult=10.0
   pbModifier.form=1
   pbModifier.moves=[
-    PBMoves::SHADOWFORCE,
-    PBMoves::AURASPHERE,
-    PBMoves::EARTHPOWER,
-    PBMoves::SHADOWSNEAK]
+    :SHADOWFORCE,
+    :AURASPHERE,
+    :EARTHPOWER,
+    :SHADOWSNEAK]
   pbBoss.add(
     [:Start],
     [:Message,"Survive for 10 turns until Giratina calms down!"])

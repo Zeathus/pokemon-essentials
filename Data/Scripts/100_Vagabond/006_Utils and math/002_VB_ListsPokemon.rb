@@ -1,29 +1,29 @@
 def pbStarter(index=nil)
   pokes=[
     # Grass
-    PBSpecies::ODDISH,
-    PBSpecies::SKIDDO,
-    PBSpecies::SEEDOT,
+    :ODDISH,
+    :SKIDDO,
+    :SEEDOT,
     # Fire
-    PBSpecies::GROWLITHE,
-    PBSpecies::MAGBY,
-    PBSpecies::HOUNDOUR,
+    :GROWLITHE,
+    :MAGBY,
+    :HOUNDOUR,
     # Water
-    PBSpecies::AZURILL,
-    PBSpecies::BUIZEL,
-    PBSpecies::CORPHISH,
+    :AZURILL,
+    :BUIZEL,
+    :CORPHISH,
     # Normal
-    PBSpecies::BUNEARY,
-    PBSpecies::STARLY,
-    PBSpecies::MEOWTH,
+    :BUNEARY,
+    :STARLY,
+    :MEOWTH,
     # Electric
-    PBSpecies::MAREEP,
-    PBSpecies::ELEKID,
-    PBSpecies::SHINX,
+    :MAREEP,
+    :ELEKID,
+    :SHINX,
     # Other
-    PBSpecies::FLABEBE,
-    PBSpecies::MEDITITE,
-    PBSpecies::INKAY]
+    :FLABEBE,
+    :MEDITITE,
+    :INKAY]
     # Don't Know
     # Random
     
@@ -36,54 +36,28 @@ end
 
 def pbAddStarter(species)
   
-  pokemon = PokeBattle_Pokemon.new(species,10,$Trainer)
-  $game_variables[STARTER_ID]=pokemon.personalID
-  pokemon.abilityflag=0
-  pokemon.natureflag=PBNatures::BASHFUL
+  pokemon = Pokemon.new(species,10,$Trainer)
+  $game_variables[STARTER_ID] = pokemon.personalID
+  pokemon.ability_index = 0
+  pokemon.nature = :BASHFUL
   case species
-  when PBSpecies::SKIDDO
-    pokemon.iv = [31,31,16,5,10,16]
-  when PBSpecies::NUMEL
-    pokemon.iv = [31,16,16,5,31,10]
-  when PBSpecies::KRABBY
-    pokemon.iv = [31,31,16,5,10,16]
+  when :SKIDDO
+    pokemon.iv = pbArrayToIVs([31,31,16,5,10,16])
+  when :NUMEL
+    pokemon.iv = pbArrayToIVs([31,16,16,5,31,10])
+  when :KRABBY
+    pokemon.iv = pbArrayToIVs([31,31,16,5,10,16])
   end
   
-  pokemon.happiness=128
+  pokemon.happiness = 128
   
-  pokemon.calcStats
+  pokemon.calc_stats
   
   pbAddPokemon(pokemon)
-  $Trainer.seen[species]=true
-  $Trainer.owned[species]=true
+  $Trainer.pokedex.set_seen(species)
+  $Trainer.pokedex.set_owned(species)
   
 end
-
-def pbAddStarterOld(species)
-  
-  pokemon = PokeBattle_Pokemon.new(species,5,$Trainer)
-  $game_variables[STARTER_ID]=pokemon.personalID
-  case species
-  when PBSpecies::GROWLITHE, PBSpecies::MAGBY, PBSpecies::STARLY,
-       PBSpecies::MAREEP, PBSpecies::ELEKID, PBSpecies::MEDITITE,
-       PBSpecies::INKAY, PBSpecies::EEVEE
-    pokemon.abilityflag=0
-  when PBSpecies::ODDISH, PBSpecies::HOUNDOUR, PBSpecies::AZURILL,
-       PBSpecies::MEOWTH, PBSpecies::SHINX, PBSpecies::BUIZEL,
-       PBSpecies::FLABEBE
-    pokemon.abilityflag=1
-  when PBSpecies::SKIDDO, PBSpecies::SEEDOT, PBSpecies::CORPHISH,
-       PBSpecies::BUNEARY
-    pokemon.abilityflag=2
-  end
-  
-  pokemon.happiness=128
-  pbAddPokemon(pokemon)
-  $Trainer.seen[species]=true
-  $Trainer.owned[species]=true
-  
-end
-
 
 
 

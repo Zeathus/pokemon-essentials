@@ -151,6 +151,8 @@ Events.onStepTakenFieldMovement += proc { |_sender, e|
     event.each_occupied_tile do |x, y|
       if $MapFactory.getTerrainTag(event.map.map_id, x, y, true).shows_grass_rustle
         $scene.spriteset.addUserAnimation(Settings::GRASS_ANIMATION_ID, x, y, true, 1)
+      elsif $MapFactory.getTerrainTag(event.map.map_id, x, y, true).shows_dust_particle
+        $scene.spriteset.addUserAnimation(Settings::DUST_ANIMATION_ID, x, y, true, 1)
       end
     end
     if event == $game_player
@@ -302,6 +304,7 @@ Events.onMapSceneChange += proc { |_sender, e|
   elsif !pbCanUseBike?($game_map.map_id)
     pbDismountBike
   end
+  $game_switches[MAP_UPDATE]=true
 }
 
 
@@ -397,6 +400,9 @@ end
 def pbCueBGM(bgm,seconds,volume=nil,pitch=nil)
   return if !bgm
   bgm        = pbResolveAudioFile(bgm,volume,pitch)
+  if $game_variables[BGM_OVERRIDE] != 0
+    bgm=pbResolveAudioFile($game_variables[BGM_OVERRIDE],volume,pitch)
+  end
   playingBGM = $game_system.playing_bgm
   if !playingBGM || playingBGM.name!=bgm.name || playingBGM.pitch!=bgm.pitch
     pbBGMFade(seconds)
@@ -607,14 +613,14 @@ def pbMoveTowardPlayer(event)
   $PokemonMap.addMovedEvent(event.id) if $PokemonMap
 end
 
-def pbJumpToward(dist=1,playSound=false,cancelSurf=false)
+def pbJumpToward(dist=1,playSound=false,cancelSurf=false,dist2=0)
   x = $game_player.x
   y = $game_player.y
   case $game_player.direction
-  when 2 then $game_player.jump(0, dist)    # down
-  when 4 then $game_player.jump(-dist, 0)   # left
-  when 6 then $game_player.jump(dist, 0)    # right
-  when 8 then $game_player.jump(0, -dist)   # up
+  when 2 then $game_player.jump(dist2, dist)    # down
+  when 4 then $game_player.jump(-dist, dist2)   # left
+  when 6 then $game_player.jump(dist, dist2)    # right
+  when 8 then $game_player.jump(dist2, -dist)   # up
   end
   if $game_player.x!=x || $game_player.y!=y
     pbSEPlay("Player jump") if playSound
@@ -669,6 +675,7 @@ def pbEraseEscapePoint
 end
 
 def pbSetPokemonCenter
+  $Trainer.stats.heal_count += 1
   $PokemonGlobal.pokecenterMapId     = $game_map.map_id
   $PokemonGlobal.pokecenterX         = $game_player.x
   $PokemonGlobal.pokecenterY         = $game_player.y
@@ -701,27 +708,60 @@ end
 #===============================================================================
 # Picking up an item found on the ground
 #===============================================================================
-def pbItemBall(item,quantity=1)
+def pbItemBall(item,quantity=1,switch="A")
+  $game_switches[MARKER_UPDATE]=true
+  event_id = nil
+  event_id = @event_id if $game_map.events[@event_id].character_name=="Object ball"
   item = GameData::Item.get(item)
   return false if !item || quantity<1
   itemname = (quantity>1) ? item.name_plural : item.name
   pocket = item.pocket
   move = item.move
   if $PokemonBag.pbStoreItem(item,quantity)   # If item can be picked up
-    meName = (item.is_key_item?) ? "Key item get" : "Item get"
-    if item == :LEFTOVERS
-      pbMessage(_INTL("\\me[{1}]You found some \\c[1]{2}\\c[0]!\\wtnp[30]",meName,itemname))
-    elsif item.is_machine?   # TM or HM
-      pbMessage(_INTL("\\me[{1}]You found \\c[1]{2} {3}\\c[0]!\\wtnp[30]",meName,itemname,GameData::Move.get(move).name))
-    elsif quantity>1
-      pbMessage(_INTL("\\me[{1}]You found {2} \\c[1]{3}\\c[0]!\\wtnp[30]",meName,quantity,itemname))
-    elsif itemname.starts_with_vowel?
-      pbMessage(_INTL("\\me[{1}]You found an \\c[1]{2}\\c[0]!\\wtnp[30]",meName,itemname))
-    else
-      pbMessage(_INTL("\\me[{1}]You found a \\c[1]{2}\\c[0]!\\wtnp[30]",meName,itemname))
+    if event_id
+      pbSEPlay("recall",100)
+      $game_self_switches[[$game_map.map_id,event_id,switch]]=true
+      $game_map.need_refresh = true
+      viewport = Viewport.new(0,0,Graphics.height,Graphics.width)
+      sprite_x = Graphics.width / 2 - 6
+      sprite_y = Graphics.height / 2 - 8
+      case $game_player.direction
+      when 2 # Down
+        sprite_y += 32
+      when 4 # Left
+        sprite_x -= 32
+      when 6 # Right
+        sprite_x += 32
+      when 8 # Up
+        sprite_y -= 32
+      end
+      sprite = ItemIconSmallSprite.new(sprite_x,sprite_y,item,viewport)
+      sprite.opacity=255
+      for i in 0...8
+        pbWait(1)
+        sprite.y -= 1
+      end
+      for i in 0...16
+        pbWait(1)
+        sprite.opacity-=16
+        sprite.y -= 1
+      end
+      sprite.dispose
+      viewport.dispose
     end
-    pbMessage(_INTL("You put the {1} away\\nin the <icon=bagPocket{2}>\\c[1]{3} Pocket\\c[0].",
-       itemname,pocket,PokemonBag.pocketNames()[pocket]))
+    title = "ITEM FOUND"
+    text = ""
+    if GameData::Item.get(item).is_TM? || GameData::Item.get(item).is_HM?
+      text += itemname + " " + GameData::Move.get(move).name
+    elsif quantity>1
+      text += quantity.to_s
+      text += "x "
+      text += itemname
+    else
+      text += itemname
+    end
+    pbLeftNotification(text.upcase, title.upcase)
+    pbSEPlay("ItemGet",100)
     return true
   end
   # Can't add the item

@@ -1,10 +1,10 @@
 def pbGetOptimalRevive(pkmn)
   return 0 if pkmn.hp>0
   items = [
-    PBItems::REVIVE,
-    PBItems::LUMBERRYSOUP,
-    PBItems::MAXREVIVE,
-    PBItems::REVIVALHERB
+    :REVIVE,
+    :LUMBERRYSOUP,
+    :MAXREVIVE,
+    :REVIVALHERB
   ]
   for i in 0...items.length
     if $PokemonBag.pbQuantity(items[i])>0
@@ -18,18 +18,18 @@ def pbGetOptimalPotion(pkmn)
   ret=0
   return ret if pkmn.hp>=pkmn.totalhp
   items = [
-    [PBItems::FULLRESTORE,999],
-    [PBItems::MAXPOTION,999],
-    [PBItems::BAKEDBALM,999],
-    [PBItems::HYPERPOTION,120],
-    [PBItems::MOOMOOMILK,100],
-    [PBItems::MUSHROOMMUFFIN,100],
-    [PBItems::LEMONADE,70],
-    [PBItems::SUPERPOTION,60],
-    [PBItems::SODAPOP,50],
-    [PBItems::FRESHWATER,30],
-    [PBItems::POTION,20],
-    [PBItems::ORANBERRY,10]
+    [:FULLRESTORE,999],
+    [:MAXPOTION,999],
+    [:BAKEDBALM,999],
+    [:HYPERPOTION,120],
+    [:MOOMOOMILK,100],
+    [:MUSHROOMMUFFIN,100],
+    [:LEMONADE,70],
+    [:SUPERPOTION,60],
+    [:SODAPOP,50],
+    [:FRESHWATER,30],
+    [:POTION,20],
+    [:ORANBERRY,10]
   ]
   
   for i in 0...items.length
@@ -48,35 +48,35 @@ def pbGetOptimalMedicine(pkmn)
   return ret if pkmn.status==0
   items=[]
   items[0]=[
-    PBItems::FULLHEAL,
-    PBItems::LAVACOOKIE,
-    PBItems::OLDGATEAU,
-    PBItems::CASTELIACONE,
-    PBItems::LUMIOSEGALETTE,
-    PBItems::BIGMALASADA,
-    PBItems::LUMBERRY,
-    PBItems::LUMBERRYSOUP,
-    PBItems::FULLRESTORE
+    :FULLHEAL,
+    :LAVACOOKIE,
+    :OLDGATEAU,
+    :CASTELIACONE,
+    :LUMIOSEGALETTE,
+    :BIGMALASADA,
+    :LUMBERRY,
+    :LUMBERRYSOUP,
+    :FULLRESTORE
   ]
   items[PBStatuses::SLEEP]=[
-    PBItems::AWAKENING,
-    PBItems::CHESTOBERRY
+    :AWAKENING,
+    :CHESTOBERRY
   ]
   items[PBStatuses::POISON]=[
-    PBItems::ANTIDOTE,
-    PBItems::PECHABERRY
+    :ANTIDOTE,
+    :PECHABERRY
   ]
   items[PBStatuses::BURN]=[
-    PBItems::BURNHEAL,
-    PBItems::RAWSTBERRY
+    :BURNHEAL,
+    :RAWSTBERRY
   ]
   items[PBStatuses::PARALYSIS]=[
-    PBItems::PARALYZEHEAL,
-    PBItems::CHERIBERRY
+    :PARALYZEHEAL,
+    :CHERIBERRY
   ]
   items[PBStatuses::FROZEN]=[
-    PBItems::ICEHEAL,
-    PBItems::ASPEARBERRY
+    :ICEHEAL,
+    :ASPEARBERRY
   ]
   
   for i in 0...items[pkmn.status].length
@@ -98,20 +98,20 @@ def pbGetOptimalBall(pkmn,wildpkmn)
   ret=0
   return ret if pkmn.hp>=pkmn.totalhp
   items = [
-    [PBItems::POKEBALL,1],
-    [PBItems::PREMIERBALL,1],
-    [PBItems::GREATBALL,1.5],
-    [PBItems::ULTRABALL,2],
-    [PBItems::SAFARIBALL,1.5],
-    [PBItems::LUXURYBALL,1],
-    [PBItems::FRIENDBALL,1],
-    [PBItems::LOVEBALL,
+    [:POKEBALL,1],
+    [:PREMIERBALL,1],
+    [:GREATBALL,1.5],
+    [:ULTRABALL,2],
+    [:SAFARIBALL,1.5],
+    [:LUXURYBALL,1],
+    [:FRIENDBALL,1],
+    [:LOVEBALL,
       (pkmn.species==wildpkmn.species && pkmn.gender!=wildpkmn.gender) ? 8 : 1],
-    [PBItems::LEVELBALL,
+    [:LEVELBALL,
       pkmn.level<=wildpkmn.level ? 1 :
       pkmn.level<wildpkmn.level*2 ? 2 :
       pkmn.level<wildpkmn.level*4 ? 4 : 8],
-    [PBItems::MOONBALL,
+    [:MOONBALL,
       (isConst?(battler.species,PBSpecies,:NIDORANFE) ||
       isConst?(battler.species,PBSpecies,:NIDORINA) ||
       isConst?(battler.species,PBSpecies,:NIDOQUEEN) ||
@@ -128,24 +128,24 @@ def pbGetOptimalBall(pkmn,wildpkmn)
       isConst?(battler.species,PBSpecies,:DELCATTY) ||
       isConst?(battler.species,PBSpecies,:MUNNA) ||
       isConst?(battler.species,PBSpecies,:MUSHARNA)) ? 4 : 1],
-    [PBItems::LUREBALL,
+    [:LUREBALL,
       ($PokemonTemp.encounterType==EncounterTypes::FishingRod) ? 5 : 1],
-    [PBItems::REPEATBALL,
+    [:REPEATBALL,
       $Trainer.owned[wildpkmn.species] ? 3.5 : 1],
-    [PBItems::HEAVYBALL,1],
-    [PBItems::FASTBALL,1],
-    [PBItems::TIMERBALL,
+    [:HEAVYBALL,1],
+    [:FASTBALL,1],
+    [:TIMERBALL,
       (1+(wildpkmn.turncount*0.3))>4 ? 4 : (1+(wildpkmn.turncount*0.3))],
-    [PBItems::NESTBALL,
+    [:NESTBALL,
       wildpkmn.level<30 ? (41-wildpkmn.level)/10 : 1],
-    [PBItems::NETBALL,
+    [:NETBALL,
       (wildpkmn.pbHasType?(:BUG) || wildpkmn.pbHasType?(:WATER)) ? 3.5 : 1],
-    [PBItems::HEALBALL,
+    [:HEALBALL,
       ($Trainer.party.length<6 && wildpkmn.hp<wildpkmn.totalhp/2) ? 2.5 : 1],
-    [PBItems::DIVEBALL,1],
-    [PBItems::DUSKBALL,
+    [:DIVEBALL,1],
+    [:DUSKBALL,
       PBDayNight.isNight? ? 3.5 : 1],
-    [PBItems::QUICKBALL,
+    [:QUICKBALL,
       wildpkmn.turncount<=0 ? 5 : 1]
   ]
   

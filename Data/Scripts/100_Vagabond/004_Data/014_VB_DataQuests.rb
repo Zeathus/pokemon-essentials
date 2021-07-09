@@ -114,7 +114,7 @@ def pbInitQuests
     "Find the Alolan Vulpix in Chert City and bring it back to the employee, Klaus."],
     "Vulpix returned back to Klaus after running away. You found it standing in the park."))
   pbAddQuest(QuestData.new(:LumberlessCarpenter, "Lumberless Carpenter",
-    0, 150, PBItems::RAREBONE, "Breccia City",
+    0, 150, :RAREBONE, "Breccia City",
     "Help Pent get his carpenter business up and running again by getting him a Timburr.", [
     "Catch a Timburr for Pent. You can find it east of the Crosswoods."],
     "Pent has got his shop up and running again! He can now craft you various items."))
