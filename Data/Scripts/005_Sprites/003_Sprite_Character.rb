@@ -65,10 +65,10 @@ class Sprite_Character < RPG::Sprite
     @isPartner    = @character.is_a?(String)
     @oldbushdepth = 0
     @spriteoffset = false
-    if !character || character == $game_player || (character.name[/reflection/i] rescue false)
+    if !character || character == $game_player || (!@isPartner && character.name[/reflection/i] rescue false)
       @reflection = Sprite_Reflection.new(self, character, viewport)
     end
-    if !character.is_a?(String)
+    if !@isPartner
       @dropshadow = DropShadowSprite.new(self, character, viewport)
     end
     #@surfbase = Sprite_SurfBase.new(self, character, viewport) if character == $game_player

@@ -79,7 +79,7 @@ def pbHelp(viewport,hints)
   
   Input.update
   loop do
-    break if Input.trigger?(Input::B) || Input.trigger?(Input::H)
+    break if Input.trigger?(Input::BACK) || Input.trigger?(Input::SPECIAL)
     update = false
     
     if Input.trigger?(Input::UP) && hint.adj[0]

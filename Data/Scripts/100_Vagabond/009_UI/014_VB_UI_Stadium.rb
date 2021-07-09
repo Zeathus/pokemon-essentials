@@ -1002,7 +1002,7 @@ def pbStadiumMenu
        if searchlist.index!=oldindex
          pbRefreshStadiumMenu(sprites,cups)
        end
-       if Input.trigger?(Input::C)
+       if Input.trigger?(Input::USE)
          pbPlayDecisionSE()
          if searchlist.index==cups[0].length + 1
            break
@@ -1022,7 +1022,7 @@ def pbStadiumMenu
              break
            end
          end
-       elsif Input.trigger?(Input::B)
+       elsif Input.trigger?(Input::BACK)
          pbPlayCancelSE()
          break
        end

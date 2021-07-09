@@ -599,7 +599,7 @@ def pbGrantExpScreen(exp)
         selected -= 1 if selected > 0
       elsif Input.trigger?(Input::DOWN)
         selected += 1 if selected < $Trainer.party.length - 1
-      elsif Input.trigger?(Input::B) || Input.trigger?(Input::C)
+      elsif Input.trigger?(Input::BACK) || Input.trigger?(Input::USE)
         exp_gain_sum=0
         for i in exp_gain
           exp_gain_sum+=i

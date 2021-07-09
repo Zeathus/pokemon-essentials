@@ -780,11 +780,11 @@ class MoveSelectionSprite < SpriteWrapper
         Graphics.update
         Input.update
         pbUpdate
-        if Input.trigger?(Input::B)
+        if Input.trigger?(Input::BACK)
           ret=4
           break
         end
-        if Input.trigger?(Input::C)
+        if Input.trigger?(Input::USE)
           break
         end
         if Input.trigger?(Input::DOWN)
@@ -830,12 +830,12 @@ class MoveSelectionSprite < SpriteWrapper
         else
           @sprites["movepresel"].z=@sprites["movesel"].z
         end
-        if Input.trigger?(Input::B)
+        if Input.trigger?(Input::BACK)
           break if !switching
           @sprites["movepresel"].visible=false
           switching=false
         end
-        if Input.trigger?(Input::A)
+        if Input.trigger?(Input::ACTION)
           if Input.press?(Input::CTRL)
             offset-=1
           else
@@ -844,7 +844,7 @@ class MoveSelectionSprite < SpriteWrapper
           drawSelectedMove(@pokemon,0,@pokemon.moves[selmove].id + offset)
           pbMessage(PBMoves.getName(@pokemon.moves[selmove].id + offset))
         end
-        if Input.trigger?(Input::C)
+        if Input.trigger?(Input::USE)
           if selmove==4
             break if !switching
             @sprites["movepresel"].visible=false
@@ -963,11 +963,11 @@ class MoveSelectionSprite < SpriteWrapper
         Graphics.update
         Input.update
         pbUpdate
-        if Input.trigger?(Input::B)
+        if Input.trigger?(Input::BACK)
           break
         end
         dorefresh=false
-        if Input.trigger?(Input::C)
+        if Input.trigger?(Input::USE)
           if @page==0
             break
           elsif @page==2
@@ -1021,7 +1021,7 @@ class MoveSelectionSprite < SpriteWrapper
             dorefresh=true
           end
         end
-        if $DEBUG && Input.trigger?(Input::A)
+        if $DEBUG && Input.trigger?(Input::ACTION)
           @test = 0 if !@test
           @test+=1
           drawPageStats(@pokemon)

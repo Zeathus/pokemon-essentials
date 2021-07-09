@@ -34,10 +34,10 @@ def pbShowTutorial(name)
     
     back = false
     while true
-      if Input.trigger?(Input::C)
+      if Input.trigger?(Input::USE)
         pbSEPlay("Choose",100)
         break
-      elsif Input.trigger?(Input::B) && num > 1
+      elsif Input.trigger?(Input::BACK) && num > 1
         pbSEPlay("Choose",100)
         back = true
         break

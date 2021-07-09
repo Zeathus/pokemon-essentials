@@ -608,9 +608,9 @@ class PartyMemberChangeSprite < SpriteWrapper
         charsprite=IconSprite.new(0,0,viewport)
         type=PBParty.getTrainerType(i)
         if i==0
-          charsprite.setBitmap(sprintf("Graphics/Characters/trchar%03d",type))
+          charsprite.setBitmap(sprintf("Graphics/Characters/trainer_%s",type.to_s))
         else
-          charsprite.setBitmap(sprintf("Graphics/Characters/trchar%03d",type))
+          charsprite.setBitmap(sprintf("Graphics/Characters/trainer_%s",type.to_s))
         end
         width=charsprite.bitmap.width
         height=charsprite.bitmap.height
@@ -948,7 +948,7 @@ class PokeSelectionSprite < SpriteWrapper
           self.bitmap.fill_rect(@gaugeX,@gaugeY+6,hpgauge,2,hpcolors[hpzone*2])
           barbg=@hpbar
           self.bitmap.blt(@hpbarX,@hpbarY,barbg.bitmap,Rect.new(0,0,@hpbar.width,16))
-          if @pokemon.hp==0 || @pokemon.status != :None
+          if @pokemon.hp==0 || @pokemon.status != :NONE
             status=(@pokemon.hp==0) ? 5 : (GameData::Status.get(@pokemon.status).id_number - 1)
             statusrect=Rect.new(0,32*status,32,32)
             self.bitmap.blt(@statusX,@statusY,@statuses.bitmap,statusrect)
@@ -1018,12 +1018,12 @@ class PokemonScreen_Scene
          Input.update
          cmdwindow.update
          self.update
-         if Input.trigger?(Input::B)
+         if Input.trigger?(Input::BACK)
            pbPlayCancelSE()
            ret=-1
            break
          end
-         if Input.trigger?(Input::C)
+         if Input.trigger?(Input::USE)
            pbPlayDecisionSE()
            ret=cmdwindow.index
            break
@@ -1242,10 +1242,10 @@ class PokemonScreen_Scene
         update = true
       end
     
-      if Input.trigger?(Input::C)
+      if Input.trigger?(Input::USE)
         return @menuindex
       end
-      if Input.trigger?(Input::B)
+      if Input.trigger?(Input::BACK)
         return -1
       end
       
@@ -1380,10 +1380,10 @@ class PokemonScreen_Scene
         update = true
       end
     
-      if Input.trigger?(Input::C)
+      if Input.trigger?(Input::USE)
         return @menuindex
       end
-      if Input.trigger?(Input::B)
+      if Input.trigger?(Input::BACK)
         return -1
       end
       
@@ -1600,7 +1600,7 @@ class PokemonScreen_Scene
         #@sprites["selected"].y = 52 + (48 * @activecmd)
         #@sprites["selected"].y = 400 if @activecmd >= 6
       end
-      if Input.trigger?(Input::B)
+      if Input.trigger?(Input::BACK)
         if switching
           return -1
         elsif @fullparty >= 0
@@ -1617,7 +1617,7 @@ class PokemonScreen_Scene
           return -1
         end
       end
-      if Input.trigger?(Input::C)
+      if Input.trigger?(Input::USE)
         if @activecmd < 12
           pbPlayDecisionSE()
           return @activecmd
@@ -1737,10 +1737,10 @@ class PokemonScreen_Scene
       if Input.repeat?(Input::LEFT)
         @sprites["memchange"].left
       end
-      if Input.trigger?(Input::C)
+      if Input.trigger?(Input::USE)
         choice = @sprites["memchange"].selected
         break
-      elsif Input.trigger?(Input::B)
+      elsif Input.trigger?(Input::BACK)
         break
       end
       Graphics.update
@@ -1780,6 +1780,7 @@ class PokemonScreen_Scene
     end
     pbToggleAll(true)
     @sprites["memchange"].dispose
+    @sprites.delete("memchange")
     pbSelect(top ? 0 : 6)
     @sprites["selected"].visible=true
     @sprites["selected"].update
@@ -1921,12 +1922,12 @@ class PokemonScreen_Scene
       Graphics.update
       Input.update
       self.update
-      if @sprites["messagebox"].busy? && Input.trigger?(Input::C)
+      if @sprites["messagebox"].busy? && Input.trigger?(Input::USE)
         pbPlayDecisionSE() if @sprites["messagebox"].pausing?
         @sprites["messagebox"].resume
       end
       if !@sprites["messagebox"].busy? &&
-         (Input.trigger?(Input::C) || Input.trigger?(Input::B))
+         (Input.trigger?(Input::USE) || Input.trigger?(Input::BACK))
         break
       end
     end
@@ -2006,11 +2007,11 @@ class PokemonScreen_Scene
          cmdwindow.visible=true if !@sprites["messagebox"].busy?
          cmdwindow.update
          self.update
-         if Input.trigger?(Input::B) && !@sprites["messagebox"].busy?
+         if Input.trigger?(Input::BACK) && !@sprites["messagebox"].busy?
            ret=false
            break
          end
-         if Input.trigger?(Input::C) && @sprites["messagebox"].resume && !@sprites["messagebox"].busy?
+         if Input.trigger?(Input::USE) && @sprites["messagebox"].resume && !@sprites["messagebox"].busy?
            ret=(cmdwindow.index==0)
            break
          end

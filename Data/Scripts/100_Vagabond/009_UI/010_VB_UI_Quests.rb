@@ -5,7 +5,7 @@ class QuestHeaderSprite < Sprite
     @text = text
     self.x = x
     self.y = y
-    @buttonBitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_header")
+    @buttonBitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/Quests/header")
     @selected = false
     self.bitmap = Bitmap.new(236,40)
     refresh
@@ -23,7 +23,7 @@ class QuestHeaderSprite < Sprite
     textpos = [[@text,118,4,2,
       Color.new(250,250,250),Color.new(100,60,50)]]
     pbSetSystemFont(self.bitmap)
-    pbDrawTextPositions(self.bitmap,textpos)
+    pbDrawTextPositions(self.bitmap,textpos,false)
   end
   
   def dispose
@@ -83,9 +83,9 @@ class QuestBarSprite < Sprite
                  [@quest.location,458,6,1,
         Color.new(250,250,250),Color.new(100,60,50)]]
       pbSetSmallFont(self.bitmap)
-      pbDrawTextPositions(self.bitmap,textpos)
+      pbDrawTextPositions(self.bitmap,textpos,false)
       imagepos=[
-        ["Graphics/Pictures/quests_status",
+        ["Graphics/Pictures/Quests/status",
          18,4,0,30*(@quest.status+1),30,30]
       ]
       pbDrawImagePositions(self.bitmap,imagepos)
@@ -128,13 +128,13 @@ class QuestBarSprite < Sprite
             ["Graphics/Icons/item000",
              12,184,0,0,48,48,24,24])
           pbDrawTextPositions(content,
-            [["SECRET TO EVERYBODY",40,182,0,white,shadow]])
+            [["SECRET TO EVERYBODY",40,182,0,white,shadow]],false)
         else
           imagepos.push(
             [sprintf("Graphics/Icons/item%03d",@quest.item),
              12,184,0,0,48,48,24,24])
           pbDrawTextPositions(content,
-            [[PBItems.getName(@quest.item).upcase,40,182,0,white,shadow]])
+            [[PBItems.getName(@quest.item).upcase,40,182,0,white,shadow]],false)
         end
       end
       offset = 0
@@ -155,7 +155,7 @@ class QuestBarSprite < Sprite
           complete ? 194 : 220)
         if complete
           imagepos.push(
-            ["Graphics/Pictures/quests_status",
+            ["Graphics/Pictures/Quests/status",
              208,10+offset+lines.length*7,0,90,30,30])
         end
         for s in lines
@@ -170,7 +170,7 @@ class QuestBarSprite < Sprite
       
     end
     
-    pbDrawTextPositions(content,textpos)
+    pbDrawTextPositions(content,textpos,false)
     pbDrawImagePositions(content,imagepos)
     
     self.z += 10
@@ -178,7 +178,7 @@ class QuestBarSprite < Sprite
     self.bitmap.blt(18,36,content,Rect.new(0,0,446,220))
     ret = 0
     loop do
-      break if Input.trigger?(Input::B)
+      break if Input.trigger?(Input::BACK)
       if Input.trigger?(Input::UP)
         ret = -1
         break
@@ -188,9 +188,9 @@ class QuestBarSprite < Sprite
       #elsif Input.trigger?(Input::LEFT) || Input.trigger?(Input::RIGHT)
       #  ret = 2
       #  break
-      elsif Input.trigger?(Input::H)
+      elsif Input.trigger?(Input::SPECIAL)
         pbHelp(viewport,pbQuestDetailHints)
-      elsif Input.trigger?(Input::A) && $DEBUG
+      elsif Input.trigger?(Input::ACTION) && $DEBUG
         if Input.press?(Input::CTRL)
           new_status = pbNumericUpDown(
             "Choose new quest status",-1,3,@quest.status)
@@ -221,8 +221,8 @@ class QuestScrollSprite < Sprite
     super(viewport)
     self.x = x
     self.y = y
-    @scrollbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_scroll")
-    @barbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_scrollbar")
+    @scrollbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/Quests/scroll")
+    @barbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/Quests/scrollbar")
     @mustrefresh = true
     @scrollpos = 0
     @scrollmax = 254 - @scrollbitmap.height
@@ -302,7 +302,7 @@ def pbShowQuests(show_quest=nil)
   
   sprites={}
   sprites["bg"] = IconSprite.new(0,0,viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/quests_bg")
+  sprites["bg"].setBitmap("Graphics/Pictures/Quests/bg")
   
   sprites["tab1"]=QuestHeaderSprite.new(viewport,22,52,"Main")
   sprites["tab2"]=QuestHeaderSprite.new(viewport,254,52,"Side")
@@ -312,8 +312,8 @@ def pbShowQuests(show_quest=nil)
     (sprites["tab1"].selected = true) :
     (sprites["tab2"].selected = true)
   
-  barbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_bar")
-  infobitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/quests_details")
+  barbitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/Quests/bar")
+  infobitmap = RPG::Cache.load_bitmap("","Graphics/Pictures/Quests/details")
   for i in 0...7
     sprites[_INTL("quest{1}",i)] = QuestBarSprite.new(
       viewport,barbitmap,infobitmap,8,92+i*36,quest_list[i])
@@ -401,12 +401,11 @@ def pbShowQuests(show_quest=nil)
       scroll = 0 if newtab == 0
       newtab = 1
       update = true
-    elsif Input.trigger?(Input::H)
+    elsif Input.trigger?(Input::SPECIAL)
       pbHelp(viewport,pbQuestHints)
-    elsif Input.trigger?(Input::B)
-      viewport.dispose
+    elsif Input.trigger?(Input::BACK)
       break
-    elsif Input.trigger?(Input::A)
+    elsif Input.trigger?(Input::ACTION)
       method=[
         "Status",
         "Alphabetical",
@@ -419,7 +418,7 @@ def pbShowQuests(show_quest=nil)
         pbSortQuests(side_quests)
         update = true
       end
-    elsif Input.trigger?(Input::C)
+    elsif Input.trigger?(Input::USE)
       if quest_list[selected].status < 1 && !$DEBUG
         next
       end

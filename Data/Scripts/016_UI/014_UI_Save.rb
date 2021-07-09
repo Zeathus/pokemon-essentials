@@ -87,7 +87,15 @@ class PokemonSaveScreen
 
   def pbSaveScreen
     ret = false
+    pbDisableOverlays
     @scene.pbStartScreen
+    while $game_variables[UI_ARRAY].is_a?(Array) && $game_variables[UI_ARRAY].length>0
+      if $game_variables[UI_ARRAY][1]
+        $game_variables[UI_ARRAY] -= [$game_variables[UI_ARRAY][1]]
+      end
+      Graphics.update
+      pbWait(2)
+    end
     if pbConfirmMessage(_INTL('Would you like to save the game?'))
       if SaveData.exists? && $PokemonTemp.begunNewGame
         pbMessage(_INTL('WARNING!'))
@@ -121,8 +129,13 @@ end
 #
 #===============================================================================
 def pbSaveScreen
-  scene = PokemonSave_Scene.new
-  screen = PokemonSaveScreen.new(scene)
-  ret = screen.pbSaveScreen
-  return ret
+  if $game_switches[ANTISAVE] # Anti Save
+    Kernel.pbMessage(_INTL(PBMessages::AntiSave))
+    return false
+  else
+    scene = PokemonSave_Scene.new
+    screen = PokemonSaveScreen.new(scene)
+    ret = screen.pbSaveScreen
+    return ret
+  end
 end

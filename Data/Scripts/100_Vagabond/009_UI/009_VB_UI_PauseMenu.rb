@@ -102,14 +102,14 @@ class PokeBarSmallSprite < SpriteWrapper
       self.bitmap.fill_rect(@gaugeX,@gaugeY,hpgauge,2,hpcolors[hpzone*2])
       self.bitmap.fill_rect(@gaugeX,@gaugeY+2,hpgauge,2,hpcolors[hpzone*2+1])
       self.bitmap.fill_rect(@gaugeX,@gaugeY+4,hpgauge,2,hpcolors[hpzone*2])
-      if @pokemon.hp==0 || @pokemon.status != :None
+      if @pokemon.hp==0 || @pokemon.status != :NONE
         status=(@pokemon.hp==0) ? 5 : (GameData::Status.get(@pokemon.status).id_number - 1)
         statusrect=Rect.new(0,14*status,14,14)
         self.bitmap.blt(@statusX,@statusY,@statuses.bitmap,statusrect)
       else
         textpos = [[_INTL("HP"),@statusX - (@other ? -2 : 2),@statusY - 6,false,Color.new(252,252,252),nil]]
         pbSetSmallestFont(self.bitmap)
-        pbDrawTextPositions(self.bitmap,textpos)
+        pbDrawTextPositions(self.bitmap,textpos,false)
       end
     end
   end
@@ -260,9 +260,9 @@ def pbPauseMenu
       commands.shift
       anim="right"
       time=0
-    elsif Input.trigger?(Input::B)
+    elsif Input.trigger?(Input::BACK)
       break
-    elsif Input.trigger?(Input::C)
+    elsif Input.trigger?(Input::USE)
       close=pbPauseCommandSelect(commands[0],[sprites,viewport,bitmaps])
       break if close == 1
       if close == 2
@@ -287,7 +287,7 @@ def pbPauseMenu
           sprites[_INTL("pokemon{1}",i*2+1)].setValues(otherparty[i],otherid)
         end
       end
-    elsif Input.trigger?(Input::A)
+    elsif Input.trigger?(Input::ACTION)
       if anim != "left" && anim != "right"
         time=0
         if !swapping
@@ -582,11 +582,11 @@ def pbPauseCommandSelect(command,toDispose)
     screen=PokemonBagScreen.new(scene,$PokemonBag)
     pbFadeOutIn(99999) { 
        item=screen.pbStartScreen 
-       if item && item > 0
+       if item
          pbPauseMenuClose(toDispose)
        end
     }
-    if item && item > 0
+    if item
       pbUseKeyItemInField(item)
       return 1
     end
