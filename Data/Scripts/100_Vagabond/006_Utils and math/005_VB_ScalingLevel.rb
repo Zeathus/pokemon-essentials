@@ -45,7 +45,9 @@ def pbGetEvolvedEncounter(species, level)
   return encounter
 end
 
-def pbScaleTrainer(trainer, trainerparty, modifier)
+def pbScaleTrainer(trainer, modifier)
+
+  trainerparty = trainer.party
   
   difficulty = $PokemonSystem.difficulty
   
@@ -83,16 +85,16 @@ def pbScaleTrainer(trainer, trainerparty, modifier)
   end
   overwrite_base = false
   for i in $game_variables[LASTBATTLEDTRAINERS]
-    if i[0]==trainer[0].trainertype &&
-       i[1]==trainer[0].name &&
-       i[2]==trainerparty && i[3]
-      level_base = i[3]
+    if i[0]==trainer.trainertype &&
+       i[1]==trainer.name &&
+       i[2]
+      level_base = i[2]
       overwrite_base = true
     end
   end
   if !overwrite_base
     $game_variables[LASTBATTLEDTRAINERS].push(
-      [trainer[0].trainertype,trainer[0].name,trainerparty,level_base])
+      [trainer[0].trainertype,trainer[0].name,level_base])
     if $game_variables[LASTBATTLEDTRAINERS].length > 30
       $game_variables[LASTBATTLEDTRAINERS].shift
     end

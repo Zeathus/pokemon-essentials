@@ -17,14 +17,65 @@ Events.onWildPokemonCreate += proc { |_sender, e|
 # map depend on the levels of Pokémon in the player's party.
 # This is a simple method, and can/should be modified to account for evolutions
 # and other such details.  Of course, you don't HAVE to use this code.
+#Events.onWildPokemonCreate += proc { |_sender, e|
+#  pokemon = e[0]
+#  if $game_map.map_id == 51
+#    new_level = pbBalancedLevel($Trainer.party) - 4 + rand(5)   # For variety
+#    new_level = new_level.clamp(1, GameData::GrowthRate.max_level)
+#    pokemon.level = new_level
+#    pokemon.calc_stats
+#    pokemon.reset_moves
+#  end
+#}
+
+# Blood Moon
+#Events.onWildPokemonCreate+=proc {|sender,e|
+#  pokemon=e[0]
+#  if $game_screen.weather_type==PBFieldWeather::BloodMoon
+#    # Hidden Ability
+#    if rand(2)==0
+#      pokemon.abilityflag=2
+#    end
+#    
+#    # IVs
+#    ivs=[0,1,2,3,4,5].shuffle
+#    for i in 0...3
+#      pokemon.iv[ivs[i]]=31
+#      pokemon.oiv[ivs[i]]=31
+#    end
+#    
+#    # Shiny Change
+#    if rand(500)==0
+#      pokemon.shinyflag=true
+#    end
+#  end
+#}
+
 Events.onWildPokemonCreate += proc { |_sender, e|
   pokemon = e[0]
-  if $game_map.map_id == 51
-    new_level = pbBalancedLevel($Trainer.party) - 4 + rand(5)   # For variety
-    new_level = new_level.clamp(1, GameData::GrowthRate.max_level)
-    pokemon.level = new_level
-    pokemon.calc_stats
-    pokemon.reset_moves
+  if $game_variables[WILD_MODIFIER] && $game_variables[WILD_MODIFIER] != 0
+    mod = $game_variables[WILD_MODIFIER]
+    if mod.moves # Custom Moves
+      pokemon.moves[0] = PBMove.new(mod.moves[0])
+      pokemon.moves[1] = PBMove.new(mod.moves[1])
+      pokemon.moves[2] = PBMove.new(mod.moves[2])
+      pokemon.moves[3] = PBMove.new(mod.moves[3])
+    end
+    pokemon.iv          = pbArrayToIVs(mod.iv)  if mod.iv
+    pokemon.ev          = pbArrayToIVs(mod.ev)  if mod.ev
+    pokemon.form        = mod.form              if mod.form
+    pokemon.name        = mod.name              if mod.name
+    pokemon.abilityflag = mod.ability           if mod.ability
+    pokemon.genderflag  = mod.gender            if mod.gender
+    pokemon.item        = mod.item              if mod.item
+    pokemon.natureflag  = mod.nature            if mod.nature
+    pokemon.shinyflag   = mod.shiny             if mod.shiny
+    pokemon.status      = mod.status            if mod.status
+    pokemon.calcStats
+    pokemon.hp          = pokemon.totalhp
+    pokemon.hp          = mod.hp                if mod.hp
+    pokemon.hp         *= mod.hpmult            if mod.hpmult
+    $game_variables[WILD_MODIFIER] = 0
   end
 }
 

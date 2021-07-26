@@ -44,12 +44,8 @@ class OverworldPokemon
     @sprite = IconSprite.new(0,0,@viewport)
     if @form > 0
       @sprite.setBitmap(sprintf("Graphics/Pokemon/Icons/%s_%d",species,@form))
-      echo sprintf("Graphics/Pokemon/Icons/%s_%d",species,@form)
-      echo "\n"
     else
       @sprite.setBitmap(sprintf("Graphics/Pokemon/Icons/%s",species))
-      echo sprintf("Graphics/Pokemon/Icons/%s",species)
-      echo "\n"
     end
     pbDayNightTint(@sprite)
     if @terrain == 0 # Grass
@@ -325,12 +321,9 @@ class SpawnArea
         end
       end
       encounterType = $PokemonEncounters.pbSpawnType(@terrain)
-      echo sprintf("%d, %d: %s\n", @x, @y, encounterType.to_s)
       return if encounterType == :None
       return if !$PokemonEncounters.has_encounter_type?(encounterType)
       encounter = $PokemonEncounters.choose_wild_pokemon(encounterType)
-      echo encounter.to_s
-      echo "\n"
       return if !encounter
       #pbScaleWildEncounter(encounter)
       pkmn = OverworldPokemon.new(@viewport,@map,encounter[0],encounter[1],encounter[2],

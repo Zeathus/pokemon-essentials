@@ -54,6 +54,10 @@ class PokemonTemp
     when "base"                   then rules["base"]           = var
     when "outcome", "outcomevar"  then rules["outcomeVar"]     = var
     when "nopartner"              then rules["noPartner"]      = true
+    when "scalelevel"             then rules["scaleLevel"]     = true
+    when "fixedlevel"             then rules["scaleLevel"]     = false
+    when "specialmod"             then rules["specialMod"]     = var
+    when "startover"              then rules["startOver"]      = var
     else
       raise _INTL("Battle rule \"{1}\" does not exist.", rule)
     end
@@ -352,6 +356,7 @@ end
 def pbTrainerBattleCore(*args)
   outcomeVar = $PokemonTemp.battleRules["outcomeVar"] || 1
   canLose    = $PokemonTemp.battleRules["canLose"] || false
+  startOver  = $PokemonTemp.battleRules["startOver"] || false
   # Skip battle if the player has no able Pokémon, or if holding Ctrl in Debug mode
   if $Trainer.able_pokemon_count == 0 || ($DEBUG && Input.press?(Input::CTRL))
     pbMessage(_INTL("SKIPPING BATTLE...")) if $DEBUG
@@ -362,6 +367,8 @@ def pbTrainerBattleCore(*args)
     $PokemonGlobal.nextBattleME        = nil
     $PokemonGlobal.nextBattleCaptureME = nil
     $PokemonGlobal.nextBattleBack      = nil
+    $game_variables[BOSS_BATTLE]=0
+    $game_variables[WILD_MODIFIER]=0
     pbMEStop
     return ($Trainer.able_pokemon_count == 0) ? 0 : 1   # Treat it as undecided/a win
   end
@@ -395,16 +402,33 @@ def pbTrainerBattleCore(*args)
       raise _INTL("Expected NPCTrainer or array of trainer data, got {1}.", arg)
     end
   end
+  foeTrainers.each { |trainer|
+    pbScaleTrainer(trainer, $PokemonTemp.battleRules["specialMod"] || 0)
+  }
   # Calculate who the player trainer(s) and their party are
-  playerTrainers    = [$Trainer]
-  playerParty       = $Trainer.party
+  mainid = getPartyActive(0)
+  mainTrainer = Trainer.new(PBParty.getName(mainid), PBParty.getTrainerType(mainid))
+  mainTrainer.party = getActivePokemon(0)
+  playerTrainers    = [mainTrainer]
+  playerParty       = mainTrainer.party
   playerPartyStarts = [0]
   room_for_partner = (foeParty.length > 1)
   if !room_for_partner && $PokemonTemp.battleRules["size"] &&
      !["single", "1v1", "1v2", "1v3"].include?($PokemonTemp.battleRules["size"])
     room_for_partner = true
   end
-  if $PokemonGlobal.partner && !$PokemonTemp.battleRules["noPartner"] && room_for_partner
+  if isInParty && room_for_partner && !$PokemonTemp.battleRules["noPartner"]
+    otherid = getPartyActive(1)
+    otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
+    otherParty = getPartyPokemon(1)
+    otherTrainer.party = otherParty
+    playerTrainers.push(otherTrainer)
+    playerParty = []
+    playerParty.each { |pkmn| playerParty.push(pkmn) }
+    playerPartyStarts.push(playerParty.length)
+    otherParty.each { |pkmn| playerParty.push(pkmn) }
+    setBattleRule("double") if !$PokemonTemp.battleRules["size"]
+  elsif $PokemonGlobal.partner && !$PokemonTemp.battleRules["noPartner"] && room_for_partner
     ally = NPCTrainer.new($PokemonGlobal.partner[1], $PokemonGlobal.partner[0])
     ally.id    = $PokemonGlobal.partner[2]
     ally.party = $PokemonGlobal.partner[3]
@@ -434,7 +458,7 @@ def pbTrainerBattleCore(*args)
     pbSceneStandby {
       decision = battle.pbStartBattle
     }
-    pbAfterBattle(decision,canLose)
+    pbAfterBattle(decision,canLose,startOver)
   }
   Input.update
   # Save the result of the battle in a Game Variable (1 by default)
@@ -454,13 +478,14 @@ end
 # multiple trainer events spot the player at once. The extra code in this method
 # deals with that case and can cause a double trainer battle instead.
 def pbTrainerBattle(trainerID, trainerName, endSpeech=nil,
-                    doubleBattle=false, trainerPartyID=0, canLose=false, outcomeVar=1)
+                    doubleBattle=true, trainerPartyID=0, canLose=false, outcomeVar=1)
   # If there is another NPC trainer who spotted the player at the same time, and
   # it is possible to have a double battle (the player has 2+ able Pokémon or
   # has a partner trainer), then record this first NPC trainer into
   # $PokemonTemp.waitingTrainer and end this method. That second NPC event will
   # then trigger and cause the battle to happen against this first trainer and
   # themselves.
+  $Trainer.stats.battles += 1
   if !$PokemonTemp.waitingTrainer && pbMapInterpreterRunning? &&
      ($Trainer.able_pokemon_count > 1 ||
      ($Trainer.able_pokemon_count > 0 && $PokemonGlobal.partner))
@@ -545,7 +570,7 @@ end
 #===============================================================================
 # After battles
 #===============================================================================
-def pbAfterBattle(decision,canLose)
+def pbAfterBattle(decision,canLose,startOver=false)
   $Trainer.party.each do |pkmn|
     pkmn.statusCount = 0 if pkmn.status == :POISON   # Bad poison becomes regular
     pkmn.makeUnmega
@@ -560,6 +585,21 @@ def pbAfterBattle(decision,canLose)
     end
   end
   if decision==2 || decision==5   # if loss or draw
+    if startOver
+      pbMessage("Do you want to retry the battle?\\ch[1,0,Retry the battle,Return to Pokémon Center]")
+      if pbGet(1)==0
+        canLose = true
+        pbCancelVehicles
+        $game_temp.player_new_map_id=startOver[0]
+        $game_temp.player_new_x=startOver[1]
+        $game_temp.player_new_y=startOver[2]
+        $game_temp.player_new_direction=startOver.length>3 ? startOver[3] : 8
+        #pbBGSStop(0)
+        $scene.transfer_player
+        #$game_map.autoplay
+        #$game_map.refresh
+      end
+    end
     if canLose
       $Trainer.party.each { |pkmn| pkmn.heal }
       (Graphics.frame_rate/4).times { Graphics.update }
