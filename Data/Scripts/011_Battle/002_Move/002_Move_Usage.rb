@@ -182,6 +182,17 @@ class PokeBattle_Move
     end
     # Disguise takes the damage
     return if target.damageState.disguise
+    # Boss Sturdy (can be at any HP)
+    if target.opposes? && !pbBoss.is_a?(Numeric)
+      phases = pbBoss.getSturdy
+      for i in phases
+        i *= opponent.totalhp
+        i = (i * 1.0 / 100).ceil
+        if opponent.hp > i && oppnent.hp - damage < i
+          damage = opponent.hp - i
+        end
+      end
+    end
     # Target takes the damage
     if damage>=target.hp
       damage = target.hp

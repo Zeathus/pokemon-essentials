@@ -122,7 +122,7 @@ ItemHandlers::CanUseInBattle.add(:FULLHEAL,proc { |item,pokemon,battler,move,fir
 
 ItemHandlers::CanUseInBattle.copy(:FULLHEAL,
    :LAVACOOKIE,:OLDGATEAU,:CASTELIACONE,:LUMIOSEGALETTE,:SHALOURSABLE,
-   :BIGMALASADA,:LUMBERRY,:HEALPOWDER)
+   :BIGMALASADA,:LUMBERRY,:HEALPOWDER,:LUMBERRYSOUP)
 ItemHandlers::CanUseInBattle.copy(:FULLHEAL,:RAGECANDYBAR) if Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::CanUseInBattle.add(:FULLRESTORE,proc { |item,pokemon,battler,move,firstAction,battle,scene,showMessages|
@@ -323,11 +323,11 @@ ItemHandlers::BattleUseOnPokemon.copy(:POTION,:BERRYJUICE,:SWEETHEART)
 ItemHandlers::BattleUseOnPokemon.copy(:POTION,:RAGECANDYBAR) if !Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::BattleUseOnPokemon.add(:SUPERPOTION,proc { |item,pokemon,battler,choices,scene|
-  pbBattleHPItem(pokemon,battler,50,scene)
+  pbBattleHPItem(pokemon,battler,60,scene)
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:HYPERPOTION,proc { |item,pokemon,battler,choices,scene|
-  pbBattleHPItem(pokemon,battler,200,scene)
+  pbBattleHPItem(pokemon,battler,120,scene)
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:MAXPOTION,proc { |item,pokemon,battler,choices,scene|
@@ -335,15 +335,15 @@ ItemHandlers::BattleUseOnPokemon.add(:MAXPOTION,proc { |item,pokemon,battler,cho
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:FRESHWATER,proc { |item,pokemon,battler,choices,scene|
-  pbBattleHPItem(pokemon,battler,50,scene)
+  pbBattleHPItem(pokemon,battler,30,scene)
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:SODAPOP,proc { |item,pokemon,battler,choices,scene|
-  pbBattleHPItem(pokemon,battler,60,scene)
+  pbBattleHPItem(pokemon,battler,50,scene)
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:LEMONADE,proc { |item,pokemon,battler,choices,scene|
-  pbBattleHPItem(pokemon,battler,80,scene)
+  pbBattleHPItem(pokemon,battler,70,scene)
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:MOOMOOMILK,proc { |item,pokemon,battler,choices,scene|
@@ -419,7 +419,7 @@ ItemHandlers::BattleUseOnPokemon.add(:FULLHEAL,proc { |item,pokemon,battler,choi
 
 ItemHandlers::BattleUseOnPokemon.copy(:FULLHEAL,
    :LAVACOOKIE,:OLDGATEAU,:CASTELIACONE,:LUMIOSEGALETTE,:SHALOURSABLE,
-   :BIGMALASADA,:LUMBERRY)
+   :BIGMALASADA,:LUMBERRY,:LUMBERRYSOUP)
 ItemHandlers::BattleUseOnPokemon.copy(:FULLHEAL,:RAGECANDYBAR) if Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::BattleUseOnPokemon.add(:FULLRESTORE,proc { |item,pokemon,battler,choices,scene|

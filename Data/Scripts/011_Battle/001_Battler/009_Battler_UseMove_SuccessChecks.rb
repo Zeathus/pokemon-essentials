@@ -74,13 +74,15 @@ class PokeBattle_Battler
       return false
     end
     # Imprison
-    @battle.eachOtherSideBattler(@index) do |b|
-      next if !b.effects[PBEffects::Imprison] || !b.pbHasMove?(move.id)
-      if showMessages
-        msg = _INTL("{1} can't use its sealed {2}!",pbThis,move.name)
-        (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
+    if !hasActiveItem?(:AEGISTALISMAN)
+      @battle.eachOtherSideBattler(@index) do |b|
+        next if !b.effects[PBEffects::Imprison] || !b.pbHasMove?(move.id)
+        if showMessages
+          msg = _INTL("{1} can't use its sealed {2}!",pbThis,move.name)
+          (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
+        end
+        return false
       end
-      return false
     end
     # Assault Vest (prevents choosing status moves but doesn't prevent
     # executing them)
@@ -103,6 +105,7 @@ class PokeBattle_Battler
   # Return true if Pokémon continues attacking (although it may have chosen to
   # use a different move in disobedience), or false if attack stops.
   def pbObedienceCheck?(choice)
+    return true
     return true if usingMultiTurnAttack?
     return true if choice[0]!=:UseMove
     return true if !@battle.internalBattle
@@ -212,13 +215,25 @@ class PokeBattle_Battler
         end
       end
     when :FROZEN
-      if !move.thawsUser?
-        if @battle.pbRandom(100)<20
-          pbCureStatus
-        else
-          pbContinueStatus
-          @lastMoveFailed = true
-          return false
+      if $PokemonSystem.freezeturns==1
+        if !move.thawsUser?
+          self.statusCount-=1
+          if self.statusCount<=0
+            pbCureStatus
+          else
+            pbContinueStatus
+            return false
+          end
+        end
+      else
+        if !move.thawsUser?
+          if @battle.pbRandom(100)<20
+            pbCureStatus
+          else
+            pbContinueStatus
+            @lastMoveFailed = true
+            return false
+          end
         end
       end
     end

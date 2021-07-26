@@ -45,6 +45,7 @@ class PokeBattle_Battle
       when :Sandstorm then pbDisplay(_INTL("The sandstorm subsided."))
       when :Hail      then pbDisplay(_INTL("The hail stopped."))
       when :ShadowSky then pbDisplay(_INTL("The shadow sky faded."))
+      when :Winds     then pbDisplay(_INTL("The wind stopped."))
       end
       @field.weather = :None
       # Check for form changes caused by the weather changing
@@ -249,7 +250,13 @@ class PokeBattle_Battle
     # Wish
     @positions.each_with_index do |pos,idxPos|
       next if !pos || pos.effects[PBEffects::Wish]==0
-      pos.effects[PBEffects::Wish] -= 1
+      if pos.hasActiveAbility?(:TIMESKIP) && pos.effects[PBEffects::Wish] >= 2
+        @battle.pbCommonAnimation("TimeSkip",i,nil)
+        pbDisplay(_INTL("{1} activated {2}!",i.pbThis,"Time Skip"))
+        pos.effects[PBEffects::Wish] -= 2
+      else
+        pos.effects[PBEffects::Wish] -= 1
+      end
       next if pos.effects[PBEffects::Wish]>0
       next if !@battlers[idxPos] || !@battlers[idxPos].canHeal?
       wishMaker = pbThisEx(idxPos,pos.effects[PBEffects::WishMaker])
@@ -281,7 +288,11 @@ class PokeBattle_Battle
       # Grassy Terrain (healing)
       if @field.terrain == :Grassy && b.affectedByTerrain? && b.canHeal?
         PBDebug.log("[Lingering effect] Grassy Terrain heals #{b.pbThis(true)}")
-        b.pbRecoverHP(b.totalhp/16)
+        if b.hasActiveAbility?(:GRASSPELT)
+          b.pbRecoverHP(b.totalhp/8)
+        else
+          b.pbRecoverHP(b.totalhp/16)
+        end
         pbDisplay(_INTL("{1}'s HP was restored.",b.pbThis))
       end
       # Healer, Hydration, Shed Skin
@@ -306,6 +317,10 @@ class PokeBattle_Battle
       hpGain = (hpGain*1.3).floor if b.hasActiveItem?(:BIGROOT)
       b.pbRecoverHP(hpGain)
       pbDisplay(_INTL("{1} absorbed nutrients with its roots!",b.pbThis))
+    end
+    priority.each do |b|
+      # Boss Status
+      pbBossTrigger(self, b, :Status, b.status)
     end
     # Leech Seed
     priority.each do |b|
@@ -591,6 +606,29 @@ class PokeBattle_Battle
     end
     pbGainExp
     return if @decision>0
+
+    # BOSS BATTLE
+    priority.each do |b|
+      next if b.isFainted? || opposes?(b.index)
+      # Timed and Interval
+      if b.turnCount > 0
+        pbBossTrigger(self, b, :Interval, b.turnCount)
+        pbBossTrigger(self, b, :Timed, b.turnCount)
+      end
+      # Below certain HP
+      pbBossTrigger(self, b, :HP, b)
+      # Weather active
+      pbBossTrigger(self, b, :Weather, pbWeather)
+      # Terrain active
+      pbBossTrigger(self, b, :Terrain, @field.effects)
+      # Field effect
+      pbBossTrigger(self, b, :Field, b.pbOwnSide.effects)
+      # Side effect
+      pbBossTrigger(self, b, :Effect, b.effects)
+      # Custom effect
+      pbBossTrigger(self, b, :Custom, [self, b])
+    end
+
     # Form checks
     priority.each { |b| b.pbCheckForm(true) }
     # Switch Pokémon in if possible
@@ -641,6 +679,7 @@ class PokeBattle_Battle
       b.tookDamage                           = false
       b.tookPhysicalHit                      = false
       b.lastRoundMoveFailed                  = b.lastMoveFailed
+      b.affinitybooster                      = nil
       b.lastAttacker.clear
       b.lastFoeAttacker.clear
     end

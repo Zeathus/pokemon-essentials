@@ -70,6 +70,10 @@ class PokeBattle_Move_004 < PokeBattle_Move
   def pbEffectAgainstTarget(user,target)
     target.effects[PBEffects::Yawn] = 2
     @battle.pbDisplay(_INTL("{1} made {2} drowsy!",user.pbThis,target.pbThis(true)))
+    if user.hasActiveAbility?(:TIMESKIP)
+      target.effects[PBEffects::Yawn] = 1
+      @battle.pbCommonAnimation("TimeSkip",user,nil)
+    end
   end
 end
 
@@ -115,6 +119,13 @@ class PokeBattle_Move_007 < PokeBattle_ParalysisMove
     if @id == :THUNDERWAVE && Effectiveness.ineffective?(target.damageState.typeMod)
       @battle.pbDisplay(_INTL("It doesn't affect {1}...",target.pbThis(true)))
       return true
+    end
+    return super
+  end
+
+  def pbOverrideSuccessCheckPerHit(user,target)
+    if @id == :THUNDERWAVE
+      return (Settings::MORE_TYPE_EFFECTS && statusMove? && user.pbHasType?(:ELECTRIC))
     end
     return super
   end
@@ -165,6 +176,12 @@ end
 # Burns the target.
 #===============================================================================
 class PokeBattle_Move_00A < PokeBattle_BurnMove
+  def pbOverrideSuccessCheckPerHit(user,target)
+    if @id == :WILLOWISP
+      return (Settings::MORE_TYPE_EFFECTS && statusMove? && user.pbHasType?(:FIRE))
+    end
+    return super
+  end
 end
 
 
@@ -310,7 +327,7 @@ class PokeBattle_Move_015 < PokeBattle_ConfuseMove
     case @battle.pbWeather
     when :Sun, :HarshSun
       return 50
-    when :Rain, :HeavyRain
+    when :Rain, :HeavyRain, :Winds
       return 0
     end
     return super
@@ -1633,7 +1650,18 @@ end
 #===============================================================================
 class PokeBattle_Move_05A < PokeBattle_Move
   def pbEffectAgainstTarget(user,target)
-    newHP = (user.hp+target.hp)/2
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1}'s Aegis Talisman protected it from {2}'s Pain Split!",
+        target.pbThis,user.pbThis))
+    end
+    if target.hp > opponent.totalhp
+      @battle.pbDisplay(_INTL("{1}'s HP is too high!",target.pbThis))
+    end
+    a = user.hp
+    a = (a / 2.0).floor if user.hasActiveItem?(:ZENCHARM)
+    b = target.hp
+    b = (b / 2.0).floor if target.hasActiveItem?(:ZENCHARM)
+    newHP = (a+b)/2
     if user.hp>newHP;    user.pbReduceHP(user.hp-newHP,false,false)
     elsif user.hp<newHP; user.pbRecoverHP(newHP-user.hp,false)
     end
@@ -2288,6 +2316,14 @@ end
 # Halves the target's current HP. (Nature's Madness, Super Fang)
 #===============================================================================
 class PokeBattle_Move_06C < PokeBattle_FixedDamageMove
+  def pbFailsAgainstTarget?(user,target)
+    if target.hp > target.totalhp
+      @battle.pbDisplay(_INTL("{1}'s HP is too high!",target.pbThis))
+      return true
+    end
+    return false
+  end
+
   def pbFixedDamage(user,target)
     return (target.hp/2.0).round
   end
@@ -2311,8 +2347,16 @@ end
 #===============================================================================
 class PokeBattle_Move_06E < PokeBattle_FixedDamageMove
   def pbFailsAgainstTarget?(user,target)
-    if user.hp>=target.hp
+    a = user.hp
+    a = (a / 2.0).floor if user.hasActiveItem?(:ZENCHARM)
+    b = target.hp
+    b = (b / 2.0).floor if target.hasActiveItem?(:ZENCHARM)
+    if a>=b
       @battle.pbDisplay(_INTL("But it failed!"))
+      return true
+    end
+    if target.hp > target.totalhp
+      @battle.pbDisplay(_INTL("{1}'s HP is too high!",target.pbThis))
       return true
     end
     return false
@@ -2321,7 +2365,11 @@ class PokeBattle_Move_06E < PokeBattle_FixedDamageMove
   def pbNumHits(user,targets); return 1; end
 
   def pbFixedDamage(user,target)
-    return target.hp-user.hp
+    a = user.hp
+    a = (a / 2.0).floor if user.hasActiveItem?(:ZENCHARM)
+    b = target.hp
+    b = (b / 2.0).floor if target.hasActiveItem?(:ZENCHARM)
+    return b - a
   end
 end
 

@@ -61,6 +61,7 @@ class PokeBattle_Battle
     end
     # Fleeing from wild battles
     if $DEBUG && Input.press?(Input::CTRL)
+      $Trainer.stats.wild_fled += 1
       pbSEPlay("Battle flee")
       pbDisplayPaused(_INTL("You got away safely!"))
       @decision = 3
@@ -72,6 +73,7 @@ class PokeBattle_Battle
     end
     if !duringBattle
       if battler.pbHasType?(:GHOST) && Settings::MORE_TYPE_EFFECTS
+        $Trainer.stats.wild_fled += 1
         pbSEPlay("Battle flee")
         pbDisplayPaused(_INTL("You got away safely!"))
         @decision = 3
@@ -80,6 +82,7 @@ class PokeBattle_Battle
       # Abilities that guarantee escape
       if battler.abilityActive?
         if BattleHandlers.triggerRunFromBattleAbility(battler.ability,battler)
+          $Trainer.stats.wild_fled += 1
           pbShowAbilitySplash(battler,true)
           pbHideAbilitySplash(battler)
           pbSEPlay("Battle flee")
@@ -140,6 +143,7 @@ class PokeBattle_Battle
       rate += @runCommand*30
     end
     if rate>=256 || @battleAI.pbAIRandom(256)<rate
+      $Trainer.stats.wild_fled += 1
       pbSEPlay("Battle flee")
       pbDisplayPaused(_INTL("You got away safely!"))
       @decision = 3

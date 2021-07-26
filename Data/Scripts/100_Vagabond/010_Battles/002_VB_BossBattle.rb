@@ -915,8 +915,8 @@ def pbBoss
 end
 
 def pbBossTrigger(battle, pokemon, triggertype, value=false)
-  return false if !battle.pbIsOpposing?(pokemon.index)
-  return false if pokemon.isFainted?
+  return false if !pokemon.opposes?
+  return false if pokemon.fainted?
   triggertype = getID(PBTrigger, triggertype) if triggertype.is_a?(Symbol)
   if !$game_variables[BOSS_BATTLE].is_a?(Numeric)
     pbBoss.checkTrigger(battle, pokemon, triggertype, value)

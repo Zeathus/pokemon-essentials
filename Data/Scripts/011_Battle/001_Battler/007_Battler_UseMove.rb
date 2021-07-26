@@ -54,6 +54,10 @@ class PokeBattle_Battler
       @battle.pbJudge
       return false
     end
+    # Affinity Boost
+    if @affinitybooster
+      pbAffinityBoost
+    end
     # Use the move
     PBDebug.log("[Move usage] #{pbThis} started using #{choice[2].name}")
     PBDebug.logonerr{
@@ -223,6 +227,14 @@ class PokeBattle_Battler
         pbChangeForm(1,_INTL("{1} changed to Blade Forme!",pbThis))
       elsif move.id == :KINGSSHIELD
         pbChangeForm(0,_INTL("{1} changed to Shield Forme!",pbThis))
+      end
+    end
+    # Eclipse (Solluna)
+    if isSpecies?(:SOLLUNA) && self.ability == :ECLIPSE
+      if move.calcType == :FAIRY
+        pbChangeForm(1,_INTL("{1} changed to Sun Phase!",pbThis))
+      elsif move.calcType == :FIRE
+        pbChangeForm(0,_INTL("{1} changed to Moon Phase!",pbThis))
       end
     end
     # Calculate the move's type during this usage
@@ -497,6 +509,19 @@ class PokeBattle_Battler
       end
       # Move-specific effects after all hits
       targets.each { |b| move.pbEffectAfterAllHits(user,b) }
+      # Affinity Boosts
+      targets.each { |b|
+        if b.opposes?(user) && !Effectiveness.not_very_effective?(b.damageState.typeMod)
+          user.eachAlly do |partner|
+            if !partner.fainted?
+              if partner.pokemon.hasAffinity?(move.calcType)
+                partner.affinitybooster = self
+                partner.effects[PBEffects::MoveNext] = true
+              end
+            end
+          end
+        end
+      }
       # Faint if 0 HP
       targets.each { |b| b.pbFaint if b && b.fainted? }
       user.pbFaint if user.fainted?

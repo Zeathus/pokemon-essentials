@@ -343,6 +343,9 @@ class PBAnimTiming
            (@bgY!=nil) ? @bgY : "-")
       end
       return text
+    when 5
+      text = sprintf("[%d] Damage Visual: %s",@frame+1,@name)
+      return text
     end
     return ""
   end
@@ -498,6 +501,7 @@ class PBAnimation < Array
   end
 
   def playTiming(frame,bgGraphic,bgColor,foGraphic,foColor,oldbg=[],oldfo=[],user=nil)
+    ret = false
     for i in @timing
       next if i.frame!=frame
       case i.timingType
@@ -564,6 +568,8 @@ class PBAnimation < Array
           oldfo[2] = foColor.opacity || 0
           oldfo[3] = foColor.color.clone || Color.new(0,0,0,0)
         end
+      when 5
+        ret = i.name
       end
     end
     for i in @timing
@@ -612,6 +618,7 @@ class PBAnimation < Array
         end
       end
     end
+    return ret
   end
 end
 
@@ -791,6 +798,15 @@ class PBAnimationPlayerX
   def setLineTransform(x1,y1,x2,y2,x3,y3,x4,y4)
     @srcLine = [x1,y1,x2,y2]
     @dstLine = [x3,y3,x4,y4]
+  end
+  
+  def length
+    return @animation.length
+  end
+  
+  def remaining
+    return 0 if (@frame>>1) >= @animation.length
+    return @animation.length - (@frame>>1)
   end
 
   def update

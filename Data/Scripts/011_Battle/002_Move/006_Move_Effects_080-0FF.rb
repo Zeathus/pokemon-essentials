@@ -3,7 +3,10 @@
 #===============================================================================
 class PokeBattle_Move_080 < PokeBattle_Move
   def pbBaseDamage(baseDmg,user,target)
-    baseDmg *= 2 if target.hp<=target.totalhp/2
+    if (target.hp<=target.totalhp/2) ||
+       (target.hasActiveItem?(:ZENCHARM) && (target.hp/2<=target.totalhp/2))
+      baseDmg *= 2
+    end
     return baseDmg
   end
 end
@@ -120,6 +123,8 @@ class PokeBattle_Move_087 < PokeBattle_Move
       ret = :ROCK if GameData::Type.exists?(:ROCK)
     when :Hail
       ret = :ICE if GameData::Type.exists?(:ICE)
+    when :Winds, :StrongWinds
+      ret = :FLYING if GameData::Type.exists?(:FLYING)
     end
     return ret
   end
@@ -182,6 +187,7 @@ end
 #===============================================================================
 class PokeBattle_Move_08B < PokeBattle_Move
   def pbBaseDamage(baseDmg,user,target)
+    return [75*user.hp/user.totalhp,1].max if user.hasActiveItem?(:ZENCHARM)
     return [150*user.hp/user.totalhp,1].max
   end
 end
@@ -193,6 +199,7 @@ end
 #===============================================================================
 class PokeBattle_Move_08C < PokeBattle_Move
   def pbBaseDamage(baseDmg,user,target)
+    return [60*target.hp/target.totalhp,1].max if target.hasActiveItem?(:ZENCHARM)
     return [120*target.hp/target.totalhp,1].max
   end
 end
@@ -546,6 +553,7 @@ class PokeBattle_Move_098 < PokeBattle_Move
   def pbBaseDamage(baseDmg,user,target)
     ret = 20
     n = 48*user.hp/user.totalhp
+    n = (n/2.0).floor if user.hasActiveItem?(:ZENCHARM)
     if n<2;     ret = 200
     elsif n<5;  ret = 150
     elsif n<10; ret = 100
@@ -1368,6 +1376,8 @@ class PokeBattle_Move_0B3 < PokeBattle_Move
         @npMove = :DRACOMETEOR if GameData::Move.exists?(:DRACOMETEOR)
       when :UltraSpace
         @npMove = :PSYSHOCK if GameData::Move.exists?(:PSYSHOCK)
+      when :DistortionWorld
+        @npMove = :SHADOWBALL if GameData::Move.exists?(:SHADOWBALL)
       end
     end
   end
@@ -1699,6 +1709,11 @@ class PokeBattle_Move_0B7 < PokeBattle_Move
       @battle.pbDisplay(_INTL("But it failed!"))
       return true
     end
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1}'s Aegis Talisman protected it from {2}'s Torment!",
+        target.pbThis,user.pbThis(true)))
+      return true
+    end
     return true if pbMoveFailedAromaVeil?(user,target)
     return false
   end
@@ -1741,6 +1756,11 @@ class PokeBattle_Move_0B9 < PokeBattle_Move
   def pbFailsAgainstTarget?(user,target)
     if target.effects[PBEffects::Disable]>0 || !target.lastRegularMoveUsed
       @battle.pbDisplay(_INTL("But it failed!"))
+      return true
+    end
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1}'s Aegis Talisman protected it from {2}'s Disable!",
+        target.pbThis,user.pbThis(true)))
       return true
     end
     return true if pbMoveFailedAromaVeil?(user,target)
@@ -2021,6 +2041,27 @@ end
 # Two turn attack. Skips first turn, attacks second turn. (Razor Wind)
 #===============================================================================
 class PokeBattle_Move_0C3 < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if [:Winds, :StrongWinds].include?(@battle.pbWeather)
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} whipped up a whirlwind!",user.pbThis))
   end
@@ -2042,6 +2083,14 @@ class PokeBattle_Move_0C4 < PokeBattle_TwoTurnMove
         @damagingTurn = true
         return false
       end
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
     end
     return ret
   end
@@ -2051,7 +2100,7 @@ class PokeBattle_Move_0C4 < PokeBattle_TwoTurnMove
   end
 
   def pbBaseDamageMultiplier(damageMult,user,target)
-    damageMult /= 2 if ![:None, :Sun, :HarshSun].include?(@battle.pbWeather)
+    damageMult /= 2 if ![:None, :Sun, :HarshSun, :Winds].include?(@battle.pbWeather)
     return damageMult
   end
 end
@@ -2063,6 +2112,21 @@ end
 # May paralyze the target.
 #===============================================================================
 class PokeBattle_Move_0C5 < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} became cloaked in a freezing light!",user.pbThis))
   end
@@ -2080,6 +2144,21 @@ end
 # May burn the target.
 #===============================================================================
 class PokeBattle_Move_0C6 < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} became cloaked in freezing air!",user.pbThis))
   end
@@ -2099,6 +2178,21 @@ end
 class PokeBattle_Move_0C7 < PokeBattle_TwoTurnMove
   def flinchingMove?; return true; end
 
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} became cloaked in a harsh light!",user.pbThis))
   end
@@ -2116,6 +2210,21 @@ end
 # (Skull Bash)
 #===============================================================================
 class PokeBattle_Move_0C8 < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+  
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} tucked in its head!",user.pbThis))
   end
@@ -2136,6 +2245,27 @@ end
 class PokeBattle_Move_0C9 < PokeBattle_TwoTurnMove
   def unusableInGravity?; return true; end
 
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if [:Winds, :StrongWinds].include?(@battle.pbWeather)
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} flew up high!",user.pbThis))
   end
@@ -2148,6 +2278,21 @@ end
 # (Handled in Battler's pbSuccessCheckPerHit): Is semi-invulnerable during use.
 #===============================================================================
 class PokeBattle_Move_0CA < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+  
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} burrowed its way under the ground!",user.pbThis))
   end
@@ -2160,6 +2305,21 @@ end
 # (Handled in Battler's pbSuccessCheckPerHit): Is semi-invulnerable during use.
 #===============================================================================
 class PokeBattle_Move_0CB < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} hid underwater!",user.pbThis))
   end
@@ -2174,6 +2334,21 @@ end
 #===============================================================================
 class PokeBattle_Move_0CC < PokeBattle_TwoTurnMove
   def unusableInGravity?; return true; end
+
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
 
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} sprang up!",user.pbThis))
@@ -2192,6 +2367,21 @@ end
 # Is invulnerable during use. Ends target's protections upon hit.
 #===============================================================================
 class PokeBattle_Move_0CD < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbChargingTurnMessage(user,targets)
     @battle.pbDisplay(_INTL("{1} vanished instantly!",user.pbThis))
   end
@@ -2463,7 +2653,13 @@ class PokeBattle_Move_0D4 < PokeBattle_FixedDamageMove
       user.effects[PBEffects::BideTarget] = -1
       user.currentMove = @id
     end
-    user.effects[PBEffects::Bide] -= 1
+    if user.hasActiveAbility?(:TIMESKIP)
+      @battle.pbCommonAnimation("TimeSkip",user,nil)
+      @battle.pbDisplayBrief(_INTL("{1} activated {2}!",user.pbThis,"Time Skip"))
+      user.effects[PBEffects::Bide] -= 2
+    else
+      user.effects[PBEffects::Bide] -= 1
+    end
   end
 
   def pbShowAnimation(id,user,targets,hitNum=0,showAnimation=true)
@@ -2642,6 +2838,10 @@ class PokeBattle_Move_0DC < PokeBattle_Move
     target.effects[PBEffects::LeechSeed] = user.index
     @battle.pbDisplay(_INTL("{1} was seeded!",target.pbThis))
   end
+
+  def pbOverrideSuccessCheckPerHit(user,target)
+    return (Settings::MORE_TYPE_EFFECTS && statusMove? && user.pbHasType?(:GRASS))
+  end
 end
 
 
@@ -2757,6 +2957,9 @@ class PokeBattle_Move_0E1 < PokeBattle_FixedDamageMove
 
   def pbOnStartUse(user,targets)
     @finalGambitDamage = user.hp
+    if user.hasActiveItem(:ZENCHARM)
+      @finalGambitDamage = (user.hp / 2).floor
+    end
   end
 
   def pbFixedDamage(user,target)
@@ -2865,18 +3068,39 @@ class PokeBattle_Move_0E5 < PokeBattle_Move
     return false
   end
 
+  def pbOnStartUse(user,targets)
+    @timeskip = false
+    if user.hasActiveAbility?(:TIMESKIP)
+      @timeskip = true
+      @battle.pbCommonAnimation("TimeSkip",user,nil)
+    end
+  end
+
   def pbFailsAgainstTarget?(user,target)
-    return target.effects[PBEffects::PerishSong]>0   # Heard it before
+    return true if target.effects[PBEffects::PerishSong]>0   # Heard it before
+    if target.hasActiveItem?(:AEGISTALISMAN) && user.opposes?(target)
+      @battle.pbDisplay(_INTL("The Aegis Talisman protected {1}!",target.pbThis))
+      return true
+    end
+    if target.hp > target.totalhp
+      @battle.pbDisplay(_INTL("{1}'s HP is too high!",target.pbThis))
+      return true
+    end
+    return false
   end
 
   def pbEffectAgainstTarget(user,target)
-    target.effects[PBEffects::PerishSong]     = 4
+    target.effects[PBEffects::PerishSong]     = @timeskip ? 1 : 4
     target.effects[PBEffects::PerishSongUser] = user.index
   end
 
   def pbShowAnimation(id,user,targets,hitNum=0,showAnimation=true)
     super
-    @battle.pbDisplay(_INTL("All Pokémon that hear the song will faint in three turns!"))
+    if @timeskip
+      @battle.pbDisplay(_INTL("All Pokémon that hear the song will faint in three turns!"))
+    else
+      @battle.pbDisplay(_INTL("All Pokémon that hear the song will faint at the end of turn!"))
+    end
   end
 end
 

@@ -17,16 +17,31 @@ class PokeBattle_Battler
   end
 
   def pbRecoverHP(amt,anim=true,anyAnim=true)
-    amt = amt.round
-    amt = @totalhp-@hp if amt>@totalhp-@hp
-    amt = 1 if amt<1 && @hp<@totalhp
-    oldHP = @hp
-    self.hp += amt
-    PBDebug.log("[HP change] #{pbThis} gained #{amt} HP (#{oldHP}=>#{@hp})") if amt>0
-    raise _INTL("HP less than 0") if @hp<0
-    raise _INTL("HP greater than total HP") if @hp>@totalhp
-    @battle.scene.pbHPChanged(self,oldHP,anim) if anyAnim && amt>0
-    return amt
+    if self.hp > @totalhp # Healing above 100% (bosses)
+      hpbars = (self.hp*1.0/@totalhp).ceil
+      if self.hp+amt > @totalhp * hpbars
+        amt=(@totalhp * hpbars)-self.hp
+      elsif amt<1 && self.hp!=@totalhp
+        amt=1
+      end
+      oldhp=self.hp
+      self.hp+=amt
+      raise _INTL("HP less than 0") if self.hp<0
+      #raise _INTL("HP greater than total HP") if self.hp>@totalhp
+      @battle.scene.pbHPChanged(self,oldhp,anim) if amt>0
+      return amt
+    else
+      amt = amt.round
+      amt = @totalhp-@hp if amt>@totalhp-@hp
+      amt = 1 if amt<1 && @hp<@totalhp
+      oldHP = @hp
+      self.hp += amt
+      PBDebug.log("[HP change] #{pbThis} gained #{amt} HP (#{oldHP}=>#{@hp})") if amt>0
+      raise _INTL("HP less than 0") if @hp<0
+      #raise _INTL("HP greater than total HP") if @hp>@totalhp
+      @battle.scene.pbHPChanged(self,oldHP,anim) if anyAnim && amt>0
+      return amt
+    end
   end
 
   def pbRecoverHPFromDrain(amt,target,msg=nil)
@@ -55,10 +70,12 @@ class PokeBattle_Battler
     @battle.pbDisplayBrief(_INTL("{1} fainted!",pbThis)) if showMessage
     PBDebug.log("[Pokémon fainted] #{pbThis} (#{@index})") if !showMessage
     @battle.scene.pbFaintBattler(self)
-    pbInitEffects(false)
-    # Reset status
-    self.status      = :NONE
-    self.statusCount = 0
+    if (!(hasActiveAbility?(:EVERLASTING, true) && @form==0))
+      pbInitEffects(false)
+      # Reset status
+      self.status      = :NONE
+      self.statusCount = 0
+    end
     # Lose happiness
     if @pokemon && @battle.internalBattle
       badLoss = false
@@ -72,12 +89,32 @@ class PokeBattle_Battler
     @pokemon.makeUnmega if mega?
     @pokemon.makeUnprimal if primal?
     # Do other things
-    @battle.pbClearChoice(@index)   # Reset choice
+    if (!(hasActiveAbility?(:EVERLASTING, true) && @form==0))
+      @battle.pbClearChoice(@index)   # Reset choice
+    end
     pbOwnSide.effects[PBEffects::LastRoundFainted] = @battle.turnCount
     # Check other battlers' abilities that trigger upon a battler fainting
     pbAbilitiesOnFainting
+    # Everlasting
+    if (hasActiveAbility?(:EVERLASTING, true) && @form==0)
+      @hp = 0
+      @pokemon.hp = 1
+      pbChangeForm(1, nil)
+      @fainted = false
+      @effects[PBEffects::EverlastingFainted] = @battle.turnCount
+      @battle.pbDisplayPaused(_INTL("{1} is Everlasting!", pbThis)) if showMessage
+      return false
+    end
+    if pbThis.include?("wild")
+      $Trainer.stats.wild_wins += 1
+    elsif pbThis.include?("opposing")
+      $Trainer.stats.pokemon_defeated += 1
+    else
+      $Trainer.stats.ally_fainted += 1
+    end
     # Check for end of primordial weather
     @battle.pbEndPrimordialWeather
+    return true
   end
 
   #=============================================================================
@@ -208,7 +245,7 @@ class PokeBattle_Battler
     pbCheckFormOnWeatherChange if !endOfRound
     # Darmanitan - Zen Mode
     if isSpecies?(:DARMANITAN) && self.ability == :ZENMODE
-      if @hp<=@totalhp/2
+      if @hp<=@totalhp/2 || (hasActiveItem?(:ZENCHARM) && @hp<=@totalhp)
         if @form!=1
           @battle.pbShowAbilitySplash(self,true)
           @battle.pbHideAbilitySplash(self)
@@ -222,7 +259,7 @@ class PokeBattle_Battler
     end
     # Minior - Shields Down
     if isSpecies?(:MINIOR) && self.ability == :SHIELDSDOWN
-      if @hp>@totalhp/2   # Turn into Meteor form
+      if @hp>@totalhp/2 || (hasActiveItem?(:ZENCHARM) && @hp<=@totalhp) # Turn into Meteor form
         newForm = (@form>=7) ? @form-7 : @form
         if @form!=newForm
           @battle.pbShowAbilitySplash(self,true)
@@ -239,7 +276,7 @@ class PokeBattle_Battler
     end
     # Wishiwashi - Schooling
     if isSpecies?(:WISHIWASHI) && self.ability == :SCHOOLING
-      if @level>=20 && @hp>@totalhp/4
+      if @level>=20 && (@hp/2>@totalhp/4 || (!hasActiveItem?(:ZENCHARM) && @hp>@totalhp/4))
         if @form!=1
           @battle.pbShowAbilitySplash(self,true)
           @battle.pbHideAbilitySplash(self)

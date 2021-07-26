@@ -448,7 +448,13 @@
 002_VB_BossBattle
 003_VB_CustomMoves
 004_VB_LeagueBattle
+005_VB_Battler_Affinity
 006_VB_PBModifier
+@@@001_Features
+001_VB_Moves
+002_VB_Abilities
+003_VB_Battle_Items
+004_VB_Items
 @@011_Graphics
 001_VB_ParticleEffects
 002_VB_Speech

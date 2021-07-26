@@ -227,19 +227,6 @@ ItemHandlers::UseInField.add(:BICYCLE,proc { |item|
 
 ItemHandlers::UseInField.copy(:BICYCLE,:MACHBIKE,:ACROBIKE)
 
-ItemHandlers::UseInField.add(:FISHINGROD,proc { |item|
-  notCliff = $game_map.passable?($game_player.x,$game_player.y,$game_player.direction,$game_player)
-  if !$game_player.pbFacingTerrainTag.can_fish || (!$PokemonGlobal.surfing && !notCliff)
-    pbMessage(_INTL("Can't use that here."))
-    next 0
-  end
-  encounter = $PokemonEncounters.has_encounter_type?(:FishingRod)
-  if pbFishing(encounter,1)
-    pbEncounter(:FishingRod)
-  end
-  next 1
-})
-
 ItemHandlers::UseInField.add(:ITEMFINDER,proc { |item|
   event = pbClosestHiddenItem
   if !event
@@ -338,11 +325,11 @@ ItemHandlers::UseOnPokemon.copy(:POTION,:BERRYJUICE,:SWEETHEART)
 ItemHandlers::UseOnPokemon.copy(:POTION,:RAGECANDYBAR) if !Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::UseOnPokemon.add(:SUPERPOTION,proc { |item,pkmn,scene|
-  next pbHPItem(pkmn,50,scene)
+  next pbHPItem(pkmn,60,scene)
 })
 
 ItemHandlers::UseOnPokemon.add(:HYPERPOTION,proc { |item,pkmn,scene|
-  next pbHPItem(pkmn,200,scene)
+  next pbHPItem(pkmn,120,scene)
 })
 
 ItemHandlers::UseOnPokemon.add(:MAXPOTION,proc { |item,pkmn,scene|
@@ -350,15 +337,15 @@ ItemHandlers::UseOnPokemon.add(:MAXPOTION,proc { |item,pkmn,scene|
 })
 
 ItemHandlers::UseOnPokemon.add(:FRESHWATER,proc { |item,pkmn,scene|
-  next pbHPItem(pkmn,50,scene)
+  next pbHPItem(pkmn,30,scene)
 })
 
 ItemHandlers::UseOnPokemon.add(:SODAPOP,proc { |item,pkmn,scene|
-  next pbHPItem(pkmn,60,scene)
+  next pbHPItem(pkmn,50,scene)
 })
 
 ItemHandlers::UseOnPokemon.add(:LEMONADE,proc { |item,pkmn,scene|
-  next pbHPItem(pkmn,80,scene)
+  next pbHPItem(pkmn,70,scene)
 })
 
 ItemHandlers::UseOnPokemon.add(:MOOMOOMILK,proc { |item,pkmn,scene|
@@ -451,7 +438,7 @@ ItemHandlers::UseOnPokemon.add(:FULLHEAL,proc { |item,pkmn,scene|
 
 ItemHandlers::UseOnPokemon.copy(:FULLHEAL,
    :LAVACOOKIE,:OLDGATEAU,:CASTELIACONE,:LUMIOSEGALETTE,:SHALOURSABLE,
-   :BIGMALASADA,:LUMBERRY)
+   :BIGMALASADA,:LUMBERRY,:LUMBERRYSOUP)
 ItemHandlers::UseOnPokemon.copy(:FULLHEAL,:RAGECANDYBAR) if Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::UseOnPokemon.add(:FULLRESTORE,proc { |item,pkmn,scene|

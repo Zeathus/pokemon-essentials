@@ -1827,6 +1827,10 @@ class PokemonStorageScreen
     end
     command = pbShowCommands(_INTL("Release this Pokémon?"),[_INTL("No"),_INTL("Yes")])
     if command==1
+      if pokemon.item>0
+        $PokemonBag.pbStoreItem(pokemon.item)
+        pbDisplay(_INTL("Returned the held {1} to the Bag.",(pokemon.item.name)))
+      end
       pkmnname = pokemon.name
       @scene.pbRelease(selected,heldpoke)
       if heldpoke

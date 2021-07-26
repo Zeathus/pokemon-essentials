@@ -462,7 +462,7 @@ class PokeBattle_Scene
   # Plays a move/common animation
   #=============================================================================
   # Plays a move animation.
-  def pbAnimation(moveID,user,targets,hitNum=0)
+  def pbAnimation(moveID,user,targets,hitNum=0,damage=nil)
     animID = pbFindMoveAnimation(moveID,user.index,hitNum)
     return if !animID
     anim = animID[0]

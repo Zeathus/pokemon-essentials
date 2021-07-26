@@ -50,6 +50,11 @@ class PokeBattle_Move
       ret = Effectiveness::NORMAL_EFFECTIVE_ONE if defType == :FLYING &&
                                                    Effectiveness.super_effective_type?(moveType, defType)
     end
+    # Corrosive Acid
+    if target.effects[PBEffects::CorrosiveAcid]
+      ret = Effectiveness::NORMAL_EFFECTIVE_ONE if defType == :STEEL &&
+                                                   Effectiveness.ineffective_type?(moveType, defType)
+    end
     # Grounded Flying-type Pokémon become susceptible to Ground moves
     if !target.airborne?
       ret = Effectiveness::NORMAL_EFFECTIVE_ONE if defType == :FLYING && moveType == :GROUND
@@ -79,6 +84,20 @@ class PokeBattle_Move
     # Multiply all effectivenesses together
     ret = 1
     typeMods.each { |m| ret *= m }
+    if user.hasActiveItem?(:TRINITYORB)
+      if ret > 1
+        ret *= 1.5
+      elsif ret < 1
+        ret *= 0.5
+      end
+    end
+    if target.hasActiveItem?(:TRINITYORB)
+      if ret > 1
+        ret *= 1.5
+      elsif ret < 1
+        ret *= 0.5
+      end
+    end
     return ret
   end
 
@@ -95,6 +114,7 @@ class PokeBattle_Move
     return true if target.effects[PBEffects::Minimize] && tramplesMinimize?(1)
     baseAcc = pbBaseAccuracy(user,target)
     return true if baseAcc==0
+    return true if user.affinitybooster && baseAcc >= 50
     # Calculate all multiplier effects
     modifiers = {}
     modifiers[:base_accuracy]  = baseAcc
@@ -397,6 +417,18 @@ class PokeBattle_Move
       if target.pbHasType?(:ROCK) && specialMove? && @function != "122"   # Psyshock
         multipliers[:defense_multiplier] *= 1.5
       end
+    when :Winds
+      if [
+          :SILVERWIND,
+          :FAIRYWIND,
+          :OMINOUSWIND,
+          :TWISTER,
+          :GUST,
+          :LEAFTORNADO,
+          :RAZORWIND
+        ].include?(@id)
+        multipliers[:final_damage_multiplier] *= 2.0
+      end
     end
     # Critical hits
     if target.damageState.critical
@@ -408,7 +440,7 @@ class PokeBattle_Move
     end
     # Random variance
     if !self.is_a?(PokeBattle_Confusion)
-      random = 85+@battle.pbRandom(16)
+      random = ($PokemonSystem.damagerolls==1) ? 92 : (85+@battle.pbRandom(16))
       multipliers[:final_damage_multiplier] *= random / 100.0
     end
     # STAB
@@ -425,6 +457,16 @@ class PokeBattle_Move
     if user.status == :BURN && physicalMove? && damageReducedByBurn? &&
        !user.hasActiveAbility?(:GUTS)
       multipliers[:final_damage_multiplier] /= 2
+    end
+    # Affinity Boost
+    if user.affinitybooster
+      if (user.hasActiveAbility?(:AQUAVORTEX) && type == :WATER) ||
+         (user.hasActiveAbility?(:FLAREVORTEX) && type == :FIRE) ||
+         (user.hasActiveAbility?(:FLORAVORTEX) && type == :GRASS)
+        multipliers[:final_damage_multiplier] *= 1.6
+      else
+        multipliers[:final_damage_multiplier] *= 1.3
+      end
     end
     # Aurora Veil, Reflect, Light Screen
     if !ignoresReflect? && !target.damageState.critical &&

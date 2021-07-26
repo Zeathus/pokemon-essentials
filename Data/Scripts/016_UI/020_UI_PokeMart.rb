@@ -65,7 +65,11 @@ class PokemonMartAdapter
 
   def getDisplayPrice(item, selling = false)
     price = getPrice(item, selling).to_s_formatted
-    return _INTL("$ {1}", price)
+    if $game_switches[STADIUM_POINT_SHOP]
+      return _INTL("{1}", price)
+    else
+      return _INTL("$ {1}", price)
+    end
   end
 
   def canSell?(item)
@@ -187,7 +191,11 @@ class PokemonMart_Scene
          (itemwindow.item) ? @adapter.getDescription(itemwindow.item) : _INTL("Quit shopping.")
       itemwindow.refresh
     end
-    @sprites["moneywindow"].text = _INTL("Money:\r\n<r>{1}", @adapter.getMoneyString)
+    if $game_switches[STADIUM_POINT_SHOP]
+      @sprites["moneywindow"].text = _INTL("Points:\r\n<r>{1}", @adapter.getMoneyString)
+    else
+      @sprites["moneywindow"].text = _INTL("Money:\r\n<r>{1}", @adapter.getMoneyString)
+    end
   end
 
   def pbStartBuyOrSellScene(buying, stock, adapter)
@@ -548,12 +556,18 @@ class PokemonMartScreen
       itemname=@adapter.getDisplayName(item)
       price=@adapter.getPrice(item)
       if @adapter.getMoney<price
-        pbDisplayPaused(_INTL("You don't have enough money."))
+        pbDisplayPaused(_INTL("You don't have enough {1}}.",
+          $game_switches[STADIUM_POINT_SHOP] ? "points" : "money"))
         next
       end
       if GameData::Item.get(item).is_important?
-        if !pbConfirm(_INTL("Certainly. You want {1}. That will be ${2}. OK?",
-           itemname,price.to_s_formatted))
+        message = _INTL("Certainly. You want {1}. That will be ${2}. OK?",
+          itemname,price.to_s_formatted)
+        if $game_switches[STADIUM_POINT_SHOP]
+          message = _INTL("Certainly. You want {1}. That will be {2} points. OK?",
+            itemname,price.to_s_formatted)
+        end
+        if !pbConfirm(message)
           next
         end
         quantity=1
@@ -570,7 +584,8 @@ class PokemonMartScreen
         end
       end
       if @adapter.getMoney<price
-        pbDisplayPaused(_INTL("You don't have enough money."))
+        pbDisplayPaused(_INTL("You don't have enough {1}}.",
+          $game_switches[STADIUM_POINT_SHOP] ? "points" : "money"))
         next
       end
       added=0
@@ -594,6 +609,7 @@ class PokemonMartScreen
         end
         @stock.compact!
         pbDisplayPaused(_INTL("Here you are! Thank you!")) { pbSEPlay("Mart buy item") }
+        $Trainer.stats.money_spent += price
         if $PokemonBag
           if quantity>=10 && GameData::Item.get(item).is_poke_ball? && GameData::Item.exists?(:PREMIERBALL)
             if @adapter.addItem(GameData::Item.get(:PREMIERBALL))
@@ -636,6 +652,7 @@ class PokemonMartScreen
           @adapter.removeItem(item)
         end
         pbDisplayPaused(_INTL("Turned over the {1} and received ${2}.",itemname,price.to_s_formatted)) { pbSEPlay("Mart buy item") }
+        $Trainer.stats.money_earned += price
         @scene.pbRefresh
       end
       @scene.pbHideMoney

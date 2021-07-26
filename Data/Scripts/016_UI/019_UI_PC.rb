@@ -40,13 +40,15 @@ class StorageSystemPC
          [_INTL("Organize Boxes"),
          _INTL("Withdraw Pokémon"),
          _INTL("Deposit Pokémon"),
+         _INTL("Edit Movesets"),
          _INTL("See ya!")],
          [_INTL("Organize the Pokémon in Boxes and in your party."),
          _INTL("Move Pokémon stored in Boxes to your party."),
          _INTL("Store Pokémon in your party in Boxes."),
+         _INTL("Change the moves equipped by Pokémon in your party."),
          _INTL("Return to the previous menu.")],-1,command
       )
-      if command>=0 && command<3
+      if command>=0 && command<4
         if command==1   # Withdraw
           if $PokemonStorage.party_full?
             pbMessage(_INTL("Your party is full!"))
@@ -61,6 +63,10 @@ class StorageSystemPC
             pbMessage(_INTL("Can't deposit the last Pokémon!"))
             next
           end
+        elsif command==3
+          Kernel.pbMessage(_INTL("Select the Pokemon you want to edit."))
+          pbStartEditMoveset
+          next
         end
         pbFadeOutIn {
           scene = PokemonStorageScene.new

@@ -9,6 +9,11 @@ module PokeBattle_BattleCommon
         nickname = @scene.pbNameEntry(_INTL("{1}'s nickname?", pkmn.speciesName), pkmn)
         pkmn.name = nickname
       end
+      if pkmn.name != pkmn.speciesName
+        $Trainer.stats.nicknamed += 1
+      else
+        $Trainer.stats.unnamed += 1
+      end
     end
     # Store the Pokémon
     currentBox = @peer.pbCurrentBox
@@ -93,6 +98,10 @@ module PokeBattle_BattleCommon
     else
       pbDisplayBrief(_INTL("{1} threw a {2}!",pbPlayer.name,itemName))
     end
+    if $game_switches[CATCH_BLOCK]
+      pbDisplay("It dodges the thrown Ball! This Pokémon can't be caught!")
+      return
+    end
     # Animation of opposing trainer blocking Poké Balls (unless it's a Snag Ball
     # at a Shadow Pokémon)
     if trainerBattle? && !(GameData::Item.get(ball).is_snag_ball? && battler.shadowPokemon?)
@@ -122,6 +131,7 @@ module PokeBattle_BattleCommon
       pbDisplay(_INTL("Gah! It was so close, too!"))
       BallHandlers.onFailCatch(ball,self,battler)
     when 4
+      $Trainer.stats.pokemon_caught += 1
       pbDisplayBrief(_INTL("Gotcha! {1} was caught!",pkmn.name))
       @scene.pbThrowSuccess   # Play capture success jingle
       pbRemoveFromParty(battler.index,battler.pokemonIndex)

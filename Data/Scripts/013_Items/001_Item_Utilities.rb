@@ -488,11 +488,11 @@ def pbUseItem(bag,item,bagscene=nil)
       loop do
         scene.pbSetHelpText(_INTL("Use on which Pokémon?"))
         chosen = screen.pbChoosePokemon
-        if chosen<0
+        if chosen<0 || chosen > 11
           ret = false
           break
         end
-        pkmn = $Trainer.party[chosen]
+        pkmn = (chosen>=6) ? scene.pparty[chosen-6] : scene.party[chosen]
         if pbCheckUseOnPokemon(item,pkmn,screen)
           ret = ItemHandlers.triggerUseOnPokemon(item,pkmn,screen)
           if ret && useType==1   # Usable on Pokémon, consumed

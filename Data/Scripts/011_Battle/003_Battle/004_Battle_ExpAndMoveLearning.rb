@@ -6,6 +6,62 @@ class PokeBattle_Battle
     # Play wild victory music if it's the end of the battle (has to be here)
     @scene.pbWildBattleSuccess if wildBattle? && pbAllFainted?(1) && !pbAllFainted?(0)
     return if !@internalBattle || !@expGain
+
+    @battlers.each do |b|
+      next unless b && b.opposes?
+      next if b.participants.length==0
+      next unless b.fainted? || b.captured
+      # Count the number of participants
+      p1 = pbParty(0)
+      numPartic = 0
+      expshare = false
+      b.participants.each do |partic|
+        next unless p1[partic] && p1[partic].able? && pbIsOwner?(0,partic)
+        numPartic += 1
+        next if !p1[partic].hasItem?(:EXPSHARE) && GameData::Item.try_get(@initialItems[0][partic]) != :EXPSHARE
+        expshare = true
+      end
+      # Add EXP to final pools
+      exp = (b.level * b.pokemon.base_exp).floor
+      next if exp <= 0
+
+      exp = (exp*1.5).floor if trainerBattle?
+      exp = (exp*3/2).floor if pbActiveDrink == "exp"
+
+      totalexp = (exp * 0.15).floor
+
+      if expshare
+        @expgainedshared += totalexp
+      else
+        @expgained += totalexp
+      end
+
+      # Find which Pokémon have an Exp Share
+      expShare = []
+      if !expAll
+        eachInTeam(0,0) do |pkmn,i|
+          next if !pkmn.able?
+          next if !pkmn.hasItem?(:EXPSHARE) && GameData::Item.try_get(@initialItems[0][i]) != :EXPSHARE
+          expShare.push(i)
+        end
+      end
+      # Calculate EV and Exp gains for the participants
+      if numPartic>0
+        # Gain EVs and Exp for participants
+        eachInTeam(0,0) do |pkmn,i|
+          next if !pkmn.able?
+          next unless b.participants.include?(i)
+          pbGainEVsOne(i,b)
+        end
+      end
+      b.participants = []
+    end
+  end
+  
+  def pbGainExpOld
+    # Play wild victory music if it's the end of the battle (has to be here)
+    @scene.pbWildBattleSuccess if wildBattle? && pbAllFainted?(1) && !pbAllFainted?(0)
+    return if !@internalBattle || !@expGain
     # Go through each battler in turn to find the Pokémon that participated in
     # battle against it, and award those Pokémon Exp/EVs
     expAll = (GameData::Item.exists?(:EXPALL) && $PokemonBag.pbHasItem?(:EXPALL))
@@ -150,6 +206,7 @@ class PokeBattle_Battle
       i = BattleHandlers.triggerExpGainModifierItem(@initialItems[0][idxParty],pkmn,exp)
     end
     exp = i if i>=0
+    exp = (exp*3/2).floor if pbActiveDrink == "exp"
     # Make sure Exp doesn't exceed the maximum
     expFinal = growth_rate.add_exp(pkmn.exp, exp)
     expGained = expFinal-pkmn.exp

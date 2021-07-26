@@ -210,7 +210,9 @@ class PokeBattle_Move_10B < PokeBattle_Move
     return if !user.takesIndirectDamage?
     @battle.pbDisplay(_INTL("{1} kept going and crashed!",user.pbThis))
     @battle.scene.pbDamageAnimation(user)
-    user.pbReduceHP(user.totalhp/2,false)
+    hplost = user.totalhp/2
+    hplost = user.totalhp/4 if user.hasActiveItem?(:STURDYHELMET)
+    user.pbReduceHP(hplost,false)
     user.pbItemHPHealCheck
     user.pbFaint if user.fainted?
   end
@@ -266,7 +268,7 @@ class PokeBattle_Move_10D < PokeBattle_Move
   end
 
   def pbMoveFailed?(user,targets)
-    return false if user.pbHasType?(:GHOST)
+    return false if user.pbHasType?(:GHOST) && !user.hasActiveItem?(:AEGISTALISMAN)
     if !user.pbCanLowerStatStage?(:SPEED,user,self) &&
        !user.pbCanRaiseStatStage?(:ATTACK,user,self) &&
        !user.pbCanRaiseStatStage?(:DEFENSE,user,self)
@@ -277,7 +279,7 @@ class PokeBattle_Move_10D < PokeBattle_Move
   end
 
   def pbFailsAgainstTarget?(user,target)
-    if user.pbHasType?(:GHOST) && target.effects[PBEffects::Curse]
+    if user.pbHasType?(:GHOST) && !user.hasActiveItem?(:AEGISTALISMAN) && target.effects[PBEffects::Curse]
       @battle.pbDisplay(_INTL("But it failed!"))
       return true
     end
@@ -285,7 +287,7 @@ class PokeBattle_Move_10D < PokeBattle_Move
   end
 
   def pbEffectGeneral(user)
-    return if user.pbHasType?(:GHOST)
+    return if user.pbHasType?(:GHOST) && !user.hasActiveItem?(:AEGISTALISMAN)
     # Non-Ghost effect
     if user.pbCanLowerStatStage?(:SPEED,user,self)
       user.pbLowerStatStage(:SPEED,1,user)
@@ -302,7 +304,7 @@ class PokeBattle_Move_10D < PokeBattle_Move
   end
 
   def pbEffectAgainstTarget(user,target)
-    return if !user.pbHasType?(:GHOST)
+    return if !user.pbHasType?(:GHOST) || user.hasActiveItem?(:AEGISTALISMAN)
     # Ghost effect
     @battle.pbDisplay(_INTL("{1} cut its own HP and laid a curse on {2}!",user.pbThis,target.pbThis(true)))
     target.effects[PBEffects::Curse] = true
@@ -325,6 +327,10 @@ class PokeBattle_Move_10E < PokeBattle_Move
   def ignoresSubstitute?(user); return true; end
 
   def pbFailsAgainstTarget?(user,target)
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1} was protected by the Aegis Talisman!", target.pbThis))
+      return true
+    end
     failed = true
     if target.lastRegularMoveUsed
       target.eachMove do |m|
@@ -360,6 +366,10 @@ class PokeBattle_Move_10F < PokeBattle_Move
   def pbFailsAgainstTarget?(user,target)
     if !target.asleep? || target.effects[PBEffects::Nightmare]
       @battle.pbDisplay(_INTL("But it failed!"))
+      return true
+    end
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1} was protected by the Aegis Talisman!", target.pbThis))
       return true
     end
     return false
@@ -445,7 +455,13 @@ class PokeBattle_Move_111 < PokeBattle_Move
   def pbEffectAgainstTarget(user,target)
     return if @battle.futureSight   # Attack is hitting
     effects = @battle.positions[target.index].effects
-    effects[PBEffects::FutureSightCounter]        = 3
+    if user.hasActiveAbility?(:TIMESKIP) ||
+      user.hasActiveItem?(:ODDSTONE) ||
+      user.hasActiveItem?(:TIMESTONE)
+      effects[PBEffects::FutureSightCounter]      = 1
+    else
+      effects[PBEffects::FutureSightCounter]      = 3
+    end
     effects[PBEffects::FutureSightMove]           = @id
     effects[PBEffects::FutureSightUserIndex]      = user.index
     effects[PBEffects::FutureSightUserPartyIndex] = user.pokemonIndex
@@ -453,6 +469,10 @@ class PokeBattle_Move_111 < PokeBattle_Move
       @battle.pbDisplay(_INTL("{1} chose Doom Desire as its destiny!",user.pbThis))
     else
       @battle.pbDisplay(_INTL("{1} foresaw an attack!",user.pbThis))
+    end
+    if user.hasActiveAbility?(:TIMESKIP)
+      @battle.pbCommonAnimation("TimeSkip",user,nil)
+      @battle.pbDisplay(_INTL("{1} activated {2}!",user.pbThis,"Time Skip"))
     end
   end
 
@@ -1405,6 +1425,10 @@ class PokeBattle_Move_142 < PokeBattle_Move
       @battle.pbDisplay(_INTL("But it failed!"))
       return true
     end
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1} was protected by its Aegis Talisman!", target.pbThis))
+      return true
+    end
     return false
   end
 
@@ -1424,6 +1448,10 @@ class PokeBattle_Move_143 < PokeBattle_Move
   def pbFailsAgainstTarget?(user,target)
     if !GameData::Type.exists?(:GRASS) || target.pbHasType?(:GRASS) || !target.canChangeType?
       @battle.pbDisplay(_INTL("But it failed!"))
+      return true
+    end
+    if target.hasActiveItem?(:AEGISTALISMAN)
+      @battle.pbDisplay(_INTL("{1} was protected by its Aegis Talisman!", target.pbThis))
       return true
     end
     return false
@@ -1634,6 +1662,21 @@ end
 # Special Defense and Speed by 2 stages each in the second turn. (Geomancy)
 #===============================================================================
 class PokeBattle_Move_14E < PokeBattle_TwoTurnMove
+  def pbIsChargingTurn?(user)
+    ret = super
+    if !user.effects[PBEffects::TwoTurnAttack]
+      if user.hasActiveAbility?(:TIMESKIP)
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip move immediately!",user.pbThis))
+        @powerHerb = false
+        @chargingTurn = true
+        @damagingTurn = true
+        return false
+      end
+    end
+    return ret
+  end
+
   def pbMoveFailed?(user,targets)
     return false if user.effects[PBEffects::TwoTurnAttack]   # Charging turn
     if !user.pbCanRaiseStatStage?(:SPECIAL_ATTACK,user,self) &&

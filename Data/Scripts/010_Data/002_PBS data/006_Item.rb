@@ -114,6 +114,14 @@ module GameData
       return false
     end
 
+    def can_toss?
+      items = [
+        :ODDSTONE,
+        :TIMESTONE
+      ]
+      return items.include?(@id)
+    end
+
     def can_hold?;           return !is_important?; end
 
     def unlosable?(species, ability)

@@ -681,11 +681,13 @@ BattleHandlers::DamageCalcUserItem.add(:NORMALGEM,
   }
 )
 
-BattleHandlers::DamageCalcUserItem.add(:PIXIEPLATE,
+BattleHandlers::DamageCalcUserItem.add(:PIXIEDUST,
   proc { |item,user,target,move,mults,baseDmg,type|
     mults[:base_damage_multiplier] *= 1.2 if type == :FAIRY
   }
 )
+
+BattleHandlers::DamageCalcUserItem.copy(:PIXIEDUST,:PIXIEPLATE)
 
 BattleHandlers::DamageCalcUserItem.add(:POISONBARB,
   proc { |item,user,target,move,mults,baseDmg,type|

@@ -191,6 +191,7 @@ Events.onChangeDirection += proc {
 }
 
 def pbBattleOnStepTaken(repel_active)
+  return
   return if $Trainer.able_pokemon_count == 0
   return if !$PokemonEncounters.encounter_possible_here?
   encounter_type = $PokemonEncounters.encounter_type

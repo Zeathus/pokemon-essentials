@@ -42,6 +42,7 @@ class PokeBattle_Battler
   attr_accessor :tookPhysicalHit
   attr_accessor :damageState
   attr_accessor :initialHP     # Set at the start of each move's usage
+  attr_accessor :affinitybooster
 
   #=============================================================================
   # Complex accessors
@@ -251,11 +252,12 @@ class PokeBattle_Battler
       speedMult = BattleHandlers.triggerSpeedCalcItem(self.item,self,speedMult)
     end
     # Other effects
+    speedMult *= 1.3 if airborne? && @battle.pbWeather == :Winds
     speedMult *= 2 if pbOwnSide.effects[PBEffects::Tailwind]>0
     speedMult /= 2 if pbOwnSide.effects[PBEffects::Swamp]>0
     # Paralysis
     if status == :PARALYSIS && !hasActiveAbility?(:QUICKFEET)
-      speedMult /= (Settings::MECHANICS_GENERATION >= 7) ? 2 : 4
+      speedMult /= (Settings::MECHANICS_GENERATION >= 7 && $PokemonSystem.oldpara!=1) ? 2 : 4
     end
     # Badge multiplier
     if @battle.internalBattle && pbOwnedByPlayer? &&
@@ -510,7 +512,7 @@ class PokeBattle_Battler
     return false if !takesIndirectDamage?
     return false if pbHasType?(:GROUND) || pbHasType?(:ROCK) || pbHasType?(:STEEL)
     return false if inTwoTurnAttack?("0CA","0CB")   # Dig, Dive
-    return false if hasActiveAbility?([:OVERCOAT,:SANDFORCE,:SANDRUSH,:SANDVEIL])
+    return false if hasActiveAbility?([:OVERCOAT,:SANDFORCE,:SANDRUSH,:SANDVEIL,:FORECAST])
     return false if hasActiveItem?(:SAFETYGOGGLES)
     return true
   end
@@ -519,7 +521,7 @@ class PokeBattle_Battler
     return false if !takesIndirectDamage?
     return false if pbHasType?(:ICE)
     return false if inTwoTurnAttack?("0CA","0CB")   # Dig, Dive
-    return false if hasActiveAbility?([:OVERCOAT,:ICEBODY,:SNOWCLOAK])
+    return false if hasActiveAbility?([:OVERCOAT,:ICEBODY,:SNOWCLOAK,:FORECAST])
     return false if hasActiveItem?(:SAFETYGOGGLES)
     return true
   end

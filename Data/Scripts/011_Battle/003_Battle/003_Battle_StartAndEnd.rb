@@ -255,7 +255,24 @@ class PokeBattle_Battle
     PBDebug.log(logMsg)
     pbEnsureParticipants
     begin
-      pbStartBattleCore
+      loop do
+        pbStartBattleCore
+        if @decision >= 0
+          break
+        else
+          @expgained = 0
+          @expgainedshared = 0
+          for p in @party1 + @party2
+            if p
+              p.hp = p.totalhp
+              p.status = :NONE
+              for m in p.moves
+                m.pp = m.totalpp
+              end
+            end
+          end
+        end
+      end
     rescue BattleAbortedException
       @decision = 0
       @scene.pbEndBattle(@decision)
@@ -282,6 +299,7 @@ class PokeBattle_Battle
     when :HeavyRain   then pbDisplay(_INTL("It is raining heavily."))
     when :StrongWinds then pbDisplay(_INTL("The wind is strong."))
     when :ShadowSky   then pbDisplay(_INTL("The sky is shadowy."))
+    when :Winds       then pbDisplay(_INTL("The wind is blowing."))
     end
     # Terrain announcement
     terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
@@ -296,6 +314,37 @@ class PokeBattle_Battle
     when :Psychic
       pbDisplay(_INTL("The battlefield is weird!"))
     end
+
+    if $Trainer.stats.affinity_boosts <= 0
+      if @opponent && @doublebattle
+        pokemon_name = nil
+        pokemon_affinity = nil
+        case pbGetChoice(:Starter)
+        when PBSpecies::KRABBY
+          pokemon_name = "Krabby"
+          pokemon_affinity = "Fighting"
+        when PBSpecies::SKIDDO
+          pokemon_name = "Skiddo"
+          pokemon_affinity = "Normal"
+        when PBSpecies::NUMEL
+          pokemon_name = "Numel"
+          pokemon_affinity = "Steel"
+        end
+        if pokemon_name
+          pbSpeech("Duke", "none",
+            "PLAYER, do you know about affinities?")
+          pbSpeech("PLAYER", "none",
+            "Affinities?WT Never heard of them.")
+          pbSpeech("Duke", "none",
+            "Allow me to explain...")
+          pbShowTutorial("affinity")
+          pbSpeech("Duke", "none",
+            _INTL("Riolu is faster than your {1}, so make Riolu use a {2}-type move to trigger an Affinity Boost.",
+            pokemon_name, pokemon_affinity))
+        end
+      end
+    end
+
     # Abilities upon entering battle
     pbOnActiveAll
     # Main battle loop
@@ -345,9 +394,11 @@ class PokeBattle_Battle
       end
       tMoney *= 2 if @field.effects[PBEffects::AmuletCoin]
       tMoney *= 2 if @field.effects[PBEffects::HappyHour]
+      tMoney *= 2 if pbActiveDrink == "money"
       oldMoney = pbPlayer.money
       pbPlayer.money += tMoney
       moneyGained = pbPlayer.money-oldMoney
+      $Trainer.stats.money_earned += moneyGained
       if moneyGained>0
         pbDisplayPaused(_INTL("You got ${1} for winning!",moneyGained.to_s_formatted))
       end
@@ -356,6 +407,7 @@ class PokeBattle_Battle
     if @field.effects[PBEffects::PayDay]>0
       @field.effects[PBEffects::PayDay] *= 2 if @field.effects[PBEffects::AmuletCoin]
       @field.effects[PBEffects::PayDay] *= 2 if @field.effects[PBEffects::HappyHour]
+      @field.effects[PBEffects::PayDay] *= 2 if pbActiveDrink == "money"
       oldMoney = pbPlayer.money
       pbPlayer.money += @field.effects[PBEffects::PayDay]
       moneyGained = pbPlayer.money-oldMoney
@@ -388,12 +440,21 @@ class PokeBattle_Battle
   def pbEndOfBattle
     oldDecision = @decision
     @decision = 4 if @decision==1 && wildBattle? && @caughtPokemon.length>0
+    if $Trainer.stats.affinity_boosts == 0 && @decision == 1
+      if @opponent && @doublebattle
+        pbSpeech("Duke", "none",
+          "You did not perform an Affinity Boost.WT Let's try this again.")
+        @decision = -1
+        return @decision
+      end
+    end
     case oldDecision
     ##### WIN #####
     when 1
       PBDebug.log("")
       PBDebug.log("***Player won***")
       if trainerBattle?
+        $Trainer.stats.battles_won += 1
         @scene.pbTrainerBattleSuccess
         case @opponent.length
         when 1
@@ -421,6 +482,7 @@ class PokeBattle_Battle
       PBDebug.log("***Player lost***") if @decision==2
       PBDebug.log("***Player drew with opponent***") if @decision==5
       if @internalBattle
+        $Trainer.stats.battles_lost += 1
         pbDisplayPaused(_INTL("You have no more Pokémon that can fight!"))
         if trainerBattle?
           case @opponent.length
@@ -477,11 +539,29 @@ class PokeBattle_Battle
       pbCancelChoice(b.index)   # Restore unused items to Bag
       BattleHandlers.triggerAbilityOnSwitchOut(b.ability,b,true) if b.abilityActive?
     end
-    pbParty(0).each_with_index do |pkmn,i|
+    getActivePokemon(0).each_with_index do |pkmn,i|
       next if !pkmn
       @peer.pbOnLeavingBattle(self,pkmn,@usedInBattle[0][i],true)   # Reset form
       pkmn.item = @initialItems[0][i]
     end
+    if isInParty
+      getActivePokemon(1).each_with_index do |pkmn,i|
+        next if !pkmn
+        @peer.pbOnLeavingBattle(self,pkmn,@usedInBattle[0][i],true)   # Reset form
+        pkmn.item = @initialItems[0][i]
+      end
+    end
+    if @decision == 1
+      pbEXPScreen(@expgained,@expgainedshared)
+      if @opponent
+        lvl = $game_variables[BATTLE_ORIGINAL_LVL]
+        if lvl > pbPlayerLevel
+          $game_variables[PLAYER_EXP] = lvl**3
+        end
+      end
+    end
+    # Reset boss battle
+    $game_variables[BOSS_BATTLE] = 0
     return @decision
   end
 

@@ -514,7 +514,10 @@ BattleHandlers::AbilityOnStatLoss.add(:DEFIANT,
 
 BattleHandlers::PriorityChangeAbility.add(:GALEWINGS,
   proc { |ability,battler,move,pri|
-    next pri+1 if battler.hp==battler.totalhp && move.type == :FLYING
+    next pri+1 if [:Winds, :StrongWinds].include?(battler.battle.pbWeather) && move.type == :FLYING
+    next pri+1 if battler.hp/2>=battler.totalhp && battler.hasActiveItem?(:ZENCHARM)
+    next pri   if battler.hasActiveItem?(:ZENCHARM)
+    next pri+1 if battler.hp>=battler.totalhp
   }
 )
 
@@ -885,7 +888,7 @@ BattleHandlers::DamageCalcUserAbility.add(:ANALYTIC,
 
 BattleHandlers::DamageCalcUserAbility.add(:BLAZE,
   proc { |ability,user,target,move,mults,baseDmg,type|
-    if user.hp <= user.totalhp / 3 && type == :FIRE
+    if (user.hasActiveItem?(:ZENCHARM) ? (user.hp / 2) : user.hp) <= user.totalhp / 3 && type == :FIRE
       mults[:attack_multiplier] *= 1.5
     end
   }
@@ -893,7 +896,7 @@ BattleHandlers::DamageCalcUserAbility.add(:BLAZE,
 
 BattleHandlers::DamageCalcUserAbility.add(:DEFEATIST,
   proc { |ability,user,target,move,mults,baseDmg,type|
-    mults[:attack_multiplier] /= 2 if user.hp <= user.totalhp / 2
+    mults[:attack_multiplier] /= 2 if (user.hasActiveItem?(:ZENCHARM) ? (user.hp / 2) : user.hp) <= user.totalhp / 2
   }
 )
 
@@ -978,7 +981,7 @@ BattleHandlers::DamageCalcUserAbility.add(:NEUROFORCE,
 
 BattleHandlers::DamageCalcUserAbility.add(:OVERGROW,
   proc { |ability,user,target,move,mults,baseDmg,type|
-    if user.hp <= user.totalhp / 3 && type == :GRASS
+    if (user.hasActiveItem?(:ZENCHARM) ? (user.hp / 2) : user.hp) <= user.totalhp / 3 && type == :GRASS
       mults[:attack_multiplier] *= 1.5
     end
   }
@@ -1059,7 +1062,7 @@ BattleHandlers::DamageCalcUserAbility.add(:STRONGJAW,
 
 BattleHandlers::DamageCalcUserAbility.add(:SWARM,
   proc { |ability,user,target,move,mults,baseDmg,type|
-    if user.hp <= user.totalhp / 3 && type == :BUG
+    if (user.hasActiveItem?(:ZENCHARM) ? (user.hp / 2) : user.hp) <= user.totalhp / 3 && type == :BUG
       mults[:attack_multiplier] *= 1.5
     end
   }
@@ -1082,7 +1085,7 @@ BattleHandlers::DamageCalcUserAbility.add(:TINTEDLENS,
 
 BattleHandlers::DamageCalcUserAbility.add(:TORRENT,
   proc { |ability,user,target,move,mults,baseDmg,type|
-    if user.hp <= user.totalhp / 3 && type == :WATER
+    if (user.hasActiveItem?(:ZENCHARM) ? (user.hp / 2) : user.hp) <= user.totalhp / 3 && type == :WATER
       mults[:attack_multiplier] *= 1.5
     end
   }
@@ -1509,6 +1512,7 @@ BattleHandlers::TargetAbilityOnHit.add(:MUMMY,
     next if !move.pbContactMove?(user)
     next if user.fainted?
     next if user.unstoppableAbility? || user.ability == ability
+    next if user.hasActiveItem?(:AEGISTALISMAN)
     oldAbil = nil
     battle.pbShowAbilitySplash(target) if user.opposes?(target)
     if user.affectedByContactEffect?(PokeBattle_SceneConstants::USE_ABILITY_SPLASH)
@@ -1703,6 +1707,7 @@ BattleHandlers::UserAbilityEndOfMove.add(:MOXIE,
 BattleHandlers::TargetAbilityAfterMoveUse.add(:BERSERK,
   proc { |ability,target,user,move,switched,battle|
     next if !move.damagingMove?
+    next if (target.damageState.initialHP<target.totalhp || target.hp>=target.totalhp) && target.hasActiveItem?(:ZENCHARM)
     next if target.damageState.initialHP<target.totalhp/2 || target.hp>=target.totalhp/2
     next if !target.pbCanRaiseStatStage?(:SPECIAL_ATTACK,target)
     target.pbRaiseStatStageByAbility(:SPECIAL_ATTACK,1,target)
@@ -1834,7 +1839,7 @@ BattleHandlers::EORWeatherAbility.add(:SOLARPOWER,
 
 BattleHandlers::EORHealingAbility.add(:HEALER,
   proc { |ability,battler,battle|
-    next unless battle.pbRandom(100)<30
+    #next unless battle.pbRandom(100)<30
     battler.eachAlly do |b|
       next if b.status == :NONE
       battle.pbShowAbilitySplash(battler)

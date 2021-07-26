@@ -9,6 +9,35 @@ class PokeBattle_Battler
     @battle.pbPrimalReversion(@index) if !fainted?
     # Ending primordial weather, checking Trace
     pbContinualAbilityChecks(true)
+    # Boss Battle
+    if @turnCount <= 1
+      pbBossTrigger(@battle, self, :Start)
+    end
+    # SPECIAL: Holding Back
+    #if self.species==pbGet(HOLDING_BACK) && self.index % 2 == 1
+    #  @battle.pbDisplayPaused(_INTL("{1} is holding back its strength!",pbThis))
+    #  @battle.pbCommonAnimation("StatDown",self,nil)
+    #  for i in 1..5
+    #    @stages[i]-=6
+    #  end
+    #  @battle.pbDisplayPaused(_INTL("{1} lowered all its stats tremendously!",pbThis))
+    #end
+    # SPECIAL: Mesprit's Aid
+    #if $game_switches[MESPRIT_AID] && self.index % 2 == 0
+    #  pbCriticalAnimation(PBSpecies::MESPRIT, true)
+    #  @battle.pbDisplayPaused(_INTL("Mesprit has come to your aid!"))
+    #  @battle.pbCommonAnimation("StatUp",self,nil)
+    #  pbOwnSide.effects[PBEffects::LightScreen]=6
+    #  pbOwnSide.effects[PBEffects::Reflect]=6
+    #  pbOwnSide.effects[PBEffects::LuckyChant]=6
+    #  for i in 1..5
+    #    pbOppositeOpposing.stages[i]-=2 if i != 3
+    #  end
+    #  pbOppositeOpposing.stages[PBStats::EVASION]-=2
+    #  @battle.pbDisplayPaused(_INTL("Barriers of light will weaken moves from the opponent!"))
+    #  pbSpeech("Mesprit", "none", "The barriers won't last forever, finish him quickly!")
+    #  $game_switches[MESPRIT_AID]=false
+    #end
     # Abilities that trigger upon switching in
     if (!fainted? && unstoppableAbility?) || abilityActive?
       BattleHandlers.triggerAbilityOnSwitchIn(self.ability,self,@battle)

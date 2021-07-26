@@ -9,6 +9,9 @@ class PokeBattle_Battler
     @dummy       = false
     @stages      = {}
     @effects     = []
+    @knownMoves  = []
+    @knownAbility = false
+    @knownItem   = false
     @damageState = PokeBattle_DamageState.new
     pbInitBlank
     pbInitEffects(false)
@@ -279,6 +282,8 @@ class PokeBattle_Battler
     @effects[PBEffects::WaterSport]          = false
     @effects[PBEffects::WeightChange]        = 0
     @effects[PBEffects::Yawn]                = 0
+    @effects[PBEffects::CorrosiveAcid]       = false
+    @effects[PBEffects::EverlastingFainted]  = 0
   end
 
   #=============================================================================

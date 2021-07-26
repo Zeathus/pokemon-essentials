@@ -3,7 +3,20 @@ class PokeBattle_Battler
   # Effect per hit
   #=============================================================================
   def pbEffectsOnMakingHit(move,user,target)
+    # Boss Battle - No Damage
+    if move.category == 2
+      pbBossTrigger(@battle, target, :Category, move.category)
+      pbBossTrigger(@battle, target, :MoveGroup, [move, user])
+    end
+    pbBossTrigger(@battle, target, :Move, move.id)
     if target.damageState.calcDamage>0 && !target.damageState.substitute
+      # Boss Battle - Has Damage
+      pbBossTrigger(@battle, target, :Damaged, target.damageState.calcDamage)
+      if move.category != 2
+        pbBossTrigger(@battle, target, :Category, move.category)
+        pbBossTrigger(@battle, target, :MoveGroup, [move, user])
+      end
+      pbBossTrigger(@battle, target, :Type, move.type)
       # Target's ability
       if target.abilityActive?(true)
         oldHP = user.hp
@@ -47,13 +60,13 @@ class PokeBattle_Battler
         end
       end
       # Grudge
-      if target.effects[PBEffects::Grudge] && target.fainted?
+      if target.effects[PBEffects::Grudge] && target.fainted? && !user.hasActiveItem?(:AEGISTALISMAN)
         move.pp = 0
         @battle.pbDisplay(_INTL("{1}'s {2} lost all of its PP due to the grudge!",
            user.pbThis,move.name))
       end
       # Destiny Bond (recording that it should apply)
-      if target.effects[PBEffects::DestinyBond] && target.fainted?
+      if target.effects[PBEffects::DestinyBond] && target.fainted? && !user.hasActiveItem?(:AEGISTALISMAN)
         if user.effects[PBEffects::DestinyBondTarget]<0
           user.effects[PBEffects::DestinyBondTarget] = target.index
         end

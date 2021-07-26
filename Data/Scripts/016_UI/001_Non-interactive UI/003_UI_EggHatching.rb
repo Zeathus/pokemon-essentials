@@ -101,6 +101,7 @@ class PokemonEggHatch_Scene
     updateScene(frames)
     pbBGMStop()
     pbMEPlay("Evolution success")
+    $Trainer.stats.eggs_hatched += 1
     @pokemon.name = nil
     pbMessage(_INTL("\\se[]{1} hatched from the Egg!\\wt[80]", @pokemon.name)) { update }
     if pbConfirmMessage(
@@ -213,6 +214,8 @@ def pbHatch(pokemon)
 end
 
 Events.onStepTaken += proc { |_sender,_e|
+  next if !$Trainer
+  $Trainer.stats.steps_taken += 1
   for egg in $Trainer.party
     next if egg.steps_to_hatch <= 0
     egg.steps_to_hatch -= 1
@@ -221,6 +224,7 @@ Events.onStepTaken += proc { |_sender,_e|
       egg.steps_to_hatch -= 1
       break
     end
+    egg.eggsteps-=2 if pbActiveDrink == "hatch"
     if egg.steps_to_hatch <= 0
       egg.steps_to_hatch = 0
       pbHatch(egg)

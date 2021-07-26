@@ -186,35 +186,35 @@ GameData::EncounterType.register({
 
 GameData::EncounterType.register({
   :id             => :Land2,
-  :type           => :land,
+  :type           => :land2,
   :trigger_chance => 21,
   :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :Land3,
-  :type           => :land,
+  :type           => :land3,
   :trigger_chance => 21,
   :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :Land4,
-  :type           => :land,
+  :type           => :land4,
   :trigger_chance => 21,
   :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :Flowers,
-  :type           => :land,
+  :type           => :flower,
   :trigger_chance => 21,
   :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })
 
 GameData::EncounterType.register({
   :id             => :Swamp,
-  :type           => :land,
+  :type           => :swamp,
   :trigger_chance => 21,
   :old_slots      => [30, 20, 20, 10, 10, 5, 5]
 })

@@ -84,7 +84,7 @@ class PokeBattle_Battler
     when :SLEEP
       # No type is immune to sleep
     when :POISON
-      if !(user && user.hasActiveAbility?(:CORROSION))
+      if !(user && user.hasActiveAbility?(:CORROSION) && @effects[PBEffects::CorrosiveAcid])
         hasImmuneType |= pbHasType?(:POISON)
         hasImmuneType |= pbHasType?(:STEEL)
       end
@@ -180,7 +180,7 @@ class PokeBattle_Battler
     case newStatus
     when :POISON
       # NOTE: target will have Synchronize, so it can't have Corrosion.
-      if !(target && target.hasActiveAbility?(:CORROSION))
+      if !(target && target.hasActiveAbility?(:CORROSION) && @effects[PBEffects::CorrosiveAcid])
         hasImmuneType |= pbHasType?(:POISON)
         hasImmuneType |= pbHasType?(:STEEL)
       end
@@ -318,6 +318,10 @@ class PokeBattle_Battler
   end
 
   def pbSleepDuration(duration = -1)
+    if duration <= 0 && $PokemonSystem.sleepturns==1
+      return 1 if hasActiveAbility?(:EARLYBIRD)
+      return 3
+    end
     duration = 2 + @battle.pbRandom(3) if duration <= 0
     duration = (duration / 2).floor if hasActiveAbility?(:EARLYBIRD)
     return duration
@@ -339,6 +343,7 @@ class PokeBattle_Battler
   end
 
   def pbPoison(user = nil, msg = nil, toxic = false)
+    toxic = true if user && user.hasWorkingItem(:NOXIOUSCHOKER)
     pbInflictStatus(:POISON, (toxic) ? 1 : 0, msg, user)
   end
 
@@ -392,7 +397,7 @@ class PokeBattle_Battler
   end
 
   def pbFreeze(msg = nil)
-    pbInflictStatus(:FROZEN, 0, msg)
+    pbInflictStatus(:FROZEN, ($PokemonSystem.freezeturns==1) ? 5 : 0, msg)
   end
 
   #=============================================================================
@@ -468,6 +473,10 @@ class PokeBattle_Battler
         end
         return false
       end
+    end
+    if !selfInflicted && hasActiveItem?(:MENTALWARD)
+      @battle.pbDisplay(_INTL("{1} is protected by its Mental Ward!",pbThis)) if showMessages
+      return false
     end
     if pbOwnSide.effects[PBEffects::Safeguard]>0 && !selfInflicted &&
        !(user && user.hasActiveAbility?(:INFILTRATOR))

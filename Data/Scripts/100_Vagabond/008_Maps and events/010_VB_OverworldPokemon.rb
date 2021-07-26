@@ -28,10 +28,10 @@ class OverworldPokemon
     @map_y = y
     @new_x = x
     @new_y = y
-    if $PokemonEncounters.isCave?
-      @terrain = 1
-    elsif PBTerrain.isJustWater?(terrain)
+    if terrain.can_surf
       @terrain = 2
+    elsif $PokemonEncounters.has_cave_encounters?
+      @terrain = 1
     else
       @terrain = 0
     end
@@ -39,13 +39,17 @@ class OverworldPokemon
     @viewport = viewport
     @map = map
     @species = species
-    @form = form
+    @form = form ? form : 0
     @lvl = lvl
     @sprite = IconSprite.new(0,0,@viewport)
-    if form > 0
-      @sprite.setBitmap(sprintf("Graphics/Icons/icon%03d_%d",species,form))
+    if @form > 0
+      @sprite.setBitmap(sprintf("Graphics/Pokemon/Icons/%s_%d",species,@form))
+      echo sprintf("Graphics/Pokemon/Icons/%s_%d",species,@form)
+      echo "\n"
     else
-      @sprite.setBitmap(sprintf("Graphics/Icons/icon%03d",species))
+      @sprite.setBitmap(sprintf("Graphics/Pokemon/Icons/%s",species))
+      echo sprintf("Graphics/Pokemon/Icons/%s",species)
+      echo "\n"
     end
     pbDayNightTint(@sprite)
     if @terrain == 0 # Grass
@@ -174,20 +178,20 @@ class OverworldPokemon
     elsif willmove && (rand(60)==0) # will move
       dirs = []
       if @terrain==0 # Grass
-        dirs.push(0) if PBTerrain.isAnyGrass?(@map.terrain_tag(@map_x,@map_y+1)) && !tileOccupied(@map_x,@map_y+1)
-        dirs.push(1) if PBTerrain.isAnyGrass?(@map.terrain_tag(@map_x-1,@map_y)) && !tileOccupied(@map_x-1,@map_y)
-        dirs.push(2) if PBTerrain.isAnyGrass?(@map.terrain_tag(@map_x+1,@map_y)) && !tileOccupied(@map_x+1,@map_y)
-        dirs.push(3) if PBTerrain.isAnyGrass?(@map.terrain_tag(@map_x,@map_y-1)) && !tileOccupied(@map_x,@map_y-1)
+        dirs.push(0) if @map.terrain_tag(@map_x,@map_y+1).shows_grass_rustle && !tileOccupied(@map_x,@map_y+1)
+        dirs.push(1) if @map.terrain_tag(@map_x-1,@map_y).shows_grass_rustle && !tileOccupied(@map_x-1,@map_y)
+        dirs.push(2) if @map.terrain_tag(@map_x+1,@map_y).shows_grass_rustle && !tileOccupied(@map_x+1,@map_y)
+        dirs.push(3) if @map.terrain_tag(@map_x,@map_y-1).shows_grass_rustle && !tileOccupied(@map_x,@map_y-1)
       elsif @terrain==1 # Cave
         dirs.push(0) if @map.passable?(@map_x,map_y+1,8) && !tileOccupied(@map_x,@map_y+1)
         dirs.push(1) if @map.passable?(@map_x-1,map_y,6) && !tileOccupied(@map_x-1,@map_y)
         dirs.push(2) if @map.passable?(@map_x+1,map_y,4) && !tileOccupied(@map_x+1,@map_y)
         dirs.push(3) if @map.passable?(@map_x,map_y-1,2) && !tileOccupied(@map_x,@map_y-1)
       elsif @terrain==2 # Water
-        dirs.push(0) if PBTerrain.isJustWater?(@map.terrain_tag(@map_x,@map_y+1)) && !tileOccupied(@map_x,@map_y+1)
-        dirs.push(1) if PBTerrain.isJustWater?(@map.terrain_tag(@map_x-1,@map_y)) && !tileOccupied(@map_x-1,@map_y)
-        dirs.push(2) if PBTerrain.isJustWater?(@map.terrain_tag(@map_x+1,@map_y)) && !tileOccupied(@map_x+1,@map_y)
-        dirs.push(3) if PBTerrain.isJustWater?(@map.terrain_tag(@map_x,@map_y-1)) && !tileOccupied(@map_x,@map_y-1)
+        dirs.push(0) if @map.terrain_tag(@map_x,@map_y+1).can_surf && !tileOccupied(@map_x,@map_y+1)
+        dirs.push(1) if @map.terrain_tag(@map_x-1,@map_y).can_surf && !tileOccupied(@map_x-1,@map_y)
+        dirs.push(2) if @map.terrain_tag(@map_x+1,@map_y).can_surf && !tileOccupied(@map_x+1,@map_y)
+        dirs.push(3) if @map.terrain_tag(@map_x,@map_y-1).can_surf && !tileOccupied(@map_x,@map_y-1)
       end
       if dirs.length > 0
         dir = dirs[rand(dirs.length)]
@@ -260,7 +264,7 @@ class SpawnArea
     @width = maxX - @x
     @height = maxY - @y
     divisor = 16.0
-    if terrain == -1 || PBTerrain.isJustWater?(terrain)
+    if terrain == -1 || terrain.can_surf
       divisor = 32.0
     end
     @max_pkmn = (@tiles.length / divisor).ceil
@@ -321,10 +325,14 @@ class SpawnArea
         end
       end
       encounterType = $PokemonEncounters.pbSpawnType(@terrain)
-      return if encounterType < 0
-      encounter = $PokemonEncounters.pbGenerateEncounter(encounterType,true)
+      echo sprintf("%d, %d: %s\n", @x, @y, encounterType.to_s)
+      return if encounterType == :None
+      return if !$PokemonEncounters.has_encounter_type?(encounterType)
+      encounter = $PokemonEncounters.choose_wild_pokemon(encounterType)
+      echo encounter.to_s
+      echo "\n"
       return if !encounter
-      pbScaleWildEncounter(encounter)
+      #pbScaleWildEncounter(encounter)
       pkmn = OverworldPokemon.new(@viewport,@map,encounter[0],encounter[1],encounter[2],
         x,y,@terrain,@pokemon)
       @pokemon.push(pkmn)
@@ -362,7 +370,6 @@ end
 class Spriteset_Map
   
   def initSpawnAreas
-    return
     $PokemonEncounters.setup(@map.map_id)
     count=0
     for y in 0...@map.height
@@ -376,13 +383,13 @@ class Spriteset_Map
         end
         if !visited
           tag = @map.terrain_tag(x,y,true)
-          if PBTerrain.isJustWater?(tag) && $PokemonEncounters.isWater?
+          if tag.can_surf && $PokemonEncounters.has_water_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
-          elsif $PokemonEncounters.isCave? &&
+          elsif $PokemonEncounters.has_cave_encounters? &&
               @map.passable?(x,y,2) &&
               @map.passable?(x,y,4) &&
               @map.passable?(x,y,6) &&
@@ -392,31 +399,31 @@ class Spriteset_Map
             if area.tiles.length > 6
               @spawn_areas.push(area)
             end
-          elsif PBTerrain.isGrass?(tag) && $PokemonEncounters.isGrass?
+          elsif tag.land_wild_encounters && $PokemonEncounters.has_land_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
-          elsif PBTerrain.isGrass2?(tag) && $PokemonEncounters.isGrass2?
+          elsif tag.land2_wild_encounters && $PokemonEncounters.has_land2_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
-          elsif PBTerrain.isGrass3?(tag) && $PokemonEncounters.isGrass3?
+          elsif tag.land3_wild_encounters && $PokemonEncounters.has_land3_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
-          elsif PBTerrain.isGrass4?(tag) && $PokemonEncounters.isGrass4?
+          elsif tag.land4_wild_encounters && $PokemonEncounters.has_land4_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
-          elsif PBTerrain.isFlowers?(tag) && $PokemonEncounters.isFlowers?
+          elsif tag.flower_wild_encounters && $PokemonEncounters.has_flower_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
@@ -429,7 +436,6 @@ class Spriteset_Map
   end
   
   def updateOverworldPokemon
-    return
     return if $game_temp.in_menu
     if $game_system.map_interpreter.running? ||
            $game_player.move_route_forcing ||
@@ -470,4 +476,96 @@ class Spriteset_Map
       end
     end
   end
+end
+
+class PokemonEncounters
+
+  def pbSpawnType(terrain)
+    if self.has_water_encounters? && terrain.can_surf
+      return :Water
+    elsif self.has_cave_encounters?
+      return :Cave
+    elsif self.has_land_encounters? && terrain.land_wild_encounters && terrain.shows_dust_particle
+      return :Land
+    elsif self.has_land_encounters? && terrain.land_wild_encounters
+      return :Land
+    elsif self.has_land2_encounters? && terrain.land2_wild_encounters
+      return :Land2
+    elsif self.has_land3_encounters? && terrain.land3_wild_encounters
+      return :Land3
+    elsif self.has_land4_encounters? && terrain.land4_wild_encounters
+      return :Land4
+    elsif self.has_flower_encounters? && terrain.flower_wild_encounters
+      return :Flower
+    elsif self.has_swamp_encounters? && terrain.swamp_wild_encounters
+      return :Swamp
+    end
+    return :None
+  end
+
+  def isSpawnPossibleHere?(terrain)
+    if $PokemonGlobal && $PokemonGlobal.surfing
+      return true
+    elsif terrain.ice
+      return false
+    elsif self.has_cave_encounters?
+      return true
+    elsif self.has_land_encounters? && terrain.land_wild_encounters && terrain.shows_dust_particle
+      return true
+    elsif self.has_land_encounters? && terrain.land_wild_encounters
+      return true
+    elsif self.has_land2_encounters? && terrain.land2_wild_encounters
+      return true
+    elsif self.has_land3_encounters? && terrain.land3_wild_encounters
+      return true
+    elsif self.has_land4_encounters? && terrain.land4_wild_encounters
+      return true
+    elsif self.has_flower_encounters? && terrain.flower_wild_encounters
+      return true
+    elsif self.has_swamp_encounters? && terrain.swamp_wild_encounters
+      return true
+    end
+    return false
+  end
+
+  def has_land2_encounters?
+    GameData::EncounterType.each do |enc_type|
+      next if ![:land2].include?(enc_type.type)
+      return true if has_encounter_type?(enc_type.id)
+    end
+    return false
+  end
+
+  def has_land3_encounters?
+    GameData::EncounterType.each do |enc_type|
+      next if ![:land3].include?(enc_type.type)
+      return true if has_encounter_type?(enc_type.id)
+    end
+    return false
+  end
+
+  def has_land4_encounters?
+    GameData::EncounterType.each do |enc_type|
+      next if ![:land4].include?(enc_type.type)
+      return true if has_encounter_type?(enc_type.id)
+    end
+    return false
+  end
+
+  def has_swamp_encounters?
+    GameData::EncounterType.each do |enc_type|
+      next if ![:swamp].include?(enc_type.type)
+      return true if has_encounter_type?(enc_type.id)
+    end
+    return false
+  end
+
+  def has_flower_encounters?
+    GameData::EncounterType.each do |enc_type|
+      next if ![:flower].include?(enc_type.type)
+      return true if has_encounter_type?(enc_type.id)
+    end
+    return false
+  end
+
 end
