@@ -229,6 +229,8 @@ class PokemonBag_Scene
 
   def pbStartScene(bag,choosing=false,filterproc=nil,resetpocket=true)
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.ox = -128
+    @viewport.oy = -96
     @viewport.z = 99999
     @bag        = bag
     @mode       = $PokemonSystem ? $PokemonSystem.bagmode : 0
@@ -278,9 +280,12 @@ class PokemonBag_Scene
     @sprites["itemlist"].index       = @bag.getChoice(lastpocket)
     @sprites["itemlist"].baseColor   = ITEMLISTBASECOLOR
     @sprites["itemlist"].shadowColor = ITEMLISTSHADOWCOLOR
-    @sprites["itemicon"] = ItemIconSprite.new(48,Graphics.height-48,nil,@viewport)
+    #@sprites["itemicon"] = ItemIconSprite.new(48,Graphics.height-48,nil,@viewport)
+    #@sprites["itemtext"] = Window_UnformattedTextPokemon.newWithSize("",
+    #   72, 270, Graphics.width - 72 - 24, 128, @viewport)
+    @sprites["itemicon"] = ItemIconSprite.new(48,384-48,nil,@viewport)
     @sprites["itemtext"] = Window_UnformattedTextPokemon.newWithSize("",
-       72, 270, Graphics.width - 72 - 24, 128, @viewport)
+      72, 270, 512 - 72 - 24, 128, @viewport)
     @sprites["itemtext"].baseColor   = ITEMTEXTBASECOLOR
     @sprites["itemtext"].shadowColor = ITEMTEXTSHADOWCOLOR
     @sprites["itemtext"].visible     = true

@@ -12,8 +12,8 @@ class PokeSelectionPlaceholderSprite < SpriteWrapper
     file = "Graphics/Pictures/Party/" + (@other ? "bar_right" : "bar_left")
     @pbitmap=AnimatedBitmap.new(file)
     self.bitmap=@pbitmap.bitmap
-    self.x=@xvalues[index]
-    self.y=@yvalues[index]
+    self.x=@xvalues[index] + 128
+    self.y=@yvalues[index] + 96
     self.src_rect = Rect.new(0,40*@otherid,512,40)
     self.tone = Tone.new(-100,-100,-100)
     @text=nil
@@ -26,15 +26,15 @@ class PokeSelectionPlaceholderSprite < SpriteWrapper
   def animating
     if @enabled
       if @other
-        return self.x < @xvalues[@index]
+        return self.x < @xvalues[@index] + 128
       else
-        return self.x > @xvalues[@index]
+        return self.x > @xvalues[@index] + 128
       end
     else
       if @other
-        return self.x > @xvalues[@index] - 512
+        return self.x > @xvalues[@index] + 128 - 512
       else
-        return self.x < @xvalues[@index] + 512
+        return self.x < @xvalues[@index] + 128 + 512
       end
     end
   end
@@ -93,8 +93,8 @@ class PokeSelectionSelectedSprite < SpriteWrapper
     @pbitmap=AnimatedBitmap.new("Graphics/Pictures/Party/bar_select")
     @mbitmap=AnimatedBitmap.new("Graphics/Pictures/Party/member_select")
     self.bitmap=@pbitmap.bitmap
-    self.x=xvalues[index]
-    self.y=yvalues[index]
+    self.x=xvalues[index] + 128
+    self.y=yvalues[index] + 96
     self.src_rect=Rect.new(0,0,512,44)
     @text=nil
   end
@@ -104,8 +104,8 @@ class PokeSelectionSelectedSprite < SpriteWrapper
     yvalues=[58,106,154,222,270,318,222,270,318,58,106,154,92,256]
     @member = value >= 12
     self.other = value >= 6 && value < 12 || value == 13
-    self.x=xvalues[value]
-    self.y=yvalues[value]
+    self.x=xvalues[value] + 128
+    self.y=yvalues[value] + 96
   end
   
   def other=(value)
@@ -488,8 +488,8 @@ class PartyMemberSprite < SpriteWrapper
     @barbitmap=AnimatedBitmap.new("Graphics/Pictures/Party/member")
     @charsprite=IconSprite.new(0,0,viewport)
     @stepx=0
-    @spritex=other ? 456 : 0
-    @spritey=other ? 258 : 94
+    @spritex=(other ? 456 : 0) + 128
+    @spritey=(other ? 258 : 94) + 96
     self.x = @spritex
     self.y = @spritey
     self.type=type
@@ -549,15 +549,15 @@ class PartyMemberSprite < SpriteWrapper
   def animating
     if @enabled
       if @other
-        return self.x > 456
+        return self.x > 456 + 128
       else
-        return self.x < 0
+        return self.x < 128
       end
     else
       if @other
-        return self.x < 512
+        return self.x < 512 + 128
       else
-        return self.x > -56
+        return self.x > -56 + 128
       end
     end
   end
@@ -626,9 +626,9 @@ class PartyMemberChangeSprite < SpriteWrapper
     end
     @spacing = 64
     @spacing = 48 if @members.length >= 6
-    @xstart = 256 - (@spacing * (@members.length - 1) / 2)
-    @spritex=64
-    @spritey=@other ? 242 : 76
+    @xstart = 256 - (@spacing * (@members.length - 1) / 2) + 128
+    @spritex=64 + 128
+    @spritey=(@other ? 242 : 76) + 96
     @arrow.y=@spritey - 32
     self.x = @spritex
     self.y = @spritey
@@ -777,8 +777,8 @@ class PokeSelectionSprite < SpriteWrapper
     @itemsprite=ChangelingSprite.new(0,0,viewport)
     @itemsprite.addBitmap("itembitmap","Graphics/Pictures/Party/icon_item")
     @itemsprite.addBitmap("mailbitmap","Graphics/Pictures/Party/icon_mail")
-    @spriteX=@xvalues[@index]
-    @spriteY=@yvalues[@index]
+    @spriteX=@xvalues[@index] + 128
+    @spriteY=@yvalues[@index] + 96
     @refreshBitmap=true
     @refreshing=false 
     @preselected=false
@@ -799,15 +799,15 @@ class PokeSelectionSprite < SpriteWrapper
   def animating
     if @enabled
       if @other
-        return self.x < @xvalues[@index]
+        return self.x < @xvalues[@index] + 128
       else
-        return self.x > @xvalues[@index]
+        return self.x > @xvalues[@index] + 128
       end
     else
       if @other
-        return self.x > @xvalues[@index] - 512
+        return self.x > @xvalues[@index] - 512 + 128
       else
-        return self.x < @xvalues[@index] + 512
+        return self.x < @xvalues[@index] + 512 + 128
       end
     end
   end
@@ -1072,7 +1072,9 @@ class PokemonScreen_Scene
     @viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
     @viewport.z=99999
     @multiselect=multiselect
-    addBackgroundPlane(@sprites,"Party/bg","Party/bg",@viewport)
+    addBackgroundPlane(@sprites,"bg","Party/bg",@viewport)
+    @sprites["bg"].ox = -128
+    @sprites["bg"].oy = -96
     @sprites["messagebox"]=Window_AdvancedTextPokemon.new("")
     @sprites["helpwindow"]=Window_UnformattedTextPokemon.new(starthelptext)
     @sprites["messagebox"].viewport=@viewport
@@ -1080,6 +1082,9 @@ class PokemonScreen_Scene
     @sprites["messagebox"].letterbyletter=true
     @sprites["helpwindow"].viewport=@viewport
     @sprites["helpwindow"].visible=false
+    @sprites["border"]=IconSprite.new(0,0,@viewport)
+    @sprites["border"].setBitmap("Graphics/Pictures/border")
+    @sprites["border"].z = 999
     pbBottomLeftLines(@sprites["messagebox"],2)
     pbBottomLeftLines(@sprites["helpwindow"],1)
     pbSetHelpText(starthelptext)
@@ -1275,10 +1280,14 @@ class PokemonScreen_Scene
           @sprites[_INTL("button{1}",i)]=
             PokeSelectionMenuSprite.new(
             cmds[i],10,92+index*48,(i+1)%2,otherid,@viewport,20)
+          @sprites[_INTL("button{1}",i)].x += 128
+          @sprites[_INTL("button{1}",i)].y += 96
         else
           @sprites[_INTL("button{1}",i)]=
             PokeSelectionMenuSprite.new(
             cmds[i],368,92+index*48,i%2,otherid,@viewport,20)
+          @sprites[_INTL("button{1}",i)].x += 128
+          @sprites[_INTL("button{1}",i)].y += 96
         end
       end
       6.times do
@@ -1299,10 +1308,14 @@ class PokemonScreen_Scene
           @sprites[_INTL("button{1}",i)]=
             PokeSelectionMenuSprite.new(
             cmds[i],10,56+index*48,(i+1)%2,otherid,@viewport,20)
+          @sprites[_INTL("button{1}",i)].x += 128
+          @sprites[_INTL("button{1}",i)].y += 96
         else
           @sprites[_INTL("button{1}",i)]=
             PokeSelectionMenuSprite.new(
             cmds[i],368,56+index*48,i%2,otherid,@viewport,20)
+          @sprites[_INTL("button{1}",i)].x += 128
+          @sprites[_INTL("button{1}",i)].y += 96
         end
       end
       6.times do
@@ -1538,7 +1551,7 @@ class PokemonScreen_Scene
       @sprites["pokemon#{i}"].enabled = false
     end
     if hide == 1 || hide == 3
-      @sprites["member1"].x = -60
+      @sprites["member1"].x = -60 + 128
       @sprites["member1"].enabled = false
       for i in 0...3
         @sprites["pokemon#{i}"].x += 512
@@ -1546,7 +1559,7 @@ class PokemonScreen_Scene
       end
     end
     if hide == 2 || hide == 3
-      @sprites["member2"].x = 516
+      @sprites["member2"].x = 516 + 128
       @sprites["member2"].enabled = false
       for i in 6...9
         @sprites["pokemon#{i}"].x -= 512

@@ -80,6 +80,8 @@ class MoveSelectionSprite < SpriteWrapper
   
     def pbStartScene(party,partyindex)
       @viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
+      @viewport.ox = -128
+      @viewport.oy = -96
       @viewport.z=99999
       @party=party
       @partyindex=partyindex

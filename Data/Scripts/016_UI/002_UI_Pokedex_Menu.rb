@@ -42,6 +42,8 @@ class PokemonPokedexMenu_Scene
   def pbStartScene(commands,commands2)
     @commands = commands
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.ox = -128
+    @viewport.oy = -96
     @viewport.z = 99999
     @sprites = {}
     @sprites["background"] = IconSprite.new(0,0,@viewport)
@@ -106,17 +108,28 @@ class PokemonPokedexMenuScreen
                       $Trainer.pokedex.owned_count(dex),
                       pbGetRegionalDexLength(dex)])
     end
+    if $game_switches && $game_switches[HAS_HABITAT_DEX]
+      commands.push(_INTL("Habitat Pokédex"))
+    end
     commands.push(_INTL("Exit"))
     @scene.pbStartScene(commands,commands2)
     loop do
       cmd = @scene.pbScene
-      break if cmd<0 || cmd>=commands2.length   # Cancel/Exit
-      $PokemonGlobal.pokedexDex = $Trainer.pokedex.accessible_dexes[cmd]
-      pbFadeOutIn {
-        scene = PokemonPokedex_Scene.new
-        screen = PokemonPokedexScreen.new(scene)
-        screen.pbStartScreen
-      }
+      break if cmd<0 || cmd>=commands.length-1   # Cancel/Exit
+      if $game_switches && $game_switches[HAS_HABITAT_DEX] && cmd == commands.length-2
+        pbFadeOutIn {
+          scene=PokemonHabitatMapScene.new
+          screen=PokemonHabitatMap.new(scene)
+          ret=screen.pbStartScreen
+        }
+      else
+        $PokemonGlobal.pokedexDex = $Trainer.pokedex.accessible_dexes[cmd]
+        pbFadeOutIn {
+          scene = PokemonPokedex_Scene.new
+          screen = PokemonPokedexScreen.new(scene)
+          screen.pbStartScreen
+        }
+      end
     end
     @scene.pbEndScene
   end

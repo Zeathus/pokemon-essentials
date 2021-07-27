@@ -598,7 +598,7 @@ def pbPauseCommandSelect(command,toDispose)
         screen.pbStartScreen
       }
     else
-      if $Trainer.pokedex.accessible_dexes.length == 1
+      if $Trainer.pokedex.accessible_dexes.length == 1 && !$game_switches[HAS_HABITAT_DEX]
         $PokemonGlobal.pokedexDex = $Trainer.pokedex.accessible_dexes[0]
         pbFadeOutIn {
           scene = PokemonPokedex_Scene.new
@@ -634,7 +634,9 @@ def pbPauseCommandSelect(command,toDispose)
       return 1
     end
   when "Quests"
-    pbShowQuests
+    pbFadeOutIn {
+      pbShowQuests
+    }
   when "Card"
     pbFadeOutIn {
       scene = PokemonTrainerCard_Scene.new

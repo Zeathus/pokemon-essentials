@@ -235,6 +235,8 @@ class PokemonPokedex_Scene
     @searchsliderbitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/Pokedex/icon_searchslider"))
     @sprites = {}
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.ox = -128
+    @viewport.oy = -96
     @viewport.z = 99999
     addBackgroundPlane(@sprites,"background","Pokedex/bg_list",@viewport)
 =begin
@@ -257,6 +259,10 @@ class PokemonPokedex_Scene
     pbSetSystemFont(@sprites["overlay"].bitmap)
     @sprites["searchcursor"] = PokedexSearchSelectionSprite.new(@viewport)
     @sprites["searchcursor"].visible = false
+    @sprites["border"] = IconSprite.new(0,0,@viewport)
+    @sprites["border"].setBitmap("Graphics/Pictures/border")
+    @sprites["border"].x = -128
+    @sprites["border"].y = -96
     @searchResults = false
     @searchParams  = [$PokemonGlobal.pokedexMode,-1,-1,-1,-1,-1,-1,-1,-1,-1]
     pbRefreshDexList($PokemonGlobal.pokedexIndex[pbGetSavePositionIndex])

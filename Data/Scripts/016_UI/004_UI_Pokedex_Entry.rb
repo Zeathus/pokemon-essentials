@@ -4,6 +4,8 @@
 class PokemonPokedexInfo_Scene
   def pbStartScene(dexlist,index,region)
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.ox = -128
+    @viewport.oy = -96
     @viewport.z = 99999
     @dexlist = dexlist
     @index   = index
@@ -24,8 +26,8 @@ class PokemonPokedexInfo_Scene
     end
     @sprites["areamap"] = IconSprite.new(0,0,@viewport)
     @sprites["areamap"].setBitmap("Graphics/Pictures/#{@mapdata[@region][1]}")
-    @sprites["areamap"].x += (Graphics.width-@sprites["areamap"].bitmap.width)/2
-    @sprites["areamap"].y += (Graphics.height+32-@sprites["areamap"].bitmap.height)/2
+    @sprites["areamap"].x += (512-@sprites["areamap"].bitmap.width)/2
+    @sprites["areamap"].y += (384+32-@sprites["areamap"].bitmap.height)/2
     for hidden in Settings::REGION_MAP_EXTRAS
       if hidden[0]==@region && hidden[1]>0 && $game_switches[hidden[1]]
         pbDrawImagePositions(@sprites["areamap"].bitmap,[
@@ -35,7 +37,7 @@ class PokemonPokedexInfo_Scene
         ])
       end
     end
-    @sprites["areahighlight"] = BitmapSprite.new(Graphics.width,Graphics.height,@viewport)
+    @sprites["areahighlight"] = BitmapSprite.new(512,384,@viewport)
     @sprites["areaoverlay"] = IconSprite.new(0,0,@viewport)
     @sprites["areaoverlay"].setBitmap("Graphics/Pictures/Pokedex/overlay_area")
     @sprites["formfront"] = PokemonSprite.new(@viewport)
@@ -59,7 +61,7 @@ class PokemonPokedexInfo_Scene
     @sprites["downarrow"].y = 348
     @sprites["downarrow"].play
     @sprites["downarrow"].visible = false
-    @sprites["overlay"] = BitmapSprite.new(Graphics.width,Graphics.height,@viewport)
+    @sprites["overlay"] = BitmapSprite.new(512,384,@viewport)
     pbSetSystemFont(@sprites["overlay"].bitmap)
     pbUpdateDummyPokemon
     @available = pbGetAvailableForms
@@ -69,6 +71,8 @@ class PokemonPokedexInfo_Scene
 
   def pbStartSceneBrief(species)  # For standalone access, shows first page only
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.ox = -128
+    @viewport.oy = -96
     @viewport.z = 99999
     dexnum = 0
     dexnumshift = false
@@ -98,7 +102,7 @@ class PokemonPokedexInfo_Scene
     @sprites["infosprite"].setOffset(PictureOrigin::Center)
     @sprites["infosprite"].x = 104
     @sprites["infosprite"].y = 136
-    @sprites["overlay"] = BitmapSprite.new(Graphics.width,Graphics.height,@viewport)
+    @sprites["overlay"] = BitmapSprite.new(512,384,@viewport)
     pbSetSystemFont(@sprites["overlay"].bitmap)
     pbUpdateDummyPokemon
     drawPage(@page)
@@ -237,7 +241,7 @@ class PokemonPokedexInfo_Scene
         textpos.push([_ISPRINTF("{1:.1f} kg", weight / 10.0), 482, 184, 1, base, shadow])
       end
       # Draw the Pokédex entry text
-      drawTextEx(overlay, 40, 244, Graphics.width - (40 * 2), 4,   # overlay, x, y, width, num lines
+      drawTextEx(overlay, 40, 244, 512 - (40 * 2), 4,   # overlay, x, y, width, num lines
                  species_data.pokedex_entry, base, shadow)
       # Draw the footprint
       footprintfile = GameData::Species.footprint_filename(@species, @form)
@@ -328,9 +332,9 @@ class PokemonPokedexInfo_Scene
     for j in 0...points.length
       if points[j]
         x = (j%mapwidth)*sqwidth
-        x += (Graphics.width-@sprites["areamap"].bitmap.width)/2
+        x += (512-@sprites["areamap"].bitmap.width)/2
         y = (j/mapwidth)*sqheight
-        y += (Graphics.height+32-@sprites["areamap"].bitmap.height)/2
+        y += (384+32-@sprites["areamap"].bitmap.height)/2
         @sprites["areahighlight"].bitmap.fill_rect(x,y,sqwidth,sqheight,pointcolor)
         if j-mapwidth<0 || !points[j-mapwidth]
           @sprites["areahighlight"].bitmap.fill_rect(x,y-2,sqwidth,2,pointcolorhl)
@@ -352,11 +356,11 @@ class PokemonPokedexInfo_Scene
       pbDrawImagePositions(overlay,[
          [sprintf("Graphics/Pictures/Pokedex/overlay_areanone"),108,188]
       ])
-      textpos.push([_INTL("Area unknown"),Graphics.width/2,Graphics.height/2 - 6,2,base,shadow])
+      textpos.push([_INTL("Area unknown"),512/2,384/2 - 6,2,base,shadow])
     end
     textpos.push([pbGetMessage(MessageTypes::RegionNames,@region),414,38,2,base,shadow])
     textpos.push([_INTL("{1}'s area",GameData::Species.get(@species).name),
-       Graphics.width/2,346,2,base,shadow])
+       512/2,346,2,base,shadow])
     pbDrawTextPositions(overlay,textpos)
   end
 
@@ -373,8 +377,8 @@ class PokemonPokedexInfo_Scene
       end
     end
     textpos = [
-       [GameData::Species.get(@species).name,Graphics.width/2,Graphics.height-94,2,base,shadow],
-       [formname,Graphics.width/2,Graphics.height-62,2,base,shadow],
+       [GameData::Species.get(@species).name,512/2,384-94,2,base,shadow],
+       [formname,512/2,384-62,2,base,shadow],
     ]
     # Draw all text
     pbDrawTextPositions(overlay,textpos)

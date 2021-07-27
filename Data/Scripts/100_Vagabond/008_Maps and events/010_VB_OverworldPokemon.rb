@@ -148,13 +148,13 @@ class OverworldPokemon
     if @lifetime + 40 < @time
       @dead = true
     elsif @time <= 30
-      @sprite.zoom_x = @time / 30.0
-      @sprite.zoom_y = @time / 30.0
+      @sprite.zoom_x = [@time / 30.0, 1].min
+      @sprite.zoom_y = [@time / 30.0, 1].min
       @sprite.y += 20 - 20 * @time / 30
     elsif @lifetime < @time
       zoom = @time - @lifetime
-      @sprite.zoom_x = 1.0 - zoom / 30.0
-      @sprite.zoom_y = 1.0 - zoom / 30.0
+      @sprite.zoom_x = [1.0 - zoom / 30.0, 0].max
+      @sprite.zoom_y = [1.0 - zoom / 30.0, 0].max
       @sprite.y += 20 * zoom / 30
     elsif @moving && willmove && @lifetime - 30 > @time
       speed = 0.1
@@ -222,6 +222,10 @@ class OverworldPokemon
       end
     end
     return false
+  end
+
+  def dispose
+    @sprite.dispose
   end
   
 end
@@ -338,9 +342,11 @@ class SpawnArea
       next if !pkmn
       pkmn.update(willmove)
       if pkmn.dead
+        pkmn.dispose
         @pokemon.delete(pkmn)
       elsif (pkmn.map_x-$game_player.x)**2 + (pkmn.map_y-$game_player.y)**2 < 0.5
         return false if $DEBUG && Input.press?(Input::CTRL)
+        pkmn.dispose
         @pokemon.delete(pkmn)
         return pkmn
       end

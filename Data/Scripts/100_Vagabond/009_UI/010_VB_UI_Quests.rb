@@ -288,6 +288,8 @@ def pbShowQuests(show_quest=nil)
   no_prev = true
   
   viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
+  viewport.ox = -128
+  viewport.oy = -96
   viewport.z = 99999
   text_color1 = Color.new(250, 250, 250)
   text_color2 = Color.new(50, 50, 100)
