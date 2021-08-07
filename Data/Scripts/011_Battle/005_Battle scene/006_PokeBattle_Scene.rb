@@ -58,6 +58,7 @@ class PokeBattle_Scene
       @sprites["pokemon_#{i}"].update(@frameCounter) if @sprites["pokemon_#{i}"]
       @sprites["shadow_#{i}"].update(@frameCounter) if @sprites["shadow_#{i}"]
     end
+    @outer.update
   end
 
   def pbRefresh
@@ -86,10 +87,11 @@ class PokeBattle_Scene
     # NOTE: If you are not using fancy graphics for the command/fight menus, you
     #       will need to make "messageBox" also visible if the windowtype if
     #       COMMAND_BOX/FIGHT_BOX respectively.
-    @sprites["messageBox"].visible    = (windowType==MESSAGE_BOX)
+    @outer.pbShowWindow(windowType)
+    @sprites["messageBox"].visible    = false #(windowType==MESSAGE_BOX)
     @sprites["messageWindow"].visible = (windowType==MESSAGE_BOX)
-    @sprites["commandWindow"].visible = (windowType==COMMAND_BOX)
-    @sprites["fightWindow"].visible   = (windowType==FIGHT_BOX)
+    @sprites["commandWindow"].visible = false #(windowType==COMMAND_BOX)
+    @sprites["fightWindow"].visible   = false #(windowType==FIGHT_BOX)
     @sprites["targetWindow"].visible  = (windowType==TARGET_BOX)
   end
 
@@ -205,8 +207,8 @@ class PokeBattle_Scene
     dw = @sprites["messageWindow"]
     dw.text = msg
     cw = Window_CommandPokemon.new(commands)
-    cw.x        = Graphics.width-cw.width
-    cw.y        = Graphics.height-cw.height-dw.height
+    cw.x        = 512-cw.width
+    cw.y        = 384-cw.height-dw.height
     cw.z        = dw.z+1
     cw.index    = 0
     cw.viewport = @viewport
@@ -260,6 +262,7 @@ class PokeBattle_Scene
 
   def pbDisposeSprites
     pbDisposeSpriteHash(@sprites)
+    @outer.dispose
   end
 
   # Used by Ally Switch.
@@ -323,7 +326,7 @@ class PokeBattle_Scene
     pkmnSprite.setPokemonBitmap(pkmn,back)
     shadowSprite.setPokemonBitmap(pkmn)
     # Set visibility of battler's shadow
-    shadowSprite.visible = pkmn.species_data.shows_shadow? if shadowSprite && !back
+    shadowSprite.visible = pkmn.species_data.shows_shadow? if shadowSprite #&& !back
   end
 
   def pbResetMoveIndex(idxBattler)

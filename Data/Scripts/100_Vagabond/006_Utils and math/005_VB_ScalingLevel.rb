@@ -37,17 +37,15 @@ end
 
 def pbGetEvolvedEncounter(species, level)
   encounter = species
-  poke = PokeBattle_Pokemon.new(species,level,$Trainer)
-  newspecies = pbCheckEvolution(poke)
-  if newspecies>0
+  poke = Pokemon.new(species,level,$Trainer)
+  newspecies = poke.check_evolution_on_level_up
+  if newspecies
     encounter = newspecies
   end
   return encounter
 end
 
 def pbScaleTrainer(trainer, modifier)
-
-  trainerparty = trainer.party
   
   difficulty = $PokemonSystem.difficulty
   
@@ -68,9 +66,9 @@ def pbScaleTrainer(trainer, modifier)
     
   # Calculate level_base
   level_base = pbPreferredLevel
-  level_base = level_base - 1 if low_trainers.include?(trainer[0].trainertype)
-  level_base = level_base + 1 if high_trainers.include?(trainer[0].trainertype)
-  level_base -= 1 if trainer[2].length > 4
+  level_base = level_base - 1 if low_trainers.include?(trainer.trainer_type)
+  level_base = level_base + 1 if high_trainers.include?(trainer.trainer_type)
+  level_base -= 1 if trainer.party.length > 4
   #party_dif = $Trainer.party.length - trainer[2].length
   #party_dif = 0 if party_dif > 0
   #party_dif = -3 if party_dif < -3
@@ -85,7 +83,7 @@ def pbScaleTrainer(trainer, modifier)
   end
   overwrite_base = false
   for i in $game_variables[LASTBATTLEDTRAINERS]
-    if i[0]==trainer.trainertype &&
+    if i[0]==trainer.trainer_type &&
        i[1]==trainer.name &&
        i[2]
       level_base = i[2]
@@ -94,7 +92,7 @@ def pbScaleTrainer(trainer, modifier)
   end
   if !overwrite_base
     $game_variables[LASTBATTLEDTRAINERS].push(
-      [trainer[0].trainertype,trainer[0].name,level_base])
+      [trainer.trainer_type,trainer.name,level_base])
     if $game_variables[LASTBATTLEDTRAINERS].length > 30
       $game_variables[LASTBATTLEDTRAINERS].shift
     end
@@ -102,15 +100,15 @@ def pbScaleTrainer(trainer, modifier)
 
   # Get the highest level
   highestlevel = 1
-  for pkmn in trainer[2]
+  for pkmn in trainer.party
     highestlevel = pkmn.level if pkmn.level > highestlevel
   end
   
   $game_variables[BATTLE_ORIGINAL_LVL] = highestlevel
   
   # Change pokemon levels
-  for pkmn in trainer[2]
-    next if trainer[0].name=="Klaus" && pkmn.species==:VULPIX
+  for pkmn in trainer.party
+    next if trainer.name=="Klaus" && pkmn.species==:VULPIX
     other_level = pkmn.level
     level_dif = other_level - highestlevel
     if level_base > other_level
@@ -120,12 +118,13 @@ def pbScaleTrainer(trainer, modifier)
       end
       new_level = 100 if new_level > 100
       new_level = 1 if new_level < 1
+      new_level = new_level.floor
       pkmn.level = new_level
       original_species = pkmn.species
-      pkmn.species = pbGetEvolvedEncounter(pkmn.species, new_level - 2) if trainer[0].name != "Joey"
+      pkmn.species = pbGetEvolvedEncounter(pkmn.species, new_level - 2) if trainer.name != "Joey"
       pkmn.species = pbCustomEvolutionLevel(pkmn.species, new_level - 2)
       if level_base >= 16
-        pkmn.species = pbGetEvolvedEncounter(pkmn.species, new_level - 2) if trainer[0].name != "Joey"
+        pkmn.species = pbGetEvolvedEncounter(pkmn.species, new_level - 2) if trainer.name != "Joey"
         pkmn.species = pbCustomEvolutionLevel(pkmn.species, new_level - 2)
       end
       pkmn.name = PBSpecies.getName(pkmn.species) if original_species != pkmn.species
@@ -137,7 +136,7 @@ def pbScaleTrainer(trainer, modifier)
   # Difficulty dependant changes
   if difficulty == 0
     # EASY
-    for pkmn in trainer[2]
+    for pkmn in trainer.party
       pkmn.level -= 1
       pkmn.item = 0
       pkmn.natureflag = PBNatures::SERIOUS
@@ -146,7 +145,7 @@ def pbScaleTrainer(trainer, modifier)
     end
   elsif difficulty == 2
     # HARD
-    for pkmn in trainer[2]
+    for pkmn in trainer.party
       pkmn.iv = pbArrayToIVs([31,31,31,31,31,31])
       pkmn.calc_stats
     end

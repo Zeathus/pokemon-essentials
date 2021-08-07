@@ -1,7 +1,7 @@
 def charWidth(char,font)
   if char == ' '
-    return 4 if font=="Small" || font=="Smallest"
-    return 6
+    return realCharWidth(4) if font=="Small" || font=="Smallest"
+    return realCharWidth(6)
   end
   rects = charRects(char,font)
   max = 0
@@ -9,7 +9,11 @@ def charWidth(char,font)
     width = r[0]+r[2]
     max = width if max < width
   end
-  return max * 2 + 2
+  return realCharWidth(max * 2 + 2)
+end
+
+def realCharWidth(width)
+  return $PokemonTemp.textSize ? (width * $PokemonTemp.textSize / 2) : width
 end
 
 def charRects(char,font)
@@ -1450,7 +1454,7 @@ def charRectsSmallest(char)
 end
 
 class Bitmap
-  def draw_text(x,y,width=nil,height=nil,string=nil,align=nil)
+  def draw_text(x,y,width=nil,height=nil,string=nil,align=nil,sizeMod=0)
     return if !string
     if align==1
       width = self.text_size(string).width
@@ -1463,7 +1467,7 @@ class Bitmap
     
     cx=x
     cy=y
-    sp = 2
+    sp = $PokemonTemp.textSize ? $PokemonTemp.textSize : 2
     
     string.split('').each { |c|
     
@@ -1471,7 +1475,7 @@ class Bitmap
         rects = charRects(c,self.font.name)
         for r in rects
           r[1] -= 2
-          self.fill_rect(cx+r[0]*sp,cy+r[1]*sp,(r[2]*sp).ceil,(r[3]*sp).ceil,self.font.color)
+          self.fill_rect(cx+r[0]*sp,cy+r[1]*sp,((r[2]+sizeMod)*sp).ceil,((r[3]+sizeMod)*sp).ceil,self.font.color)
         end
       end
       

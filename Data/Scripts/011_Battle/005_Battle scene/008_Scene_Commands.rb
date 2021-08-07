@@ -57,6 +57,16 @@ class PokeBattle_Scene
         pbPlayDecisionSE
         ret = -2
         break
+      elsif Input.trigger?(Input::SPECIAL)
+        str = "p1: "
+        @battle.pbPlayerDisplayParty(0).each { |p|
+          str += p ? (p.name + ", ") : "nil, "
+        }
+        str += "\np2: "
+        @battle.pbPlayerDisplayParty(2).each { |p|
+          str += p ? (p.name + ", ") : "nil, "
+        }
+        pbMessage(str)
       end
     end
     return ret
@@ -146,19 +156,37 @@ class PokeBattle_Scene
     # Get player's party
     partyPos = @battle.pbPartyOrder(idxBattler)
     partyStart, _partyEnd = @battle.pbTeamIndexRangeFromBattlerIndex(idxBattler)
-    modParty = @battle.pbPlayerDisplayParty(idxBattler)
+    modParty = @battle.pbPlayerDisplayParty(0)
+    modParty2 = @battle.pbPlayerDisplayParty(2)
+    modParty2 = nil if modParty == modParty2
     # Start party screen
-    scene = PokemonParty_Scene.new
-    switchScreen = PokemonPartyScreen.new(scene,modParty)
+    scene = PokemonScreen_Scene.new
+    switchScreen = PokemonScreen.new(scene,modParty,modParty2)
     switchScreen.pbStartScene(_INTL("Choose a Pokémon."),@battle.pbNumPositions(0,0))
     # Loop while in party screen
     loop do
       # Select a Pokémon
       scene.pbSetHelpText(_INTL("Choose a Pokémon."))
-      idxParty = switchScreen.pbChoosePokemon
+      idxParty = switchScreen.pbChoosePokemon(nil,-1,true)
       if idxParty<0
         next if !canCancel
         break
+      end
+      # Check if Pokemon is valid
+      if idxBattler == 2
+        idxParty -= 6
+        if idxParty < 0
+          scene.pbDisplay("You can't choose a Pokémon from this trainer's party.")
+          next
+        elsif !modParty[idxParty]
+          scene.pbDisplay("You can't choose this Pokémon, though I am not really sure why (This should not happen).")
+          next
+        end
+      else
+        if !modParty[idxParty]
+          scene.pbDisplay("You can't choose a Pokémon from this trainer's party.")
+          next
+        end
       end
       # Choose a command for the selected Pokémon
       cmdSwitch  = -1
@@ -175,6 +203,7 @@ class PokeBattle_Scene
           idxPartyRet = i
           break
         end
+        pbMessage(idxPartyRet.to_s)
         break if yield idxPartyRet, switchScreen
       elsif cmdSummary>=0 && command==cmdSummary   # Summary
         scene.pbSummary(idxParty,true)
@@ -253,15 +282,15 @@ class PokeBattle_Scene
         partyStart, _partyEnd = @battle.pbTeamIndexRangeFromBattlerIndex(idxBattler)
         modParty = @battle.pbPlayerDisplayParty(idxBattler)
         # Start party screen
-        pkmnScene = PokemonParty_Scene.new
-        pkmnScreen = PokemonPartyScreen.new(pkmnScene,modParty)
+        pkmnScene = PokemonScreen_Scene.new
+        pkmnScreen = PokemonScreen.new(pkmnScene,modParty)
         pkmnScreen.pbStartScene(_INTL("Use on which Pokémon?"),@battle.pbNumPositions(0,0))
         idxParty = -1
         # Loop while in party screen
         loop do
           # Select a Pokémon
           pkmnScene.pbSetHelpText(_INTL("Use on which Pokémon?"))
-          idxParty = pkmnScreen.pbChoosePokemon
+          idxParty = pkmnScreen.pbChoosePokemon(nil,-1,true)
           break if idxParty<0
           idxPartyRet = -1
           partyPos.each_with_index do |pos,i|

@@ -1,3 +1,7 @@
+class PokemonTemp
+  attr_accessor :textSize
+end
+
 def pbTextEffect(type, startc=false, endc=false, speed=false)
   
   type = type.downcase
@@ -226,7 +230,8 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
       #Showing neutral portrait if emotion isn't found
       face.bitmap=RPG::Cache.load_bitmap("",backup)
     end
-    face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 10 : 302
+    face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 50 : 490
+    face.y = 158
   end
   
   #Checks if the message is a sign
@@ -236,9 +241,9 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
     name_box=Sprite.new(viewport)
     file="Graphics/Messages/name_box"
     name_box.bitmap=RPG::Cache.load_bitmap("",file)
-    name_box.x = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 326 : 30
-    name_box.y = 108
-    
+    name_box.x = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 326 : 94
+    name_box.y = 256
+
     #Showing the name
     sprites={}
     sprites["name"]=Sprite.new(viewport)
@@ -250,9 +255,9 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
     #Switches name if unknown
     name2 = name
     name2 = "???" if unknown == true
-    textx = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 404 : 108
-    texty = 116
-    textpos=[[name2,textx,texty,2,getCharColor(name, 0),getCharColor(name, 1)]]
+    textx = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 404 : 172
+    texty = name_box.y + 6
+    textpos=[[name2,textx,texty,2,getCharColor(name, 1),Color.new(0,0,0),1]]
     pbDrawTextPositions(bitmap,textpos)
   end
   
@@ -276,7 +281,7 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
     phrase+="]"
   end
   
-  Kernel.pbMessage(_INTL("{1}{2}</c2>",color,phrase))
+  pbMessage(_INTL("{1}{2}</c2>",color,phrase))
   $game_system.message_effect = false
   
   pbDisposeSpriteHash(sprites)
@@ -338,7 +343,8 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
     #Showing neutral portrait if emotion isn't found
     face.bitmap=RPG::Cache.load_bitmap("",backup)
   end
-  face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 10 : 302
+  face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 50 : 490
+  face.y = 158
   
   #Checks if the message is a sign
   if !name.downcase.include?("sign") && $game_system.message_position==2
@@ -346,8 +352,8 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
     name_box=Sprite.new(viewport)
     file="Graphics/Messages/name_box"
     name_box.bitmap=RPG::Cache.load_bitmap("",file)
-    name_box.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 326 : 30
-    name_box.y = 108
+    name_box.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 326 : 94
+    name_box.y = 256
   
     #Showing the name
     @sprites={}
@@ -360,9 +366,9 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
     #Switches name if unknown
     name2 = name
     name2 = "???" if unknown == true
-    textx = (SPEECH_DISPLAY_LEFT.include?(name)) ? 404 : 108 #(name2.length*6)
-    texty=116
-    textpos=[[name2,textx,texty,2,getCharColor(name, 0),getCharColor(name, 1)]]
+    textx = (SPEECH_DISPLAY_LEFT.include?(name)) ? 404 : 172
+    texty = name_box.y + 6
+    textpos=[[name2,textx,texty,2,getCharColor(name, 1),Color.new(0,0,0),true]]
     pbDrawTextPositions(bitmap,textpos)
   end
   
@@ -374,12 +380,15 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
   pbSetSystemFont(@sprites["text"].bitmap)
   @sprites["text"].bitmap.font.size=52
   @sprites["text"].bitmap.clear
-  textpos = [[phrase,32,108,false,getCharColor(name,0),getCharColor(name,1)]]
+  textpos = [[phrase,128,274,false,getCharColor(name,0),getCharColor(name,1)]]
   
+  $PokemonTemp.textSize = 4
   pbDrawTextPositions(@sprites["text"].bitmap,textpos)
+  $PokemonTemp.textSize = 2
+
   pbSEPlay("Damage1",100,100)
   $game_screen.start_shake(2, 25, 10)
-  Kernel.pbMessage(command)
+  pbMessage(command)
   
   pbDisposeSpriteHash(@sprites)
   viewport.dispose

@@ -81,7 +81,7 @@ module GameData
     end
 
     def can_surf_freely
-      return @can_surf && !@waterfall && !@waterfall_crest
+      return @can_surf && !@waterfall && !@waterfall_crest && !@water_edge
     end
   end
 end

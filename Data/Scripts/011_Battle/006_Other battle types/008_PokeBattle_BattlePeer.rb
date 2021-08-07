@@ -63,7 +63,7 @@ class PokeBattle_RealBattlePeer
     f = MultipleForms.call("getFormOnLeavingBattle",pkmn,battle,usedInBattle,endBattle)
     pkmn.form = f if f && pkmn.form!=f
     pkmn.hp = pkmn.totalhp if pkmn.hp>pkmn.totalhp
-    pkmn.hp = 1 if pkmn.hp < 1
+    pkmn.hp = 1 if pkmn.hp < 1 if endBattle
   end
 end
 

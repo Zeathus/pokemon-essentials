@@ -122,6 +122,7 @@ class Window_PokemonBag < Window_DrawableCommand
         pbDrawImagePositions(self.contents,imagepos)
       else
         item=indexItem(index)
+        return if item == 0
         if !GameData::Item.get(item).is_important? # Not a Key item or HM (or infinite TM)
           qty=sprintf("x%d",indexQty(index))
           xQty=rect.x+rect.width-40
@@ -235,7 +236,7 @@ class PokemonBag_Scene
     @bag        = bag
     @mode       = $PokemonSystem ? $PokemonSystem.bagmode : 0
     @choosing   = choosing
-    @filterproc = filterproc
+    #@filterproc = filterproc
     pbRefreshFilter
     lastpocket = @bag.lastpocket
     numfilledpockets = @bag.pockets.length-1
@@ -293,9 +294,14 @@ class PokemonBag_Scene
     @sprites["helpwindow"] = Window_UnformattedTextPokemon.new("")
     @sprites["helpwindow"].visible  = false
     @sprites["helpwindow"].viewport = @viewport
+    @sprites["helpwindow"].ox = 128
+    @sprites["helpwindow"].oy = 96
     @sprites["msgwindow"] = Window_AdvancedTextPokemon.new("")
     @sprites["msgwindow"].visible  = false
     @sprites["msgwindow"].viewport = @viewport
+    @sprites["msgwindow"].z = 999999
+    @sprites["msgwindow"].ox = 128
+    @sprites["msgwindow"].oy = 96
     @sprites["menusel"]=IconSprite.new(14,50,@viewport)
     @sprites["menusel"].setBitmap(sprintf("Graphics/Pictures/Bag/cursor_pocket"))
     if @mode==0
@@ -416,12 +422,13 @@ class PokemonBag_Scene
       end
       overlay.blt(470,y+boxheight-18,@sliderbitmap.bitmap,Rect.new(36,20,36,18))
     end
+    return if itemlist.item == 0
     # Set the selected item's icon
     @sprites["itemicon"].item = itemlist.item
     # Set the selected item's description
     @sprites["itemtext"].text =
        (itemlist.item) ? GameData::Item.get(itemlist.item).description : _INTL("Close bag.")
-    @sprites["nametext"].text = ((itemlist.item) ? GameData::Item.get(itemlist.item).name : "Test") if @mode==0
+    @sprites["nametext"].text = ((itemlist.item) ? GameData::Item.get(itemlist.item).name : "") if @mode==0
   end
 
   def pbRefreshFilter

@@ -693,3 +693,8 @@
 674,SOAK,Soak,061,0,WATER,Status,100,20,0,NearOther,0,bce,"The user shoots a torrent of water at the target and changes the target's type to Water."
 675,WATERSPORT,Water Sport,09E,0,WATER,Status,0,15,0,BothSides,0,,"The user soaks itself with water. The move weakens Fire-type moves while the user is in the battle."
 676,WITHDRAW,Withdraw,01D,0,WATER,Status,0,40,0,User,0,d,"The user withdraws its body into its hard shell, raising its Defense stat."
+#-------------------------------
+1000,TOUGHHUG,Tough Hug,00F,50,FAIRY,Physical,100,25,20,NearOther,0,abefi,"The user gives the target a really tough hug that might make them flinch."
+1001,CORROSIVEACID,Corrosive Acid,300,0,POISON,Status,0,20,0,NearOther,0,ce,"The user spits corrosive acid to make Steel-types vulnerable to Poison-type moves."
+1002,WINDS,Winds,301,0,FLYING,Status,0,5,0,BothSides,0,,"The user strengthens the wind for five turns, speeding up airborne Pokémon."
+1003,DIVERSITY,Diversity,302,120,NORMAL,Physical,100,10,0,NearOther,0,abef,"Spinda only. Lowers two stats or harshly lowers one stat and has a type, all decided by Spinda's unique pattern."

@@ -61,20 +61,20 @@ Events.onWildPokemonCreate += proc { |_sender, e|
       pokemon.moves[2] = PBMove.new(mod.moves[2])
       pokemon.moves[3] = PBMove.new(mod.moves[3])
     end
-    pokemon.iv          = pbArrayToIVs(mod.iv)  if mod.iv
-    pokemon.ev          = pbArrayToIVs(mod.ev)  if mod.ev
-    pokemon.form        = mod.form              if mod.form
-    pokemon.name        = mod.name              if mod.name
-    pokemon.abilityflag = mod.ability           if mod.ability
-    pokemon.genderflag  = mod.gender            if mod.gender
-    pokemon.item        = mod.item              if mod.item
-    pokemon.natureflag  = mod.nature            if mod.nature
-    pokemon.shinyflag   = mod.shiny             if mod.shiny
-    pokemon.status      = mod.status            if mod.status
-    pokemon.calcStats
-    pokemon.hp          = pokemon.totalhp
-    pokemon.hp          = mod.hp                if mod.hp
-    pokemon.hp         *= mod.hpmult            if mod.hpmult
+    pokemon.iv            = pbArrayToIVs(mod.iv)  if mod.iv
+    pokemon.ev            = pbArrayToIVs(mod.ev)  if mod.ev
+    pokemon.form          = mod.form              if mod.form
+    pokemon.name          = mod.name              if mod.name
+    pokemon.ability_index = mod.ability           if mod.ability
+    pokemon.gender        = mod.gender            if mod.gender
+    pokemon.item          = mod.item              if mod.item
+    pokemon.nature        = mod.nature            if mod.nature
+    pokemon.shiny         = mod.shiny             if mod.shiny
+    pokemon.status        = mod.status            if mod.status
+    pokemon.calc_stats
+    pokemon.hp            = pokemon.totalhp
+    pokemon.hp            = mod.hp                if mod.hp
+    pokemon.hp           *= mod.hpmult            if mod.hpmult
     $game_variables[WILD_MODIFIER] = 0
   end
 }

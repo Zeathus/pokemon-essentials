@@ -35,12 +35,6 @@ BattleHandlers::DamageCalcTargetAbility.add(:ILLUMINATE,
   }
 )
 
-BattleHandlers::DamageCalcTargetAbility.add(:OVERSHADOW,
-  proc { |ability,user,target,move,mults,baseDmg,type|
-    mults[:base_damage_multiplier] /= 2 if type == :FAIRY
-  }
-)
-
 BattleHandlers::DamageCalcTargetAbility.add(:DIVIDE,
   proc { |ability,user,target,move,mults,baseDmg,type|
     mults[:final_damage_multiplier] /= 2

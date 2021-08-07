@@ -184,10 +184,10 @@ class OverworldPokemon
         dirs.push(2) if @map.passable?(@map_x+1,map_y,4) && !tileOccupied(@map_x+1,@map_y)
         dirs.push(3) if @map.passable?(@map_x,map_y-1,2) && !tileOccupied(@map_x,@map_y-1)
       elsif @terrain==2 # Water
-        dirs.push(0) if @map.terrain_tag(@map_x,@map_y+1).can_surf && !tileOccupied(@map_x,@map_y+1)
-        dirs.push(1) if @map.terrain_tag(@map_x-1,@map_y).can_surf && !tileOccupied(@map_x-1,@map_y)
-        dirs.push(2) if @map.terrain_tag(@map_x+1,@map_y).can_surf && !tileOccupied(@map_x+1,@map_y)
-        dirs.push(3) if @map.terrain_tag(@map_x,@map_y-1).can_surf && !tileOccupied(@map_x,@map_y-1)
+        dirs.push(0) if @map.terrain_tag(@map_x,@map_y+1).can_surf_freely && !tileOccupied(@map_x,@map_y+1)
+        dirs.push(1) if @map.terrain_tag(@map_x-1,@map_y).can_surf_freely && !tileOccupied(@map_x-1,@map_y)
+        dirs.push(2) if @map.terrain_tag(@map_x+1,@map_y).can_surf_freely && !tileOccupied(@map_x+1,@map_y)
+        dirs.push(3) if @map.terrain_tag(@map_x,@map_y-1).can_surf_freely && !tileOccupied(@map_x,@map_y-1)
       end
       if dirs.length > 0
         dir = dirs[rand(dirs.length)]
@@ -382,7 +382,7 @@ class Spriteset_Map
         end
         if !visited
           tag = @map.terrain_tag(x,y,true)
-          if tag.can_surf && $PokemonEncounters.has_water_encounters?
+          if tag.can_surf_freely && $PokemonEncounters.has_water_encounters?
             count+=1
             area = SpawnArea.new(@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
@@ -480,7 +480,7 @@ end
 class PokemonEncounters
 
   def pbSpawnType(terrain)
-    if self.has_water_encounters? && terrain.can_surf
+    if self.has_water_encounters? && terrain.can_surf_freely
       return :Water
     elsif self.has_cave_encounters?
       return :Cave

@@ -372,7 +372,6 @@
 007_VB_DataItemEffects
 008_VB_DataMail
 009_VB_DataMessages
-010_VB_DataMoveExEffects
 013_VB_DataOverworldMarkers
 014_VB_DataQuests
 015_VB_DataQuestsMain
@@ -443,6 +442,7 @@
 019_VB_UI_EditMoveset
 020_VB_UI_Party
 021_VB_UI_Summary
+022_VB_UI_Battle
 @@010_Battles
 001_VB_AddedAI
 002_VB_BossBattle

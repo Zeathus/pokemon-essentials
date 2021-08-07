@@ -15,10 +15,13 @@ class PokeBattle_Scene
   def pbStartBattle(battle)
     @battle   = battle
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.ox = -128
+    @viewport.oy = -92
     @viewport.z = 99999
     @lastCmd  = Array.new(@battle.battlers.length,0)
     @lastMove = Array.new(@battle.battlers.length,0)
     pbInitSprites
+    @outer.pbInitInfoSprites
     pbBattleIntroAnimation
   end
 
@@ -26,25 +29,15 @@ class PokeBattle_Scene
     @sprites = {}
     # The background image and each side's base graphic
     pbCreateBackdropSprites
-    # Create message box graphic
-    messageBox = pbAddSprite("messageBox",0,Graphics.height-96,
-       "Graphics/Pictures/Battle/overlay_message",@viewport)
-    messageBox.z = 195
-    # Create message window (displays the message)
-    msgWindow = Window_AdvancedTextPokemon.newWithSize("",
-       16,Graphics.height-96+2,Graphics.width-32,96,@viewport)
-    msgWindow.z              = 200
-    msgWindow.opacity        = 0
-    msgWindow.baseColor      = PokeBattle_SceneConstants::MESSAGE_BASE_COLOR
-    msgWindow.shadowColor    = PokeBattle_SceneConstants::MESSAGE_SHADOW_COLOR
-    msgWindow.letterbyletter = true
-    @sprites["messageWindow"] = msgWindow
     # Create command window
     @sprites["commandWindow"] = CommandMenuDisplay.new(@viewport,200)
     # Create fight window
     @sprites["fightWindow"] = FightMenuDisplay.new(@viewport,200)
-    # Create targeting window
-    @sprites["targetWindow"] = TargetMenuDisplay.new(@viewport,200,@battle.sideSizes)
+    @sprites["border"] = IconSprite.new(-128,-96,@viewport)
+    @sprites["border"].setBitmap("Graphics/Pictures/Battle/border")
+    @sprites["border"].z = 999
+    @outer = PokeBattle_OuterScene.new(@sprites,@viewport,@battle)
+    @outer.pbInitMenuSprites
     pbShowWindow(MESSAGE_BOX)
     # The party lineup graphics (bar and balls) for both sides
     for side in 0...2
@@ -133,11 +126,12 @@ class PokeBattle_Scene
     # Apply graphics
     bg = pbAddSprite("battle_bg",0,0,battleBG,@viewport)
     bg.z = 0
-    bg = pbAddSprite("battle_bg2",-Graphics.width,0,battleBG,@viewport)
+    bg = pbAddSprite("battle_bg2",-512,0,battleBG,@viewport)
     bg.z      = 0
     bg.mirror = true
     for side in 0...2
       baseX, baseY = PokeBattle_SceneConstants.pbBattlerPosition(side)
+      baseY += 80 if side == 0
       base = pbAddSprite("base_#{side}",baseX,baseY,
          (side==0) ? playerBase : enemyBase,@viewport)
       base.z    = 1
@@ -146,8 +140,8 @@ class PokeBattle_Scene
         base.oy = (side==0) ? base.bitmap.height : base.bitmap.height/2
       end
     end
-    cmdBarBG = pbAddSprite("cmdBar_bg",0,Graphics.height-96,messageBG,@viewport)
-    cmdBarBG.z = 180
+    #cmdBarBG = pbAddSprite("cmdBar_bg",0,384-96,messageBG,@viewport)
+    #cmdBarBG.z = 180
   end
 
   def pbCreateTrainerBackSprite(idxTrainer,trainerType,numTrainers=1)

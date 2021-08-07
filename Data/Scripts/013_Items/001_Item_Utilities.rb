@@ -482,8 +482,8 @@ def pbUseItem(bag,item,bagscene=nil)
       end
     end
     pbFadeOutIn {
-      scene = PokemonParty_Scene.new
-      screen = PokemonPartyScreen.new(scene,$Trainer.party)
+      scene = PokemonScreen_Scene.new
+      screen = PokemonScreen.new(scene,$Trainer.party)
       screen.pbStartScene(_INTL("Use on which Pokémon?"),false,annot)
       loop do
         scene.pbSetHelpText(_INTL("Use on which Pokémon?"))

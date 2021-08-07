@@ -343,6 +343,8 @@ module UIHelper
       pbBottomRight(cmdwindow)
       helpwindow.resizeHeightToFit(helpwindow.text,Graphics.width-cmdwindow.width)
       pbBottomLeft(helpwindow)
+      cmdwindow.x -= helpwindow.ox
+      cmdwindow.y -= helpwindow.oy
       loop do
         Graphics.update
         Input.update

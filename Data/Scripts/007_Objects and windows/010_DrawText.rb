@@ -1054,7 +1054,7 @@ def drawSingleFormattedChar(bitmap,ch)
       bitmap.font.bold=ch[6] if bitmap.font.bold!=ch[6]
       bitmap.font.italic=ch[7] if bitmap.font.italic!=ch[7]
       offset=0
-      sp = 2
+      sp = $PokemonTemp.textSize ? $PokemonTemp.textSize : 2
       rects = charRects(ch[0],bitmap.font.name)
       for r in rects
         r[1] -= 2
@@ -1269,9 +1269,7 @@ def pbDrawShadowText(bitmap,x,y,width,height,string,baseColor,shadowColor=nil,al
   y += 4
   if shadowColor && shadowColor.alpha>0
     bitmap.font.color=shadowColor
-    bitmap.draw_text(x+2,y,width,height,string,align)
-    bitmap.draw_text(x,y+2,width,height,string,align)
-    bitmap.draw_text(x+2,y+2,width,height,string,align)
+    bitmap.draw_text(x,y,width,height,string,align,1)
   end
   if baseColor && baseColor.alpha>0
     bitmap.font.color=baseColor
@@ -1279,20 +1277,17 @@ def pbDrawShadowText(bitmap,x,y,width,height,string,baseColor,shadowColor=nil,al
   end
 end
 
-def pbDrawOutlineText(bitmap,x,y,width,height,string,baseColor,shadowColor=nil,align=0)
+def pbDrawOutlineText(bitmap,x,y,width,height,string,baseColor,shadowColor=nil,align=0,thick=false)
   return if !bitmap || !string
   width=(width<0) ? bitmap.text_size(string).width+4 : width
   height=(height<0) ? bitmap.text_size(string).height+4 : height
   if shadowColor && shadowColor.alpha>0
     bitmap.font.color=shadowColor
-    bitmap.draw_text(x-2,y-2,width,height,string,align)
-    bitmap.draw_text(x,y-2,width,height,string,align)
-    bitmap.draw_text(x+2,y-2,width,height,string,align)
-    bitmap.draw_text(x-2,y,width,height,string,align)
-    bitmap.draw_text(x+2,y,width,height,string,align)
-    bitmap.draw_text(x-2,y+2,width,height,string,align)
-    bitmap.draw_text(x,y+2,width,height,string,align)
-    bitmap.draw_text(x+2,y+2,width,height,string,align)
+    if thick
+      bitmap.draw_text(x-2,y-2,width,height,string,align,3)
+    else
+      bitmap.draw_text(x-2,y-2,width,height,string,align,2)
+    end
   end
   if baseColor && baseColor.alpha>0
     bitmap.font.color=baseColor
@@ -1320,7 +1315,9 @@ def pbDrawTextPositions(bitmap,textpos,shift=true)
     elsif i[3]==2 # centered
       x -= (textsize.width/2)
     end
-    if i[6]==true || i[6]==1   # outline text
+    if i[6]==2 # thick outline text
+      pbDrawOutlineText(bitmap,x,y,textsize.width,textsize.height,i[0],i[4],i[5],0,true)
+    elsif i[6]==true || i[6]==1   # outline text
       pbDrawOutlineText(bitmap,x,y,textsize.width,textsize.height,i[0],i[4],i[5])
     else
       pbDrawShadowText(bitmap,x,y,textsize.width,textsize.height,i[0],i[4],i[5])

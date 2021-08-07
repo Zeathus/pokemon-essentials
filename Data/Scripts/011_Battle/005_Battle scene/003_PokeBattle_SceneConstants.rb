@@ -8,12 +8,12 @@ module PokeBattle_SceneConstants
   NUM_BALLS = Settings::MAX_PARTY_SIZE
 
   # Centre bottom of the player's side base graphic
-  PLAYER_BASE_X = 128
-  PLAYER_BASE_Y = Settings::SCREEN_HEIGHT - 80
+  PLAYER_BASE_X = 136
+  PLAYER_BASE_Y = 384 - 74
 
   # Centre middle of the foe's side base graphic
-  FOE_BASE_X    = Settings::SCREEN_WIDTH - 128
-  FOE_BASE_Y    = (Settings::SCREEN_HEIGHT * 3 / 4) - 112
+  FOE_BASE_X    = 512 - 128
+  FOE_BASE_Y    = (384 * 3 / 4) - 104
 
   # Returns where the centre bottom of a battler's sprite should be, given its
   # index and the number of battlers on its side, assuming the battler has
@@ -28,10 +28,12 @@ module PokeBattle_SceneConstants
     # Shift depending on index (no shifting needed for sideSize of 1)
     case sideSize
     when 2
-      ret[0] += [-48, 48, 32, -32][index]
+      mod = [-48, 48, 32, -32][index]
+      ret[0] += ((index & 1) == 0) ? (mod*1.5+32) : mod
       ret[1] += [  0,  0, 16, -16][index]
     when 3
-      ret[0] += [-80, 80,  0,  0, 80, -80][index]
+      mod = [-80, 80,  0,  0, 80, -80][index]
+      ret[0] += ((index & 1) == 0) ? (mod*1.5) : mod
       ret[1] += [  0,  0,  8, -8, 16, -16][index]
     end
     return ret
@@ -42,7 +44,7 @@ module PokeBattle_SceneConstants
   def self.pbTrainerPosition(side, index = 0, sideSize = 1)
     # Start at the centre of the base for the appropriate side
     if side == 0
-      ret = [PLAYER_BASE_X, PLAYER_BASE_Y - 16]
+      ret = [PLAYER_BASE_X - 20, PLAYER_BASE_Y + 160]
     else
       ret = [FOE_BASE_X, FOE_BASE_Y + 6]
     end

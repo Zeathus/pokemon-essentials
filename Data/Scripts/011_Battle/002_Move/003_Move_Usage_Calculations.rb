@@ -296,6 +296,9 @@ class PokeBattle_Move
         multipliers[:base_damage_multiplier] *= 4 / 3.0
       end
     end
+    if (@battle.pbCheckGlobalAbility(:OVERSHADOW) && type == :FAIRY)
+      multipliers[:base_damage_multiplier] /= 2
+    end
     # Ability effects that alter damage
     if user.abilityActive?
       BattleHandlers.triggerDamageCalcUserAbility(user.ability,

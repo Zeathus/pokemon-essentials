@@ -1,6 +1,5 @@
 #===============================================================================
-# Target's evasion stat changes are ignored from now on. (Miracle Eye)
-# Psychic moves have normal effectiveness against the Dark-type target.
+# Target steel type becomes susceptible to Poison-type moves (Corrosive Acid)
 #===============================================================================
 class PokeBattle_Move_300 < PokeBattle_Move
     def pbMoveFailed?(user,targets)
@@ -27,3 +26,64 @@ class PokeBattle_Move_301 < PokeBattle_WeatherMove
         @weatherType = :Winds
     end
 end
+
+################################################################################
+# Type depends on the user's Personality ID.
+# Boosts up to two stats based on Personality ID. (Diversity)
+# Exclusive to Spinda
+################################################################################
+class PokeBattle_Move_302 < PokeBattle_Move
+    # This move definitely does not work right now
+    def pbModifyType(type,attacker,opponent)
+      types = [
+        :NORMAL,
+        :FIRE,
+        :WATER,
+        :GRASS,
+        :ICE,
+        :STEEL,
+        :ROCK,
+        :GROUND,
+        :FAIRY,
+        :FIGHTING,
+        :BUG,
+        :FLYING,
+        :DRAGON,
+        :GHOST,
+        :DARK,
+        :PSYCHIC,
+        :ELECTRIC,
+        :POISON
+      ]
+      id=attacker.pokemon.personalID
+      type=types[(id % 256) % 18]
+      pbMessage(PBTypes.getName(type)) if $DEBUG && Input.press?(Input::CTRL)
+      return type
+    end
+    
+    def pbEffect(attacker,opponent,hitnum=0,alltargets=nil,showanimation=true)
+      ret=super(attacker,opponent,hitnum,alltargets,showanimation)
+      if opponent.damageState.calcDamage>0
+        id=attacker.pokemon.personalID
+        stat1=((id>>24)&255)%5+1
+        stat2=((id>>8)&255)%5+1
+        showanim=true
+        if stat1==stat2
+          if attacker.pbCanReduceStatStage?(stat1,attacker,false,self)
+            attacker.pbReduceStat(stat1,2,attacker,false,self,showanim)
+            showanim=false
+          end
+        else
+          if attacker.pbCanReduceStatStage?(stat1,attacker,false,self)
+            attacker.pbReduceStat(stat1,1,attacker,false,self,showanim)
+            showanim=false
+          end
+          if attacker.pbCanReduceStatStage?(stat2,attacker,false,self)
+            attacker.pbReduceStat(stat2,1,attacker,false,self,showanim)
+            showanim=false
+          end
+        end
+      end
+      return ret
+    end
+  end

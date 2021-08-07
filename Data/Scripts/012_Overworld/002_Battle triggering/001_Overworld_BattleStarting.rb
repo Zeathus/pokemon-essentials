@@ -150,8 +150,10 @@ def pbPrepareBattle(battle)
   battle.backdrop = backdrop
   # Choose a name for bases depending on environment
   if battleRules["base"].nil?
-    environment_data = GameData::Environment.try_get(battle.environment)
-    base = environment_data.battle_base if environment_data
+    if !([:Grass,:Forest,:TallGrass,:ForestGrass].include?(battle.environment))
+      environment_data = GameData::Environment.try_get(battle.environment)
+      base = environment_data.battle_base if environment_data
+    end
   else
     base = battleRules["base"]
   end
@@ -422,9 +424,10 @@ def pbTrainerBattleCore(*args)
     otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
     otherParty = getPartyPokemon(1)
     otherTrainer.party = otherParty
+    otherTrainer.id = 50
     playerTrainers.push(otherTrainer)
     playerParty = []
-    playerParty.each { |pkmn| playerParty.push(pkmn) }
+    mainTrainer.party.each { |pkmn| playerParty.push(pkmn) }
     playerPartyStarts.push(playerParty.length)
     otherParty.each { |pkmn| playerParty.push(pkmn) }
     setBattleRule("double") if !$PokemonTemp.battleRules["size"]
@@ -515,7 +518,8 @@ def pbTrainerBattle(trainerID, trainerName, endSpeech=nil,
   # Set some battle rules
   setBattleRule("outcomeVar",outcomeVar) if outcomeVar!=1
   setBattleRule("canLose") if canLose
-  setBattleRule("double") if doubleBattle || $PokemonTemp.waitingTrainer
+  setBattleRule("double") if !$PokemonTemp.battleRules["size"]
+  setBattleRule("single") if !doubleBattle && !$PokemonTemp.waitingTrainer
   # Perform the battle
   if $PokemonTemp.waitingTrainer
     decision = pbTrainerBattleCore($PokemonTemp.waitingTrainer[0],

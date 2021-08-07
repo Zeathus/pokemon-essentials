@@ -12,8 +12,8 @@ class PokemonDataBox < SpriteWrapper
   # Maximum time in seconds to make a change to the HP bar.
   HP_BAR_CHANGE_TIME = 1.0
   STATUS_ICON_HEIGHT = 16
-  NAME_BASE_COLOR         = Color.new(72,72,72)
-  NAME_SHADOW_COLOR       = Color.new(184,184,184)
+  NAME_BASE_COLOR         = Color.new(248,248,248)
+  NAME_SHADOW_COLOR       = Color.new(15,15,15)
   MALE_BASE_COLOR         = Color.new(48,96,216)
   MALE_SHADOW_COLOR       = NAME_SHADOW_COLOR
   FEMALE_BASE_COLOR       = Color.new(248,88,40)
@@ -26,9 +26,10 @@ class PokemonDataBox < SpriteWrapper
     @spriteX      = 0
     @spriteY      = 0
     @spriteBaseX  = 0
+    @spriteBaseY  = 0
     @selected     = 0
     @frame        = 0
-    @showHP       = false   # Specifically, show the HP numbers
+    @showHP       = true    # Specifically, show the HP numbers
     @animatingHP  = false
     @showExp      = false   # Specifically, show the Exp bar
     @animatingExp = false
@@ -39,7 +40,6 @@ class PokemonDataBox < SpriteWrapper
   end
 
   def initializeDataBoxGraphic(sideSize)
-    onPlayerSide = ((@battler.index%2)==0)
     # Get the data box graphic and set whether the HP numbers/Exp bar are shown
     if sideSize==1   # One Pokémon on side, use the regular dara box BG
       bgFilename = ["Graphics/Pictures/Battle/databox_normal",
@@ -55,9 +55,10 @@ class PokemonDataBox < SpriteWrapper
     @databoxBitmap  = AnimatedBitmap.new(bgFilename)
     # Determine the co-ordinates of the data box and the left edge padding width
     if onPlayerSide
-      @spriteX = Graphics.width - 244
-      @spriteY = Graphics.height - 192
+      @spriteX = 512 - 254
+      @spriteY = 384 - 192
       @spriteBaseX = 34
+      @spriteBaseY = 60
     else
       @spriteX = -16
       @spriteY = 36
@@ -65,12 +66,18 @@ class PokemonDataBox < SpriteWrapper
     end
     case sideSize
     when 2
-      @spriteX += [-12,  12,  0,  0][@battler.index]
+      mod = [-12,  12,  0,  0][@battler.index]
+      @spriteX += onPlayerSide ? -mod : mod
       @spriteY += [-20, -34, 34, 20][@battler.index]
     when 3
-      @spriteX += [-12,  12, -6,  6,  0,  0][@battler.index]
+      mod = [-12,  12, -6,  6,  0,  0][@battler.index]
+      @spriteX += onPlayerSide ? -mod : mod
       @spriteY += [-42, -46,  4,  0, 50, 46][@battler.index]
     end
+  end
+
+  def onPlayerSide
+    return ((@battler.index%2)==0)
   end
 
   def initializeOtherGraphics(viewport)
@@ -84,8 +91,7 @@ class PokemonDataBox < SpriteWrapper
     @sprites["hpNumbers"] = @hpNumbers
     # Create sprite wrapper that displays HP bar
     @hpBar = SpriteWrapper.new(viewport)
-    @hpBar.bitmap = @hpBarBitmap.bitmap
-    @hpBar.src_rect.height = @hpBarBitmap.height/3
+    @hpBar.bitmap = Bitmap.new(200,16)
     @sprites["hpBar"] = @hpBar
     # Create sprite wrapper that displays Exp bar
     @expBar = SpriteWrapper.new(viewport)
@@ -111,16 +117,16 @@ class PokemonDataBox < SpriteWrapper
 
   def x=(value)
     super
-    @hpBar.x     = value+@spriteBaseX+102
+    @hpBar.x     = value+@spriteBaseX+(onPlayerSide ? -22 : 22)
     @expBar.x    = value+@spriteBaseX+6
-    @hpNumbers.x = value+@spriteBaseX+80
+    @hpNumbers.x = value+@spriteBaseX+40
   end
 
   def y=(value)
     super
-    @hpBar.y     = value+40
+    @hpBar.y     = value+28
     @expBar.y    = value+74
-    @hpNumbers.y = value+52
+    @hpNumbers.y = value+28
   end
 
   def z=(value)
@@ -193,9 +199,11 @@ class PokemonDataBox < SpriteWrapper
   def pbDrawNumber(number,btmp,startX,startY,align=0)
     # -1 means draw the / character
     n = (number == -1) ? [10] : number.to_i.digits.reverse
-    charWidth  = @numbersBitmap.width/11
+    n.push(11) if number.to_s.include?("%")
+    charWidth  = @numbersBitmap.width/12
     charHeight = @numbersBitmap.height
     startX -= charWidth*n.length if align==1
+    startX -= (charWidth*n.length)/2 if align==2
     n.each do |i|
       btmp.blt(startX,startY,@numbersBitmap.bitmap,Rect.new(i*charWidth,0,charWidth,charHeight))
       startX += charWidth
@@ -209,22 +217,38 @@ class PokemonDataBox < SpriteWrapper
     imagePos = []
     # Draw background panel
     self.bitmap.blt(0,0,@databoxBitmap.bitmap,Rect.new(0,0,@databoxBitmap.width,@databoxBitmap.height))
+    # Draw Pokémon's level
+    lvl_x = onPlayerSide ? 174 : 16
+    lvl_text = _INTL("{1}",@battler.level)
+    if $game_switches[QMARK_LEVEL] && (@battler.index&1)!=0
+      lvl_text = "???"
+    elsif $game_switches[MINUS1_LEVEL] && (@battler.index&1)!=0
+      lvl_text = "-1"
+    end
+    textPos.push([lvl_text,@spriteBaseX+lvl_x,-6,0,NAME_BASE_COLOR,NAME_SHADOW_COLOR,true])
+    # Draw Pokémon's gender symbol
+    genderX=onPlayerSide ? 140 : (lvl_x + self.bitmap.text_size(lvl_text).width + 4)
+    genderX+=@spriteBaseX + 4
+    case @battler.displayGender
+    when 0   # Male
+      textPos.push([_INTL("♂"),genderX,-4,false,MALE_BASE_COLOR,MALE_SHADOW_COLOR,true])
+    when 1   # Female
+      textPos.push([_INTL("♀"),genderX,-4,false,FEMALE_BASE_COLOR,FEMALE_SHADOW_COLOR,true])
+    end
+    pbSetSystemFont(self.bitmap)
+    pbDrawTextPositions(self.bitmap,textPos)
+    textPos = []
     # Draw Pokémon's name
     nameWidth = self.bitmap.text_size(@battler.name).width
     nameOffset = 0
     nameOffset = nameWidth-116 if nameWidth>116
-    textPos.push([@battler.name,@spriteBaseX+8-nameOffset,0,false,NAME_BASE_COLOR,NAME_SHADOW_COLOR])
-    # Draw Pokémon's gender symbol
-    case @battler.displayGender
-    when 0   # Male
-      textPos.push([_INTL("♂"),@spriteBaseX+126,0,false,MALE_BASE_COLOR,MALE_SHADOW_COLOR])
-    when 1   # Female
-      textPos.push([_INTL("♀"),@spriteBaseX+126,0,false,FEMALE_BASE_COLOR,FEMALE_SHADOW_COLOR])
+    if onPlayerSide
+      textPos.push([@battler.name,@spriteBaseX+10,0,0,NAME_BASE_COLOR,NAME_SHADOW_COLOR,true])
+    else
+      textPos.push([@battler.name,@spriteBaseX+202,0,1,NAME_BASE_COLOR,NAME_SHADOW_COLOR,true])
     end
+    pbSetSmallFont(self.bitmap)
     pbDrawTextPositions(self.bitmap,textPos)
-    # Draw Pokémon's level
-    imagePos.push(["Graphics/Pictures/Battle/overlay_lv",@spriteBaseX+140,16])
-    pbDrawNumber(@battler.level,self.bitmap,@spriteBaseX+162,16)
     # Draw shiny icon
     if @battler.shiny?
       shinyX = (@battler.opposes?(0)) ? 206 : -6   # Foe's/player's
@@ -260,28 +284,65 @@ class PokemonDataBox < SpriteWrapper
   end
 
   def refreshHP
-    @hpNumbers.bitmap.clear
     return if !@battler.pokemon
+    @hpNumbers.bitmap.clear
     # Show HP numbers
     if @showHP
-      pbDrawNumber(self.hp,@hpNumbers.bitmap,54,2,1)
-      pbDrawNumber(-1,@hpNumbers.bitmap,54,2)   # / char
-      pbDrawNumber(@battler.totalhp,@hpNumbers.bitmap,70,2)
+      if onPlayerSide
+        pbDrawNumber(self.hp,@hpNumbers.bitmap,54,2,1)
+        pbDrawNumber(-1,@hpNumbers.bitmap,54,2)   # / char
+        pbDrawNumber(@battler.totalhp,@hpNumbers.bitmap,70,2)
+      else
+        hpPercent = (self.hp*100.0/@battler.totalhp)
+        hpText = self.hp>=@battler.totalhp ? sprintf("%d%%",hpPercent.round) : sprintf("%.1f%%",hpPercent)
+        pbDrawNumber(hpText,@hpNumbers.bitmap,76,2,2)
+      end
     end
+    hpGaugeSize=160
+    hpgauge=@battler.totalhp==0 ? 0 : (self.hp*hpGaugeSize/@battler.totalhp)
+    hpgauge=2 if hpgauge==0 && self.hp>0
+    hpzone=0
+    hpzone=1 if self.hp<=(@battler.totalhp/2).floor
+    hpzone=2 if self.hp<=(@battler.totalhp/4).floor
+    hpcolors=[
+        Color.new(14,152,22),Color.new(24,192,32),   # Green
+        Color.new(202,138,0),Color.new(232,168,0),   # Orange
+        Color.new(218,42,36),Color.new(248,72,56)    # Red
+    ]
     # Resize HP bar
-    w = 0
-    if self.hp>0
-      w = @hpBarBitmap.width.to_f*self.hp/@battler.totalhp
-      w = 1 if w<1
-      # NOTE: The line below snaps the bar's width to the nearest 2 pixels, to
-      #       fit in with the rest of the graphics which are doubled in size.
-      w = ((w/2.0).round)*2
+    @hpBar.bitmap.clear
+    if self.hp>@battler.totalhp
+      hpBars = (self.hp*1.0/@battler.totalhp).ceil
+      tempHP = self.hp
+      color1 = hpcolors[hpzone*2]
+      color2 = hpcolors[hpzone*2+1]
+      hues = -1
+      while tempHP > @battle.totalhp
+        hues += 1
+        tempHP -= @battler.totalhp
+      end
+      color1 = pbHueShift(color1,100*hues)
+      color2 = pbHueShift(color2,100*hues)
+      for i in 0..8
+        clr = (i<=1 || i>=7) ? color1 : color2
+        if onPlayerSide
+
+        else
+
+        end
+      end
+    else
+      for i in 0..8
+        clr = (i<=1 || i>=7) ? hpcolors[hpzone*2] : hpcolors[hpzone*2+1]
+        if onPlayerSide
+          @hpBar.bitmap.fill_rect(@spriteBaseX+i*2,i*2,hpgauge-i*2,2,clr) if hpgauge>i*2
+        else
+          line_width = hpgauge
+          line_width = hpGaugeSize - i*2 if hpgauge > hpGaugeSize - i*2
+          @hpBar.bitmap.fill_rect(@spriteBaseX,i*2,line_width,2,clr)
+        end
+      end
     end
-    @hpBar.src_rect.width = w
-    hpColor = 0                                  # Green bar
-    hpColor = 1 if self.hp<=@battler.totalhp/2   # Yellow bar
-    hpColor = 2 if self.hp<=@battler.totalhp/4   # Red bar
-    @hpBar.src_rect.y = hpColor*@hpBarBitmap.height/3
   end
 
   def refreshExp
@@ -349,12 +410,12 @@ class PokemonDataBox < SpriteWrapper
 
   def updatePositions(frameCounter)
     self.x = @spriteX
-    self.y = @spriteY
+    self.y = @spriteY + @spriteBaseY
     # Data box bobbing while Pokémon is selected
     if @selected==1 || @selected==2   # Choosing commands/targeted or damaged
       case (frameCounter/QUARTER_ANIM_PERIOD).floor
-      when 1 then self.y = @spriteY-2
-      when 3 then self.y = @spriteY+2
+      when 1 then self.y = @spriteY-2 + @spriteBaseY
+      when 3 then self.y = @spriteY+2 + @spriteBaseY
       end
     end
   end
@@ -397,7 +458,7 @@ class AbilitySplashBar < SpriteWrapper
     self.bitmap = @contents
     pbSetSystemFont(self.bitmap)
     # Position the bar
-    self.x       = (side==0) ? -Graphics.width/2 : Graphics.width
+    self.x       = (side==0) ? -512/2 : 512
     self.y       = (side==0) ? 180 : 80
     self.z       = 120
     self.visible = false
@@ -631,6 +692,13 @@ class PokemonBattlerShadowSprite < RPG::Sprite
 
   def pbSetPosition
     return if !@_iconBitmap
+    if @index&1==0
+      self.zoom_x = 1.5
+      self.zoom_y = 1.5
+    else
+      self.zoom_x = 1.0
+      self.zoom_y = 1.0
+    end
     pbSetOrigin
     self.z = 3
     # Set original position

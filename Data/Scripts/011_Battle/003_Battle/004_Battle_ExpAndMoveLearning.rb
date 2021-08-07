@@ -36,15 +36,6 @@ class PokeBattle_Battle
         @expgained += totalexp
       end
 
-      # Find which Pokémon have an Exp Share
-      expShare = []
-      if !expAll
-        eachInTeam(0,0) do |pkmn,i|
-          next if !pkmn.able?
-          next if !pkmn.hasItem?(:EXPSHARE) && GameData::Item.try_get(@initialItems[0][i]) != :EXPSHARE
-          expShare.push(i)
-        end
-      end
       # Calculate EV and Exp gains for the participants
       if numPartic>0
         # Gain EVs and Exp for participants

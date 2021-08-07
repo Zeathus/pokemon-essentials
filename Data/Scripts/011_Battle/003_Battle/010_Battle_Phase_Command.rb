@@ -213,13 +213,13 @@ class PokeBattle_Battle
         case cmd
         when 0    # Fight
           break if pbFightMenu(idxBattler)
-        when 1    # Pokémon
-          break if pbPartyMenu(idxBattler)
-        when 2    # Bag
+        when 1    # Bag
           if pbItemMenu(idxBattler,actioned.length==1)
             commandsEnd = true if pbItemUsesAllActions?(@choices[idxBattler][1])
             break
           end
+        when 2    # Pokémon
+          break if pbPartyMenu(idxBattler)
         when 3    # Run
           # NOTE: "Run" is only an available option for the first battler the
           #       player chooses an action for in a round. Attempting to run

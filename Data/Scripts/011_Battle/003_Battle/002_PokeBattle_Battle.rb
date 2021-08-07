@@ -208,7 +208,7 @@ class PokeBattle_Battle
   #=============================================================================
   # Trainers and owner-related methods
   #=============================================================================
-  def pbPlayer; return @player[0]; end
+  def pbPlayer; return $Trainer; end
 
   # Given a battler index, returns the index within @player/@opponent of the
   # trainer that controls that battler index.
@@ -219,6 +219,7 @@ class PokeBattle_Battle
     return 0 if !trainer
     case trainer.length
     when 2
+      #return 0 if !opposes?(idxBattler)
       n = pbSideSize(idxBattler%2)
       return [0,0,1][idxBattler/2] if n==3
       return idxBattler/2   # Same as [0,1][idxBattler/2], i.e. 2 battler slots
@@ -294,19 +295,19 @@ class PokeBattle_Battle
   # Get party information (counts all teams on the same side)
   #=============================================================================
   def pbParty(idxBattler)
-    party1_1 = getActivePokemon(0)
-    party1_2 = isInParty ? getActivePokemon(1) : false
-    party1_active = (party1_2 && idxBattler == 2) ? party1_2 : party1_1
-    party1_active = party1_active[0..2] if party1_active.length>3 && isInParty
-    return (opposes?(idxBattler)) ? @party2 : party1_active
+    #party1_1 = getActivePokemon(0)
+    #party1_2 = isInParty ? getActivePokemon(1) : false
+    #party1_active = (party1_2 && idxBattler == 2) ? party1_2 : party1_1
+    #party1_active = party1_active[0..2] if party1_active.length>3 && isInParty
+    return (opposes?(idxBattler)) ? @party2 : @party1
   end
 
   def pbOpposingParty(idxBattler)
-    party1_1 = getActivePokemon(0)
-    party1_2 = isInParty ? getActivePokemon(1) : false
-    party1_active = (party1_2 && idxBattler == 2) ? party1_2 : party1_1
-    party1_active = party1_active[0..2] if party1_active.length>3 && isInParty
-    return (opposes?(idxBattler)) ? party1_active : @party2
+    #party1_1 = getActivePokemon(0)
+    #party1_2 = isInParty ? getActivePokemon(1) : false
+    #party1_active = (party1_2 && idxBattler == 2) ? party1_2 : party1_1
+    #party1_active = party1_active[0..2] if party1_active.length>3 && isInParty
+    return (opposes?(idxBattler)) ? party1 : @party2
   end
 
   def pbPartyOrder(idxBattler)
@@ -618,7 +619,6 @@ class PokeBattle_Battle
   # Returns the battler representing the Pokémon at index idxParty in its party,
   # on the same side as a battler with battler index of idxBattlerOther.
   def pbFindBattler(idxParty,idxBattlerOther=0)
-    idxParty -= 3 if idxBattlerOther == 2
     eachSameSideBattler(idxBattlerOther) { |b| return b if b.pokemonIndex==idxParty }
     return nil
   end

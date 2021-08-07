@@ -40,11 +40,6 @@ class BattleIntroAnimation < PokeBattle_Animation
     blackScreen = addNewSprite(0,0,"Graphics/Battle animations/black_screen")
     blackScreen.setZ(0,999)
     blackScreen.moveOpacity(0,8,0)
-    # Fading blackness over command bar
-    blackBar = addNewSprite(@sprites["cmdBar_bg"].x,@sprites["cmdBar_bg"].y,
-       "Graphics/Battle animations/black_bar")
-    blackBar.setZ(0,998)
-    blackBar.moveOpacity(appearTime*3/4,appearTime/4,0)
   end
 
   def makeSlideSprite(spriteName,deltaMult,appearTime,origin=nil)
@@ -52,8 +47,8 @@ class BattleIntroAnimation < PokeBattle_Animation
     # left (for sprites on the player's side and the background).
     return if !@sprites[spriteName]
     s = addSprite(@sprites[spriteName],origin)
-    s.setDelta(0,(Graphics.width*deltaMult).floor,0)
-    s.moveDelta(0,appearTime,(-Graphics.width*deltaMult).floor,0)
+    s.setDelta(0,(512*deltaMult).floor,0)
+    s.moveDelta(0,appearTime,(-512*deltaMult).floor,0)
   end
 end
 
@@ -101,8 +96,8 @@ class LineupAppearAnimation < PokeBattle_Animation
     bar = sprites["partyBar_#{@side}"]
     case @side
     when 0   # Player's lineup
-      barX  = Graphics.width - BAR_DISPLAY_WIDTH
-      barY  = Graphics.height - 142
+      barX  = 512 - BAR_DISPLAY_WIDTH
+      barY  = 384 - 142
       ballX = barX + 44
       ballY = barY - 30
     when 1   # Opposing lineup
@@ -151,8 +146,8 @@ class LineupAppearAnimation < PokeBattle_Animation
     bar = addSprite(@sprites["partyBar_#{@side}"])
     bar.setVisible(0,true)
     dir = (@side==0) ? 1 : -1
-    bar.setDelta(0,dir*Graphics.width/2,0)
-    bar.moveDelta(0,8,-dir*Graphics.width/2,0)
+    bar.setDelta(0,dir*512/2,0)
+    bar.moveDelta(0,8,-dir*512/2,0)
     delay = bar.totalDuration
     for i in 0...PokeBattle_SceneConstants::NUM_BALLS
       createBall(i,(@fullAnim) ? delay+i*2 : 0,dir)
@@ -176,8 +171,8 @@ class LineupAppearAnimation < PokeBattle_Animation
     ball = addSprite(@sprites["partyBall_#{@side}_#{idxBall}"])
     ball.setVisible(delay,true)
     ball.setName(delay,graphicFilename)
-    ball.setDelta(delay,dir*Graphics.width/2,0)
-    ball.moveDelta(delay,8,-dir*Graphics.width/2,0)
+    ball.setDelta(delay,dir*512/2,0)
+    ball.moveDelta(delay,8,-dir*512/2,0)
   end
 end
 
@@ -197,8 +192,8 @@ class DataBoxAppearAnimation < PokeBattle_Animation
     box = addSprite(@sprites["dataBox_#{@idxBox}"])
     box.setVisible(0,true)
     dir = ((@idxBox%2)==0) ? 1 : -1
-    box.setDelta(0,dir*Graphics.width/2,0)
-    box.moveDelta(0,8,-dir*Graphics.width/2,0)
+    box.setDelta(0,dir*512/2,0)
+    box.moveDelta(0,8,-dir*512/2,0)
   end
 end
 
@@ -217,7 +212,7 @@ class DataBoxDisappearAnimation < PokeBattle_Animation
     return if !@sprites["dataBox_#{@idxBox}"] || !@sprites["dataBox_#{@idxBox}"].visible
     box = addSprite(@sprites["dataBox_#{@idxBox}"])
     dir = ((@idxBox%2)==0) ? 1 : -1
-    box.moveDelta(0,8,dir*Graphics.width/2,0)
+    box.moveDelta(0,8,dir*512/2,0)
     box.setVisible(8,false)
   end
 end
@@ -238,7 +233,7 @@ class AbilitySplashAppearAnimation < PokeBattle_Animation
     bar = addSprite(@sprites["abilityBar_#{@side}"])
     bar.setVisible(0,true)
     dir = (@side==0) ? 1 : -1
-    bar.moveDelta(0,8,dir*Graphics.width/2,0)
+    bar.moveDelta(0,8,dir*512/2,0)
   end
 end
 
@@ -257,7 +252,7 @@ class AbilitySplashDisappearAnimation < PokeBattle_Animation
     return if !@sprites["abilityBar_#{@side}"]
     bar = addSprite(@sprites["abilityBar_#{@side}"])
     dir = (@side==0) ? -1 : 1
-    bar.moveDelta(0,8,dir*Graphics.width/2,0)
+    bar.moveDelta(0,8,dir*512/2,0)
     bar.setVisible(8,false)
   end
 end
@@ -280,18 +275,18 @@ class TrainerAppearAnimation < PokeBattle_Animation
     # Make old trainer sprite move off-screen first if necessary
     if @idxTrainer>0 && @sprites["trainer_#{@idxTrainer}"].visible
       oldTrainer = addSprite(@sprites["trainer_#{@idxTrainer}"],PictureOrigin::Bottom)
-      oldTrainer.moveDelta(delay,8,Graphics.width/4,0)
+      oldTrainer.moveDelta(delay,8,512/4,0)
       oldTrainer.setVisible(delay+8,false)
       delay = oldTrainer.totalDuration
     end
     # Make new trainer sprite move on-screen
     if @sprites["trainer_#{@idxTrainer+1}"]
       trainerX, trainerY = PokeBattle_SceneConstants.pbTrainerPosition(1)
-      trainerX += 64+Graphics.width/4
+      trainerX += 64+512/4
       newTrainer = addSprite(@sprites["trainer_#{@idxTrainer+1}"],PictureOrigin::Bottom)
       newTrainer.setVisible(delay,true)
       newTrainer.setXY(delay,trainerX,trainerY)
-      newTrainer.moveDelta(delay,8,-Graphics.width/4,0)
+      newTrainer.moveDelta(delay,8,-512/4,0)
     end
   end
 end
@@ -319,7 +314,7 @@ class PlayerFadeAnimation < PokeBattle_Animation
       i += 1
       next if !pl.visible || pl.x<0
       trainer = addSprite(pl,PictureOrigin::Bottom)
-      trainer.moveDelta(0,16,-Graphics.width/2,0)
+      trainer.moveDelta(0,16,-512/2,0)
       # Animate trainer sprite(s) if they have multiple frames
       if pl.bitmap && !pl.bitmap.disposed? && pl.bitmap.width>=pl.bitmap.height*2
         size = pl.src_rect.width   # Width per frame
@@ -334,7 +329,7 @@ class PlayerFadeAnimation < PokeBattle_Animation
     delay = 3
     if @sprites["partyBar_0"] && @sprites["partyBar_0"].visible
       partyBar = addSprite(@sprites["partyBar_0"])
-      partyBar.moveDelta(delay,16,-Graphics.width/4,0) if @fullAnim
+      partyBar.moveDelta(delay,16,-512/4,0) if @fullAnim
       partyBar.moveOpacity(delay,12,0)
       partyBar.setVisible(delay+12,false)
       partyBar.setOpacity(delay+12,255)
@@ -342,7 +337,7 @@ class PlayerFadeAnimation < PokeBattle_Animation
     for i in 0...PokeBattle_SceneConstants::NUM_BALLS
       next if !@sprites["partyBall_0_#{i}"] || !@sprites["partyBall_0_#{i}"].visible
       partyBall = addSprite(@sprites["partyBall_0_#{i}"])
-      partyBall.moveDelta(delay+2*i,16,-Graphics.width,0) if @fullAnim
+      partyBall.moveDelta(delay+2*i,16,-512,0) if @fullAnim
       partyBall.moveOpacity(delay,12,0)
       partyBall.setVisible(delay+12,false)
       partyBall.setOpacity(delay+12,255)
@@ -370,16 +365,16 @@ class TrainerFadeAnimation < PokeBattle_Animation
     while @sprites[spriteNameBase+"_#{i}"]
       trSprite = @sprites[spriteNameBase+"_#{i}"]
       i += 1
-      next if !trSprite.visible || trSprite.x>Graphics.width
+      next if !trSprite.visible || trSprite.x>512
       trainer = addSprite(trSprite,PictureOrigin::Bottom)
-      trainer.moveDelta(0,16,Graphics.width/2,0)
+      trainer.moveDelta(0,16,512/2,0)
       trainer.setVisible(16,false)
     end
     # Move and fade party bar/balls
     delay = 3
     if @sprites["partyBar_1"] && @sprites["partyBar_1"].visible
       partyBar = addSprite(@sprites["partyBar_1"])
-      partyBar.moveDelta(delay,16,Graphics.width/4,0) if @fullAnim
+      partyBar.moveDelta(delay,16,512/4,0) if @fullAnim
       partyBar.moveOpacity(delay,12,0)
       partyBar.setVisible(delay+12,false)
       partyBar.setOpacity(delay+12,255)
@@ -387,7 +382,7 @@ class TrainerFadeAnimation < PokeBattle_Animation
     for i in 0...PokeBattle_SceneConstants::NUM_BALLS
       next if !@sprites["partyBall_1_#{i}"] || !@sprites["partyBall_1_#{i}"].visible
       partyBall = addSprite(@sprites["partyBall_1_#{i}"])
-      partyBall.moveDelta(delay+2*i,16,Graphics.width,0) if @fullAnim
+      partyBall.moveDelta(delay+2*i,16,512,0) if @fullAnim
       partyBall.moveOpacity(delay,12,0)
       partyBall.setVisible(delay+12,false)
       partyBall.setOpacity(delay+12,255)
@@ -863,7 +858,7 @@ class PokeballThrowDeflectAnimation < PokeBattle_Animation
     # Poké Ball knocked back
     delay = ball.totalDuration
     ball.setSE(delay,"Battle ball drop")
-    ball.moveXY(delay,8,-32,Graphics.height-96+32)   # Back to player's corner
+    ball.moveXY(delay,8,-32,384-96+32)   # Back to player's corner
     createBallTumbling(ball,delay,8)
   end
 end

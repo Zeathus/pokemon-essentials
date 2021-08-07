@@ -517,6 +517,8 @@ def pbMessageDisplay(msgwindow,message,letterbyletter=true,commandProc=nil)
   return if !msgwindow
   oldletterbyletter=msgwindow.letterbyletter
   msgwindow.letterbyletter=(letterbyletter) ? true : false
+  msgwindow.width = Graphics.width*3/4
+  msgwindow.x = Graphics.width/8
   ret=nil
   commands=nil
   facewindow=nil

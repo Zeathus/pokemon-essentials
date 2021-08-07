@@ -1061,13 +1061,21 @@ class PokemonScreen_Scene
     return @pparty
   end
 
+  def party=(value)
+    @party = value
+  end
+
+  def pparty=(value)
+    @pparty = value
+  end
+
   def pbStartScene(party,starthelptext,annotations=nil,multiselect=false)
     @sprites={}
     @mode=0
     @tid=getPartyActive(0)
     @ptid=getPartyActive(1)
-    @party=getActivePokemon(0)
-    @pparty=getActivePokemon(1) # Partner Party
+    @party=getActivePokemon(0) if !@party
+    @pparty=getActivePokemon(1) if !@pparty # Partner Party
     @fullparty=-1
     @viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
     @viewport.z=99999
@@ -1082,6 +1090,8 @@ class PokemonScreen_Scene
     @sprites["messagebox"].letterbyletter=true
     @sprites["helpwindow"].viewport=@viewport
     @sprites["helpwindow"].visible=false
+    @sprites["messagebox"].z = 9999
+    @sprites["helpwindow"].z = 9999
     @sprites["border"]=IconSprite.new(0,0,@viewport)
     @sprites["border"].setBitmap("Graphics/Pictures/border")
     @sprites["border"].z = 999
@@ -2099,9 +2109,12 @@ end
 
 
 class PokemonScreen
-  def initialize(scene,party)
+  def initialize(scene,party=nil,pparty=nil)
     @party=party
+    @pparty=pparty
     @scene=scene
+    @scene.party=@party if @party
+    @scene.pparty=@pparty if @pparty
   end
 
   def pbHardRefresh
@@ -3193,8 +3206,8 @@ class PokemonScreen
   end
 
   def pbPokemonScreen
-    @party=getActivePokemon(0)
-    @pparty=getActivePokemon(1)
+    @party=getActivePokemon(0) if !@party
+    @pparty=getActivePokemon(1) if !@pparty
     @tid=getPartyActive(0)
     @ptid=getPartyActive(1)
     @scene.pbStartScene(@party,@party.length>1 ? _INTL("Choose a Pokémon.") : _INTL("Choose Pokémon or cancel."),nil)
