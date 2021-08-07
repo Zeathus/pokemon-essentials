@@ -8,7 +8,7 @@ class TradeAdapter
 
   def getItemIcon(item)
     return nil if !item
-    return pbItemIconFile(item)
+    return GameData::Item.icon_filename(item)
   end
 
   def getItemIconRect(item)

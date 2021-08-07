@@ -1,7 +1,7 @@
 def pbHarvestBerry(item, quantity)
-  Kernel.pbMessage(_INTL("It's a bush blooming of {1}. Do you want to pick them?{2}",
+  pbMessage(_INTL("It's a bush blooming of {1}. Do you want to pick them?{2}",
     GameData::Item.get(item).name_plural,"\\ch[1,2,Yes,No]"))
-  quantity += 1 if $game_screen.weather_type==PBFieldWeather::Sun
+  quantity += 1 if GameData::Weather.get($game_screen.weather_type).category == :Sun
   if pbGet(1)==0
     realqnt = quantity
     if (pbPartyAbilityCount(:HARVEST)+
@@ -16,7 +16,8 @@ def pbHarvestBerry(item, quantity)
     title = "ITEM COLLECTED"
     text = ""
     text2 = nil
-    itemname=(realqnt>1) ? PBItems.getNamePlural(item) : PBItems.getName(item)
+    itemobj = GameData::Item.get(item)
+    itemname=(realqnt>1) ? itemobj.name_plural : itemobj.name
     if realqnt>1
       text += realqnt.to_s
       text += "x "

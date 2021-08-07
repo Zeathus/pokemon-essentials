@@ -1,5 +1,4 @@
 def pbPartyTypeCount(type)
-  type = getID(PBTypes,type) if type.is_a?(Symbol)
   ret = 0
   for pkmn in $Trainer.party
     if pkmn.type1 == type || pkmn.type2 == type
@@ -10,7 +9,6 @@ def pbPartyTypeCount(type)
 end
 
 def pbPartyAbilityCount(ability)
-  ability = getID(PBAbilities,ability) if ability.is_a?(Symbol)
   ret = 0
   for pkmn in $Trainer.party
     if pkmn.ability == ability
@@ -21,7 +19,6 @@ def pbPartyAbilityCount(ability)
 end
 
 def pbPartyAbilityPokemon(ability)
-  ability = getID(PBAbilities,ability) if ability.is_a?(Symbol)
   for pkmn in $Trainer.party
     if pkmn.ability == ability
       return pkmn
@@ -31,7 +28,6 @@ def pbPartyAbilityPokemon(ability)
 end
 
 def pbPartyMoveCount(move)
-  move = getID(PBMoves,move) if move.is_a?(Symbol)
   ret = 0
   for pkmn in $Trainer.party
     for m in pkmn.moves
@@ -44,7 +40,6 @@ def pbPartyMoveCount(move)
 end
 
 def pbPartyMovePokemon(move)
-  move = getID(PBMoves,move) if move.is_a?(Symbol)
   for pkmn in $Trainer.party
     for m in pkmn.moves
       if m.id == move
@@ -56,7 +51,6 @@ def pbPartyMovePokemon(move)
 end
 
 def pbRemoveSpecies(species)
-  species=getID(PBSpecies,species) if species.is_a?(Symbol)
   for i in 0...$Trainer.party.length
     if $Trainer.party[i].species==species
       $Trainer.party-=[$Trainer.party[i]]
@@ -67,7 +61,6 @@ def pbRemoveSpecies(species)
 end
 
 def pbHasInParty?(species)
-  species=getID(PBSpecies,species) if species.is_a?(Symbol)
   ret=false
   for pkmn in $Trainer.party
     ret=true if pkmn.species==species
@@ -76,7 +69,6 @@ def pbHasInParty?(species)
 end
 
 def pbNumberInParty(species)
-  species=getID(PBSpecies,species) if species.is_a?(Symbol)
   ret=0
   for pkmn in $Trainer.party
     ret+=1 if pkmn.species==species

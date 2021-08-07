@@ -178,8 +178,14 @@ class PokeBattle_Scene
         if idxParty < 0
           scene.pbDisplay("You can't choose a Pokémon from this trainer's party.")
           next
-        elsif !modParty[idxParty]
+        elsif !modParty2[idxParty]
           scene.pbDisplay("You can't choose this Pokémon, though I am not really sure why (This should not happen).")
+          if $DEBUG
+            scene.pbDisplay("Party order is as such:")
+            for i in 0...modParty2.length
+              scene.pbDisplay(_INTL("{1}: {2}", i, modParty2[i] ? modParty2[i].name : "nil"))
+            end
+          end
           next
         end
       else
@@ -188,14 +194,15 @@ class PokeBattle_Scene
           next
         end
       end
+      pokemon = ((idxBattler == 2) ? modParty2 : modParty)[idxParty]
       # Choose a command for the selected Pokémon
       cmdSwitch  = -1
       cmdSummary = -1
       commands = []
-      commands[cmdSwitch  = commands.length] = _INTL("Switch In") if modParty[idxParty].able?
+      commands[cmdSwitch  = commands.length] = _INTL("Switch In") if pokemon.able?
       commands[cmdSummary = commands.length] = _INTL("Summary")
       commands[commands.length]              = _INTL("Cancel")
-      command = scene.pbShowCommands(_INTL("Do what with {1}?",modParty[idxParty].name),commands)
+      command = scene.pbShowCommands(_INTL("Do what with {1}?",pokemon.name),commands)
       if cmdSwitch>=0 && command==cmdSwitch        # Switch In
         idxPartyRet = -1
         partyPos.each_with_index do |pos,i|

@@ -255,24 +255,7 @@ class PokeBattle_Battle
     PBDebug.log(logMsg)
     pbEnsureParticipants
     begin
-      loop do
-        pbStartBattleCore
-        if @decision >= 0
-          break
-        else
-          @expgained = 0
-          @expgainedshared = 0
-          for p in @party1 + @party2
-            if p
-              p.hp = p.totalhp
-              p.status = :NONE
-              for m in p.moves
-                m.pp = m.totalpp
-              end
-            end
-          end
-        end
-      end
+      pbStartBattleCore
     rescue BattleAbortedException
       @decision = 0
       @scene.pbEndBattle(@decision)
@@ -316,17 +299,17 @@ class PokeBattle_Battle
     end
 
     if $Trainer.stats.affinity_boosts <= 0
-      if @opponent && @doublebattle
+      if trainerBattle? && @player.length >= 2
         pokemon_name = nil
         pokemon_affinity = nil
         case pbGetChoice(:Starter)
-        when PBSpecies::KRABBY
+        when :KRABBY
           pokemon_name = "Krabby"
           pokemon_affinity = "Fighting"
-        when PBSpecies::SKIDDO
+        when :SKIDDO
           pokemon_name = "Skiddo"
           pokemon_affinity = "Normal"
-        when PBSpecies::NUMEL
+        when :NUMEL
           pokemon_name = "Numel"
           pokemon_affinity = "Steel"
         end
@@ -441,10 +424,22 @@ class PokeBattle_Battle
     oldDecision = @decision
     @decision = 4 if @decision==1 && wildBattle? && @caughtPokemon.length>0
     if $Trainer.stats.affinity_boosts == 0 && @decision == 1
-      if @opponent && @doublebattle
+      if trainerBattle? && @player.length >= 2
         pbSpeech("Duke", "none",
           "You did not perform an Affinity Boost.WT Let's try this again.")
         @decision = -1
+        @expgained = 0
+        @expgainedshared = 0
+        for p in @party1 + @party2
+          if p
+            p.hp = p.totalhp
+            p.status = :NONE
+            for m in p.moves
+              m.pp = m.totalpp
+            end
+          end
+        end
+        @scene.pbEndBattle(@decision)
         return @decision
       end
     end

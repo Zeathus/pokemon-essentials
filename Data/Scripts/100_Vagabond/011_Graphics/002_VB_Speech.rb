@@ -306,6 +306,12 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
   command = "\\wtnp[20]" if phrase.include?("WTNP")
   phrase.gsub!("WTNP","")
   
+  #Getting the window type
+  window_type = getTextWindow(name)
+  if window_type
+    command = _INTL("{1}{2}", "\\w[" + window_type + "]", command)
+  end
+  
   #Placing variables
   for i in 100..150
     var = _INTL("VAR{1}",i.to_s)
@@ -321,11 +327,6 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
     var = _INTL("VAR{1}",i.to_s)
     out = _INTL("\\v[{1}]",i.to_s)
     phrase.gsub!(var,out)
-  end
-  
-  #Making it a sign if name == "Sign"
-  if name == "Sign"
-    phrase = _INTL("{1}{2}", "\\w[sign]", phrase)
   end
   
   #Defining the viewport

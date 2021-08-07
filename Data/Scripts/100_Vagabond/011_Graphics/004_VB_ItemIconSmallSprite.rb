@@ -53,7 +53,7 @@ class ItemIconSmallSprite < SpriteWrapper
     @animbitmap.dispose if @animbitmap
     @animbitmap=nil
     if @item
-      srcbitmap=Bitmap.new(pbItemIconFile(value))
+      srcbitmap=Bitmap.new(GameData::Item.icon_filename(value))
       @animbitmap=Bitmap.new(12,12)
       @animbitmap.stretch_blt(Rect.new(0,0,11,11),srcbitmap,Rect.new(0,0,47,47))
       srcbitmap.dispose

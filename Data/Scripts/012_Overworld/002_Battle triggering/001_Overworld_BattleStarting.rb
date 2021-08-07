@@ -374,95 +374,98 @@ def pbTrainerBattleCore(*args)
     pbMEStop
     return ($Trainer.able_pokemon_count == 0) ? 0 : 1   # Treat it as undecided/a win
   end
-  # Record information about party Pokémon to be used at the end of battle (e.g.
-  # comparing levels for an evolution check)
-  Events.onStartBattle.trigger(nil)
-  # Generate trainers and their parties based on the arguments given
-  foeTrainers    = []
-  foeItems       = []
-  foeEndSpeeches = []
-  foeParty       = []
-  foePartyStarts = []
-  for arg in args
-    if arg.is_a?(NPCTrainer)
-      foeTrainers.push(arg)
-      foePartyStarts.push(foeParty.length)
-      arg.party.each { |pkmn| foeParty.push(pkmn) }
-      foeEndSpeeches.push(arg.lose_text)
-      foeItems.push(arg.items)
-    elsif arg.is_a?(Array)   # [trainer type, trainer name, ID, speech (optional)]
-      trainer = pbLoadTrainer(arg[0],arg[1],arg[2])
-      pbMissingTrainer(arg[0],arg[1],arg[2]) if !trainer
-      return 0 if !trainer
-      Events.onTrainerPartyLoad.trigger(nil,trainer)
-      foeTrainers.push(trainer)
-      foePartyStarts.push(foeParty.length)
-      trainer.party.each { |pkmn| foeParty.push(pkmn) }
-      foeEndSpeeches.push(arg[3] || trainer.lose_text)
-      foeItems.push(trainer.items)
-    else
-      raise _INTL("Expected NPCTrainer or array of trainer data, got {1}.", arg)
-    end
-  end
-  foeTrainers.each { |trainer|
-    pbScaleTrainer(trainer, $PokemonTemp.battleRules["specialMod"] || 0)
-  }
-  # Calculate who the player trainer(s) and their party are
-  mainid = getPartyActive(0)
-  mainTrainer = Trainer.new(PBParty.getName(mainid), PBParty.getTrainerType(mainid))
-  mainTrainer.party = getActivePokemon(0)
-  playerTrainers    = [mainTrainer]
-  playerParty       = mainTrainer.party
-  playerPartyStarts = [0]
-  room_for_partner = (foeParty.length > 1)
-  if !room_for_partner && $PokemonTemp.battleRules["size"] &&
-     !["single", "1v1", "1v2", "1v3"].include?($PokemonTemp.battleRules["size"])
-    room_for_partner = true
-  end
-  if isInParty && room_for_partner && !$PokemonTemp.battleRules["noPartner"]
-    otherid = getPartyActive(1)
-    otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
-    otherParty = getPartyPokemon(1)
-    otherTrainer.party = otherParty
-    otherTrainer.id = 50
-    playerTrainers.push(otherTrainer)
-    playerParty = []
-    mainTrainer.party.each { |pkmn| playerParty.push(pkmn) }
-    playerPartyStarts.push(playerParty.length)
-    otherParty.each { |pkmn| playerParty.push(pkmn) }
-    setBattleRule("double") if !$PokemonTemp.battleRules["size"]
-  elsif $PokemonGlobal.partner && !$PokemonTemp.battleRules["noPartner"] && room_for_partner
-    ally = NPCTrainer.new($PokemonGlobal.partner[1], $PokemonGlobal.partner[0])
-    ally.id    = $PokemonGlobal.partner[2]
-    ally.party = $PokemonGlobal.partner[3]
-    playerTrainers.push(ally)
-    playerParty = []
-    $Trainer.party.each { |pkmn| playerParty.push(pkmn) }
-    playerPartyStarts.push(playerParty.length)
-    ally.party.each { |pkmn| playerParty.push(pkmn) }
-    setBattleRule("double") if !$PokemonTemp.battleRules["size"]
-  end
-  # Create the battle scene (the visual side of it)
-  scene = pbNewBattleScene
-  # Create the battle class (the mechanics side of it)
-  battle = PokeBattle_Battle.new(scene,playerParty,foeParty,playerTrainers,foeTrainers)
-  battle.party1starts = playerPartyStarts
-  battle.party2starts = foePartyStarts
-  battle.items        = foeItems
-  battle.endSpeeches  = foeEndSpeeches
-  # Set various other properties in the battle class
-  pbPrepareBattle(battle)
-  $PokemonTemp.clearBattleRules
-  # End the trainer intro music
-  Audio.me_stop
-  # Perform the battle itself
   decision = 0
-  pbBattleAnimation(pbGetTrainerBattleBGM(foeTrainers),(battle.singleBattle?) ? 1 : 3,foeTrainers) {
-    pbSceneStandby {
-      decision = battle.pbStartBattle
+  loop do
+    # Record information about party Pokémon to be used at the end of battle (e.g.
+    # comparing levels for an evolution check)
+    Events.onStartBattle.trigger(nil)
+    # Generate trainers and their parties based on the arguments given
+    foeTrainers    = []
+    foeItems       = []
+    foeEndSpeeches = []
+    foeParty       = []
+    foePartyStarts = []
+    for arg in args
+      if arg.is_a?(NPCTrainer)
+        foeTrainers.push(arg)
+        foePartyStarts.push(foeParty.length)
+        arg.party.each { |pkmn| foeParty.push(pkmn) }
+        foeEndSpeeches.push(arg.lose_text)
+        foeItems.push(arg.items)
+      elsif arg.is_a?(Array)   # [trainer type, trainer name, ID, speech (optional)]
+        trainer = pbLoadTrainer(arg[0],arg[1],arg[2])
+        pbMissingTrainer(arg[0],arg[1],arg[2]) if !trainer
+        return 0 if !trainer
+        Events.onTrainerPartyLoad.trigger(nil,trainer)
+        foeTrainers.push(trainer)
+        foePartyStarts.push(foeParty.length)
+        trainer.party.each { |pkmn| foeParty.push(pkmn) }
+        foeEndSpeeches.push(arg[3] || trainer.lose_text)
+        foeItems.push(trainer.items)
+      else
+        raise _INTL("Expected NPCTrainer or array of trainer data, got {1}.", arg)
+      end
+    end
+    foeTrainers.each { |trainer|
+      pbScaleTrainer(trainer, $PokemonTemp.battleRules["specialMod"] || 0)
     }
-    pbAfterBattle(decision,canLose,startOver)
-  }
+    # Calculate who the player trainer(s) and their party are
+    mainid = getPartyActive(0)
+    mainTrainer = Trainer.new(PBParty.getName(mainid), PBParty.getTrainerType(mainid))
+    mainTrainer.party = getActivePokemon(0)
+    playerTrainers    = [mainTrainer]
+    playerParty       = mainTrainer.party
+    playerPartyStarts = [0]
+    room_for_partner = (foeParty.length > 1)
+    if !room_for_partner && $PokemonTemp.battleRules["size"] &&
+      !["single", "1v1", "1v2", "1v3"].include?($PokemonTemp.battleRules["size"])
+      room_for_partner = true
+    end
+    if isInParty && room_for_partner && !$PokemonTemp.battleRules["noPartner"]
+      otherid = getPartyActive(1)
+      otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
+      otherParty = getPartyPokemon(1)
+      otherTrainer.party = otherParty
+      otherTrainer.id = 50
+      playerTrainers.push(otherTrainer)
+      playerParty = []
+      mainTrainer.party.each { |pkmn| playerParty.push(pkmn) }
+      playerPartyStarts.push(playerParty.length)
+      otherParty.each { |pkmn| playerParty.push(pkmn) }
+      setBattleRule("double") if !$PokemonTemp.battleRules["size"]
+    elsif $PokemonGlobal.partner && !$PokemonTemp.battleRules["noPartner"] && room_for_partner
+      ally = NPCTrainer.new($PokemonGlobal.partner[1], $PokemonGlobal.partner[0])
+      ally.id    = $PokemonGlobal.partner[2]
+      ally.party = $PokemonGlobal.partner[3]
+      playerTrainers.push(ally)
+      playerParty = []
+      $Trainer.party.each { |pkmn| playerParty.push(pkmn) }
+      playerPartyStarts.push(playerParty.length)
+      ally.party.each { |pkmn| playerParty.push(pkmn) }
+      setBattleRule("double") if !$PokemonTemp.battleRules["size"]
+    end
+    # Create the battle scene (the visual side of it)
+    scene = pbNewBattleScene
+    # Create the battle class (the mechanics side of it)
+    battle = PokeBattle_Battle.new(scene,playerParty,foeParty,playerTrainers,foeTrainers)
+    battle.party1starts = playerPartyStarts
+    battle.party2starts = foePartyStarts
+    battle.items        = foeItems
+    battle.endSpeeches  = foeEndSpeeches
+    # Set various other properties in the battle class
+    pbPrepareBattle(battle)
+    $PokemonTemp.clearBattleRules
+    # End the trainer intro music
+    Audio.me_stop
+    # Perform the battle itself
+    pbBattleAnimation(pbGetTrainerBattleBGM(foeTrainers),(battle.singleBattle?) ? 1 : 3,foeTrainers) {
+      pbSceneStandby {
+        decision = battle.pbStartBattle
+      }
+      pbAfterBattle(decision,canLose,startOver)
+    }
+    break if decision != -1 # Do-over
+  end
   Input.update
   # Save the result of the battle in a Game Variable (1 by default)
   #    0 - Undecided or aborted

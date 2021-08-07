@@ -451,6 +451,7 @@
 005_VB_Battler_Affinity
 006_VB_PBModifier
 007_VB_AI
+008_VB_Battle_Scene
 @@@001_Features
 001_VB_Moves
 002_VB_Abilities

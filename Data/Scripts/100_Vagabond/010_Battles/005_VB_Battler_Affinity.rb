@@ -5,7 +5,7 @@ class PokeBattle_Battler
             $Trainer.stats.affinity_boosts += 1
         end
         booster = @affinitybooster
-        #@battle.scene.pbAffinityBoostAnimation(self)
+        @battle.scene.pbAffinityBoostAnimation(self,booster)
         allies = [self]
         allies.push(booster) if booster && !booster.fainted?
         

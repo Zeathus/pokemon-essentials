@@ -17,7 +17,7 @@ def getCharColor(name, tint, bg=0)
     elsif name == "Nekane"
       return Color.new(7, 8, 17) if tint == 0
       return Color.new(62, 72, 127) if tint == 1
-    elsif name == "Duke" || name == "Joe?" || name == "Merrick"
+    elsif name == "Duke" || name == "Merrick"
       return Color.new(68, 114, 84) if tint == 0
       return Color.new(157, 204, 172) if tint == 1
       #return Color.new(120, 170, 140) if tint == 0
@@ -73,7 +73,7 @@ def getCharColor(name, tint, bg=0)
     elsif name == "Nekane"
       return Color.new(7, 8, 17) if tint == 0
       return Color.new(62, 72, 127) if tint == 1
-    elsif name == "Duke" || name == "Joe?" || name == "Merrick"
+    elsif name == "Duke" || name == "Merrick"
       return Color.new(120, 170, 140) if tint == 0
       return Color.new(70, 100, 80) if tint == 1
     elsif name == "Mesprit"
@@ -98,6 +98,8 @@ end
 def getTextWindow(name)
   if name == "Sign"
     return "sign"
+  elsif name == "Duke" || name == "Merrick"
+    return "speech duke"
   elsif name == "Mesprit"
     return "telepathy_mesprit"
   elsif name == "Azelf"

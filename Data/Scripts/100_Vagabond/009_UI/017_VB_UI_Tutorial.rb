@@ -2,6 +2,8 @@ def pbShowTutorial(name)
   
   viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
   viewport.z = 99999
+  viewport.ox = -128
+  viewport.oy = -96
   sprite = IconSprite.new(0, 32, viewport)
   filename = "Graphics/Tutorials/" + name + "_"
   num = 1
