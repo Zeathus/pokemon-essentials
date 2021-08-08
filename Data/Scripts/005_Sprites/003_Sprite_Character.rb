@@ -304,6 +304,8 @@ class Sprite_Character < RPG::Sprite
     if (@real_y - owner.character.real_y) < 4
       self.z = owner.z - 1
     end
+
+    pbDayNightTint(self)
     
     self.zoom_x = owner.zoom_x
     self.zoom_y = owner.zoom_y

@@ -1,14 +1,14 @@
 
 # List of Pokemon that don't have their sprites sunk into the water
 OVERWORLD_WATER_ABOVE = [
-  283, 284, #Surskit, Masquerain
-  278, 279  #Wingull, Pelipper
+  :SURSKIT, :MASQUERAIN,
+  :WINGULL, :PELIPPER
 ]
 
 # List of Pokemon that are lowered less into the water than normal
 OVERWORLD_WATER_FLOAT = [
-  54, # Psyduck
-  580 # Ducklett
+  :PSYDUCK,
+  :DUCKLETT, :SWANNA
 ]
 
 class OverworldPokemon
@@ -21,13 +21,14 @@ class OverworldPokemon
   attr_reader   :lifetime
   attr_reader   :dead
   
-  def initialize(viewport,map,species,lvl,form,x,y,terrain,list)
+  def initialize(viewport,map,species,lvl,form,x,y,terrain,list,area)
     @list = list
     @time = 0
     @map_x = x
     @map_y = y
     @new_x = x
     @new_y = y
+    @area = area
     if terrain.can_surf
       @terrain = 2
     elsif $PokemonEncounters.has_cave_encounters?
@@ -141,6 +142,7 @@ class OverworldPokemon
     @sprite.y = @map_y * 32 - (@map.display_y / 4)
     @sprite.y += 10 if @terrain == 2 # Water
     @sprite.mirror = @mirror
+    @sprite.z = screen_y_ground
     if !@moving
       @map_x = @new_x.round
       @map_y = @new_y.round
@@ -226,6 +228,14 @@ class OverworldPokemon
 
   def dispose
     @sprite.dispose
+  end
+
+  def screen_y_ground
+    #ret = 0#((@sprite.y - @area.map.display_y) / Game_Map::Y_SUBPIXELS).round
+    #ret += Game_Map::TILE_HEIGHT
+    ret = 0#@sprite.y / Game_Map::Y_SUBPIXELS
+    $Trainer.party[0].name = $game_player.screen_z.to_s
+    return ret
   end
   
 end
@@ -331,7 +341,7 @@ class SpawnArea
       return if !encounter
       #pbScaleWildEncounter(encounter)
       pkmn = OverworldPokemon.new(@viewport,@map,encounter[0],encounter[1],encounter[2],
-        x,y,@terrain,@pokemon)
+        x,y,@terrain,@pokemon,self)
       @pokemon.push(pkmn)
     end
   end
@@ -346,8 +356,6 @@ class SpawnArea
         @pokemon.delete(pkmn)
       elsif (pkmn.map_x-$game_player.x)**2 + (pkmn.map_y-$game_player.y)**2 < 0.5
         return false if $DEBUG && Input.press?(Input::CTRL)
-        pkmn.dispose
-        @pokemon.delete(pkmn)
         return pkmn
       end
     end
@@ -361,6 +369,9 @@ class SpawnArea
   end
   
   def despawnPokemon
+    for p in @pokemon
+      p.dispose
+    end
     @pokemon = []
   end
   
@@ -368,6 +379,12 @@ end
 
 class Spriteset_Map
   
+  def despawnPokemon
+    for area in @spawn_areas
+      area.despawnPokemon
+    end
+  end
+
   def initSpawnAreas
     $PokemonEncounters.setup(@map.map_id)
     count=0
@@ -384,7 +401,7 @@ class Spriteset_Map
           tag = @map.terrain_tag(x,y,true)
           if tag.can_surf_freely && $PokemonEncounters.has_water_encounters?
             count+=1
-            area = SpawnArea.new(@viewport1,@map,tag,x,y)
+            area = SpawnArea.new(@@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
@@ -394,37 +411,37 @@ class Spriteset_Map
               @map.passable?(x,y,6) &&
               @map.passable?(x,y,8)
             count+=1
-            area = SpawnArea.new(@viewport1,@map,-1,x,y)
+            area = SpawnArea.new(@@viewport1,@map,-1,x,y)
             if area.tiles.length > 6
               @spawn_areas.push(area)
             end
           elsif tag.land_wild_encounters && $PokemonEncounters.has_land_encounters?
             count+=1
-            area = SpawnArea.new(@viewport1,@map,tag,x,y)
+            area = SpawnArea.new(@@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
           elsif tag.land2_wild_encounters && $PokemonEncounters.has_land2_encounters?
             count+=1
-            area = SpawnArea.new(@viewport1,@map,tag,x,y)
+            area = SpawnArea.new(@@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
           elsif tag.land3_wild_encounters && $PokemonEncounters.has_land3_encounters?
             count+=1
-            area = SpawnArea.new(@viewport1,@map,tag,x,y)
+            area = SpawnArea.new(@@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
           elsif tag.land4_wild_encounters && $PokemonEncounters.has_land4_encounters?
             count+=1
-            area = SpawnArea.new(@viewport1,@map,tag,x,y)
+            area = SpawnArea.new(@@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end
           elsif tag.flower_wild_encounters && $PokemonEncounters.has_flower_encounters?
             count+=1
-            area = SpawnArea.new(@viewport1,@map,tag,x,y)
+            area = SpawnArea.new(@@viewport1,@map,tag,x,y)
             if area.tiles.length > 3
               @spawn_areas.push(area)
             end

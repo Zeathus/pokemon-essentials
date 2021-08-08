@@ -286,6 +286,7 @@ def pbWildBattleCore(*args)
   # Perform the battle itself
   decision = 0
   pbBattleAnimation(pbGetWildBattleBGM(foeParty),(foeParty.length==1) ? 0 : 2,foeParty) {
+    $scene.spriteset.despawnPokemon
     pbSceneStandby {
       decision = battle.pbStartBattle
     }
