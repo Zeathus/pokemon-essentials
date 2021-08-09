@@ -330,7 +330,7 @@ class SpawnArea
   
   def updateSpawns
     return if !$Trainer || $Trainer.party.length <= 0
-    if @pokemon.length < @max_pkmn && Graphics.frame_count % 6 == 0
+    if Graphics.frame_count % 6 == 0 && @pokemon.length < @max_pkmn
       tile = @tiles[rand(@tiles.length)]
       x = tile[0]
       y = tile[1]
@@ -343,6 +343,7 @@ class SpawnArea
       end
       encounterType = $PokemonEncounters.pbSpawnType(@terrain)
       return if encounterType == :None
+      echo encounterType.to_s
       return if !$PokemonEncounters.has_encounter_type?(encounterType)
       encounter = $PokemonEncounters.choose_wild_pokemon(encounterType)
       return if !encounter
@@ -521,7 +522,7 @@ class PokemonEncounters
     elsif self.has_land4_encounters? && terrain.land4_wild_encounters
       return :Land4
     elsif self.has_flower_encounters? && terrain.flower_wild_encounters
-      return :Flower
+      return :Flowers
     elsif self.has_swamp_encounters? && terrain.swamp_wild_encounters
       return :Swamp
     end

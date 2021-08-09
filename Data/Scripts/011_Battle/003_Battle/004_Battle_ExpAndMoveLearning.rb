@@ -260,14 +260,14 @@ class PokeBattle_Battle
                                     oldSpAtk,oldSpDef,oldSpeed)
       # Learn all moves learned at this level
       moveList = pkmn.getMoveList
-      moveList.each { |m| pbLearnMove(idxParty,m[1]) if m[0]==curLevel }
+      moveList.each { |m| pbLearnMoveBattle(idxParty,m[1]) if m[0]==curLevel }
     end
   end
 
   #=============================================================================
   # Learning a move
   #=============================================================================
-  def pbLearnMove(idxParty,newMove)
+  def pbLearnMoveBattle(idxParty,newMove)
     pkmn = pbParty(0)[idxParty]
     return if !pkmn
     pkmnName = pkmn.name
