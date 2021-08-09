@@ -234,7 +234,6 @@ class OverworldPokemon
     #ret = 0#((@sprite.y - @area.map.display_y) / Game_Map::Y_SUBPIXELS).round
     #ret += Game_Map::TILE_HEIGHT
     ret = 0#@sprite.y / Game_Map::Y_SUBPIXELS
-    $Trainer.party[0].name = $game_player.screen_z.to_s
     return ret
   end
   

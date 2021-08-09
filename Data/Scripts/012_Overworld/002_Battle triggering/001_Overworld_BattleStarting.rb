@@ -256,15 +256,30 @@ def pbWildBattleCore(*args)
   end
   raise _INTL("Expected a level after being given {1}, but one wasn't found.",sp) if sp
   # Calculate who the trainers and their party are
-  playerTrainers    = [$Trainer]
-  playerParty       = $Trainer.party
+  mainid = getPartyActive(0)
+  mainTrainer = Trainer.new(PBParty.getName(mainid), PBParty.getTrainerType(mainid))
+  mainTrainer.party = getActivePokemon(0)
+  playerTrainers    = [mainTrainer]
+  playerParty       = mainTrainer.party
   playerPartyStarts = [0]
   room_for_partner = (foeParty.length > 1)
   if !room_for_partner && $PokemonTemp.battleRules["size"] &&
      !["single", "1v1", "1v2", "1v3"].include?($PokemonTemp.battleRules["size"])
     room_for_partner = true
   end
-  if $PokemonGlobal.partner && !$PokemonTemp.battleRules["noPartner"] && room_for_partner
+  if isInParty && room_for_partner && !$PokemonTemp.battleRules["noPartner"]
+    otherid = getPartyActive(1)
+    otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
+    otherParty = getPartyPokemon(1)
+    otherTrainer.party = otherParty
+    otherTrainer.id = 50
+    playerTrainers.push(otherTrainer)
+    playerParty = []
+    mainTrainer.party.each { |pkmn| playerParty.push(pkmn) }
+    playerPartyStarts.push(playerParty.length)
+    otherParty.each { |pkmn| playerParty.push(pkmn) }
+    setBattleRule("double") if !$PokemonTemp.battleRules["size"]
+  elsif $PokemonGlobal.partner && !$PokemonTemp.battleRules["noPartner"] && room_for_partner
     ally = NPCTrainer.new($PokemonGlobal.partner[1],$PokemonGlobal.partner[0])
     ally.id    = $PokemonGlobal.partner[2]
     ally.party = $PokemonGlobal.partner[3]

@@ -647,7 +647,8 @@ def getFormattedText(bitmap,xDst,yDst,widthDst,heightDst,text,lineheight=32,
       width=graphicWidth   # +8  # No padding
       xStart=0   # 4
       yStart=[(lineheight/2)-(graphicHeight/2),0].max
-      graphicRect=Rect.new(graphicX,graphicY,graphicWidth,graphicHeight)
+      unown = graphic.include?("unown")
+      graphicRect=Rect.new(graphicX,unown ? (graphicY - 4) : graphicY,graphicWidth,graphicHeight)
     else
       xStart=0
       yStart=0

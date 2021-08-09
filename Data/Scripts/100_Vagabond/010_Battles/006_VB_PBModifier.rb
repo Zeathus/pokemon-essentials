@@ -30,9 +30,6 @@ class EncounterModifiers
   end
   
   def moves=(value)
-    for i in 0...value.length
-      value[i] = getID(PBMoves,value[i]) if value[i].is_a?(Symbol)
-    end
     @moves=value
   end
   
@@ -54,7 +51,7 @@ class EncounterModifiers
   def optimize
     @iv      = [31,31,31,31,31,31]
     @ability = 0
-    @nature  = PBNatures::SERIOUS
+    @nature  = :SERIOUS
   end
 end
 

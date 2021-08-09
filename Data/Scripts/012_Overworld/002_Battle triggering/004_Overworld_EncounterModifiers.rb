@@ -56,10 +56,10 @@ Events.onWildPokemonCreate += proc { |_sender, e|
   if $game_variables[WILD_MODIFIER] && $game_variables[WILD_MODIFIER] != 0
     mod = $game_variables[WILD_MODIFIER]
     if mod.moves # Custom Moves
-      pokemon.moves[0] = PBMove.new(mod.moves[0])
-      pokemon.moves[1] = PBMove.new(mod.moves[1])
-      pokemon.moves[2] = PBMove.new(mod.moves[2])
-      pokemon.moves[3] = PBMove.new(mod.moves[3])
+      pokemon.moves = []
+      for m in mod.moves
+        pokemon.moves.push(Pokemon::Move.new(m))
+      end
     end
     pokemon.iv            = pbArrayToIVs(mod.iv)  if mod.iv
     pokemon.ev            = pbArrayToIVs(mod.ev)  if mod.ev

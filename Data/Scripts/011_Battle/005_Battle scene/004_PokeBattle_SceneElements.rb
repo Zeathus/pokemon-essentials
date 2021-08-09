@@ -317,7 +317,7 @@ class PokemonDataBox < SpriteWrapper
       color1 = hpcolors[hpzone*2]
       color2 = hpcolors[hpzone*2+1]
       hues = -1
-      while tempHP > @battle.totalhp
+      while tempHP > @battler.totalhp
         hues += 1
         tempHP -= @battler.totalhp
       end
@@ -326,9 +326,24 @@ class PokemonDataBox < SpriteWrapper
       for i in 0..8
         clr = (i<=1 || i>=7) ? color1 : color2
         if onPlayerSide
-
+          @hpBar.bitmap.fill_rect(@spriteBaseX+i*2,i*2,hpgauge-i*2,2,clr) if hpgauge>i*2
         else
-
+          line_width = hpgauge
+          line_width = hpGaugeSize - i*2 if hpgauge > hpGaugeSize - i*2
+          @hpBar.bitmap.fill_rect(@spriteBaseX,i*2,line_width,2,clr)
+        end
+      end
+      color1 = pbHueShift(color1,100)
+      color2 = pbHueShift(color2,100)
+      curhpgauge = (tempHP * hpGaugeSize / @battler.totalhp)
+      for i in 0..8
+        clr = (i<=1 || i>=7) ? color1 : color2
+        if onPlayerSide
+          @hpBar.bitmap.fill_rect(@spriteBaseX+i*2,i*2,curhpgauge-i*2,2,clr) if curhpgauge>i*2
+        else
+          line_width = curhpgauge
+          line_width = hpGaugeSize - i*2 if curhpgauge > hpGaugeSize - i*2
+          @hpBar.bitmap.fill_rect(@spriteBaseX,i*2,line_width,2,clr)
         end
       end
     else

@@ -189,21 +189,17 @@ class BossBattle
     when PBBossEffect::Moveset
       for i in 0...4
         moveid = effect[i+1]
-        moveid = getID(PBMoves,moveid) if moveid.is_a?(Symbol)
         move = PBMove.new(moveid)
         battler.moves[i]=PokeBattle_Move.new(battle,move)
       end
     when PBBossEffect::HeldItem
-      effect[1] = getID(PBItems,effect[1]) if effect[1].is_a?(Symbol)
       battler.item = effect[1]
     when PBBossEffect::Ability
-      effect[1] = getID(PBAbilities,effect[1]) if effect[1].is_a?(Symbol)
       battler.ability = effect[1]
     when PBBossEffect::Shininess
       battler.pokemon.shinyflag = effect[1]
       self.changePokemon(battle,battler,battler.pokemon)
     when PBBossEffect::Species
-      effect[1] = getID(PBSpecies,effect[1]) if effect[1].is_a?(Symbol)
       hp_percent = battler.hp * 1.0 / battler.totalhp
       level = battler.level
       battler.pokemon.species = effect[1]
@@ -221,7 +217,6 @@ class BossBattle
       battler.hp = battler.totalhp * hp_percent
       self.changePokemon(battle,battler,battler.pokemon)
     when PBBossEffect::Nature
-      effect[1] = getID(PBNatures,effect[1]) if effect[1].is_a?(Symbol)
       battler.pokemon.natureflag = effect[1]
       hp_percent = battler.hp * 1.0 / battler.totalhp
       battler.pbUpdate
@@ -244,13 +239,10 @@ class BossBattle
       battler.pbUpdate
       battler.hp = battler.totalhp * hp_percent
     when PBBossEffect::Type1
-      effect[1] = getID(PBTypes,effect[1]) if effect[1].is_a?(Symbol)
       battler.type1 = effect[1]
     when PBBossEffect::Type2
-      effect[1] = getID(PBTypes,effect[1]) if effect[1].is_a?(Symbol)
       battler.type2 = effect[1]
     when PBBossEffect::Type3
-      effect[1] = getID(PBTypes,effect[1]) if effect[1].is_a?(Symbol)
       battler.effects[PBEffects::Type3] = effect[1]
     when PBBossEffect::Level
       if effect[1] + battler.pokemon.level > 100
@@ -267,16 +259,14 @@ class BossBattle
       battler.pbUpdate
       battler.hp = battler.totalhp * hp_percent
     when PBBossEffect::StatChange
-      effect[1] = getID(PBStats,effect[1]) if effect[1].is_a?(Symbol)
       if effect[2] > 0
-        battler.pbIncreaseStat(effect[1],effect[2],battler,true)
+        battler.pbRaiseStatStage(effect[1],effect[2],battler)
       elsif effect[2] < 0
-        battler.pbReduceStat(effect[1],-effect[2],battler,true)
+        battler.pbLowerStatStage(effect[1],-effect[2],battler)
       else
         battler.stages[effect[1]]=effect[2]
       end
     when PBBossEffect::SetStat
-      effect[1] = getID(PBStats,effect[1]) if effect[1].is_a?(Symbol)
       battler.stages[effect[1]]=effect[2]
     when PBBossEffect::Invincible
       # TODO
@@ -329,7 +319,6 @@ class BossBattle
         end
       end
     when PBBossEffect::DealStatus
-      effect[1] = getID(PBStatuses,effect[1]) if effect[1].is_a?(Symbol)
       target = battler.pbOppositeOpposing
       case effect[1]
       when PBStatuses::POISON
@@ -354,13 +343,11 @@ class BossBattle
         end
       end
     when PBBossEffect::TakeStatus
-      effect[1] = getID(PBStatuses,effect[1]) if effect[1].is_a?(Symbol)
       battler.status = effect[1]
     when PBBossEffect::HealStatus
       battler.status = 0
     when PBBossEffect::PlayerStat
       target = battler.pbOppositeOpposing
-      effect[1] = getID(PBStats,effect[1]) if effect[1].is_a?(Symbol)
       if effect[2] > 0
         target.pbIncreaseStat(effect[1],effect[2],battler,true)
       elsif effect[2] < 0
@@ -384,7 +371,6 @@ class BossBattle
     when PBBossEffect::PlayCry
       pbPlayCry(battler.species)
     when PBBossEffect::MoveAnim
-      effect[1] = getID(PBMoves,effect[1]) if effect[1].is_a?(Symbol)
       target = battler.pbOppositeOpposing
       battle.pbAnimation(effect[1],battler,target)
     when PBBossEffect::MoveOut
@@ -406,7 +392,6 @@ class BossBattle
       end
       self.outside = false
     when PBBossEffect::Weather
-      effect[1] = getID(PBWeather,effect[1]) if effect[1].is_a?(Symbol)
       battle.weather = effect[1]
       battle.weatherduration = effect[2]
       case effect[1]
@@ -431,7 +416,6 @@ class BossBattle
       battle.scene.pbBackdrop(backdrop)
     when PBBossEffect::UseMove
       moveid = effect[1]
-      moveid = getID(PBMoves,moveid) if moveid.is_a?(Symbol)
       movedata = PBMove.new(moveid)
       move = PokeBattle_Move.pbFromPBMove(battle,movedata)
       choices = [1, i, move, -1]
@@ -480,7 +464,6 @@ class BossBattle
       battler.name = effect[1]
     when PBBossEffect::CommonAnim
       if effect[1].is_a?(Symbol) || effect[1].is_a?(Numeric)
-        effect[1] = getID(PBMoves,effect[1]) if effect[1].is_a?(Symbol)
         effect[1] = PBMoves.getName(effect[1])
         while effect[1].include?(" ")
           effect[1].gsub!(" ","")
@@ -651,18 +634,15 @@ class BossBattle
       return true
     when PBTrigger::Type
       # value = move.type
-      t[1] = getID(PBTypes,t[1]) if t[1].is_a?(Symbol)
       return true if t[1] == value
     when PBTrigger::Move
       # value = moveid
-      t[1] = getID(PBMoves,t[1]) if t[1].is_a?(Symbol)
       return true if t[1] == value
     when PBTrigger::Switch
       # Always called when switching
       return true
     when PBTrigger::Weather
       # value = current weather
-      t[1] = getID(PBWeather,t[1]) if t[1].is_a?(Symbol)
       if t.length==3
         return true if t[1] == t[2]
       else
@@ -713,7 +693,6 @@ class BossBattle
       if t.length == 1
         return true if value > 0
       else
-        t[1] = getID(PBStatuses,t[1]) if t[1].is_a?(Symbol)
         if t.length == 3 # Specifies on/off
           return true if (value == t[1]) == t[2]
         else # only checks on
@@ -805,9 +784,6 @@ class BossBattle
         raise ArgumentError.new(
           _INTL("\n\nWrong number of arguments for boss trigger\n"))
       end
-      if trigger.length == 2
-        trigger[1] = getID(PBItems,trigger[1]) if trigger[1].is_a?(Symbol)
-      end
     # 1 argument
     when PBTrigger::Timed, PBTrigger::HP, PBTrigger::Category,
          PBTrigger::Type, PBTrigger::Move, PBTrigger::Sturdy,
@@ -816,12 +792,6 @@ class BossBattle
         raise ArgumentError.new(
           _INTL("\n\nWrong number of arguments for boss trigger\n"))
       end
-      case trigger[0]
-      when PBTrigger::Type
-        trigger[1] = getID(PBTypes,trigger[1]) if trigger[1].is_a?(Symbol)
-      when PBTrigger::Move
-        trigger[1] = getID(PBMoves,trigger[1]) if trigger[1].is_a?(Symbol)
-      end
     # 1-2 arguments
     when PBTrigger::Interval, PBTrigger::Weather, PBTrigger::Terrain,
          PBTrigger::Effect, PBTrigger::Field
@@ -829,10 +799,7 @@ class BossBattle
         raise ArgumentError.new(
           _INTL("\n\nWrong number of arguments for boss trigger\n"))
       end
-      case trigger[0]
-      when PBTrigger::Weather
-        trigger[1] = getID(PBWeather,trigger[1]) if trigger[1].is_a?(Symbol)
-      when PBTrigger::Terrain, PBTrigger::Effect
+      if trigger[0] == PBTrigger::Terrain || trigger[0] == PBTrigger::Effect
         trigger[1] = getID(PBEffects,trigger[1]) if trigger[1].is_a?(Symbol)
       end
     end

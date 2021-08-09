@@ -233,8 +233,8 @@ class Pokemon
 
   # Sets the Pokémon's health.
   # @param value [Integer] new HP value
-  def hp=(value)
-    @hp = value.clamp(0, @totalhp)
+  def hp=(value,limit=false)
+    @hp = limit ? value.clamp(0, @totalhp) : value
     heal_status if @hp == 0
   end
 

@@ -2,7 +2,13 @@ def pbPokemonBossBGM
   $PokemonGlobal.nextBattleBGM="Battle! VS Wild Strong Pokemon (Hero Encore)"
 end
 
+def pbBossGeneral
+  setBattleRule("2v1")
+  pbPokemonBossBGM
+end
+
 def pbBossGiratina1
+  pbBossGeneral
   $PokemonGlobal.nextBattleBGM="Battle! VS Giratina"
   $PokemonGlobal.nextBattleBack="Giratina"
   pbModifier.optimize
@@ -32,30 +38,33 @@ end
 
 # --- Dunsparce ---
 def pbBossRuinNormal
-  pbPokemonBossBGM
+  pbBossGeneral
   # Start: Gets +2 Defense/Sp.Def
   # If hit by a Physical attack, +Defense/-Sp.Def
   # If hit by a Special attack, +Sp.Def/-Defense
+  pbModifier.moves=[
+    :ROLLOUT,
+    :TAKEDOWN]
   pbBoss.add(
     [:Start],
     [:Message,"NAME is preparing for your attacks."],
     [:StatChange,:DEFENSE,2],
-    [:StatChange,:SPDEF,2])
+    [:StatChange,:SPECIAL_DEFENSE,2])
   pbBoss.add(
     [:Category,0],
     [:Message,"NAME is getting ready for more Physical attacks."],
     [:StatChange,:DEFENSE,2],
-    [:StatChange,:SPDEF,-2])
+    [:StatChange,:SPECIAL_DEFENSE,-2])
   pbBoss.add(
     [:Category,1],
     [:Message,"NAME is getting ready for more Special attacks."],
-    [:StatChange,:SPDEF,2],
+    [:StatChange,:SPECIAL_DEFENSE,2],
     [:StatChange,:DEFENSE,-2])
 end
 
 # --- Primeape ---
 def pbBossRuinFighting
-  pbPokemonBossBGM
+  pbBossGeneral
   # Start: Gets +4 Attack/Speed
   # Each Turn: -1 Defense/Sp.Def
   # Goes back to +4 Attack/Speed when at -2 Attack/Speed
@@ -78,7 +87,7 @@ end
 
 # --- Skarmory ---
 def pbBossRuinSteel
-  pbPokemonBossBGM
+  pbBossGeneral
   # Start: Lays Stealth Rock and 3 spike layers
   # Each Turn: Uses Whirlwind
   pbBoss.add(
@@ -94,7 +103,7 @@ end
 
 # --- Spiritomb ---
 def pbBossRuinGhost
-  pbPokemonBossBGM
+  pbBossGeneral
   # Each Turn: Uses Spite
   pbBoss.add(
     [:Start],
@@ -107,7 +116,7 @@ end
 
 # --- Darmanitan ---
 def pbBossRuinFire
-  pbPokemonBossBGM
+  pbBossGeneral
   # Start: Increases defenses and is in Zen forme
   # Each Turn: Has only Bulk Up
   # When at low HP, turns aggressive and changes moves
@@ -115,13 +124,13 @@ def pbBossRuinFire
     [:Start],
     [:Message,"NAME is taking a defensive position."],
     [:StatChange,:DEFENSE,2],
-    [:StatChange,:SPDEF,2])
+    [:StatChange,:SPECIAL_DEFENSE,2])
   pbBoss.add(
     [:HP,33],
     [:Message,"The pinch made NAME aggressive!"],
     [:StatChange,:SPEED,1],
     [:StatChange,:DEFENSE,-2],
-    [:StatChange,:SPDEF,-2],
+    [:StatChange,:SPECIAL_DEFENSE,-2],
     [:Message,"NAME gained the ability Sheer Force!"],
     [:Ability,:SHEERFORCE],
     [:Moves,:FIREPUNCH,:BRICKBREAK,:ROCKSLIDE,0],
@@ -131,7 +140,7 @@ end
 
 # --- Chimecho ---
 def pbBossSmokeyForest
-  pbPokemonBossBGM
+  pbBossGeneral
   # Start: Sets infinite Misty Terrain and gains Pixilate
   # Each Turn: Powers up Echoed Voice one turn
   pbBoss.add(
