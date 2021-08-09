@@ -115,7 +115,7 @@ BattleHandlers::DamageCalcTargetItem.add(:OCEANNECKLACE,
 
 BattleHandlers::WeatherExtenderItem.add(:VELVETYROCK,
     proc { |item,weather,duration,battler,battle|
-      next 8 if weather == :Winds
+      next 3 if weather == :Winds
     }
 )
 

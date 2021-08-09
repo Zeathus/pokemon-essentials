@@ -660,12 +660,12 @@ class PokeBattle_Battle
   end
 
   # Used for causing weather by a move or by an ability.
-  def pbStartWeather(user,newWeather,fixedDuration=false,showAnim=true)
+  def pbStartWeather(user,newWeather,fixedDuration=false,showAnim=true,duration=5)
     return if @field.weather==newWeather
     @field.weather = newWeather
-    duration = (fixedDuration) ? 5 : -1
+    duration = (fixedDuration) ? duration : -1
     if duration>0 && user && user.itemActive?
-      duration = BattleHandlers.triggerWeatherExtenderItem(user.item,
+      duration += BattleHandlers.triggerWeatherExtenderItem(user.item,
          @field.weather,duration,user,self)
     end
     @field.weatherDuration = duration
@@ -677,6 +677,7 @@ class PokeBattle_Battle
     when :Rain        then pbDisplay(_INTL("It started to rain!"))
     when :Sandstorm   then pbDisplay(_INTL("A sandstorm brewed!"))
     when :Hail        then pbDisplay(_INTL("It started to hail!"))
+    when :Winds       then pbDisplay(_INTL("The air became windy!"))
     when :HarshSun    then pbDisplay(_INTL("The sunlight turned extremely harsh!"))
     when :HeavyRain   then pbDisplay(_INTL("A heavy rain began to fall!"))
     when :StrongWinds then pbDisplay(_INTL("Mysterious strong winds are protecting Flying-type Pokémon!"))
@@ -721,12 +722,12 @@ class PokeBattle_Battle
     @field.terrainDuration = -1
   end
 
-  def pbStartTerrain(user,newTerrain,fixedDuration=true)
+  def pbStartTerrain(user,newTerrain,fixedDuration=true,duration=5)
     return if @field.terrain==newTerrain
     @field.terrain = newTerrain
-    duration = (fixedDuration) ? 5 : -1
+    duration = (fixedDuration) ? duration : -1
     if duration>0 && user && user.itemActive?
-      duration = BattleHandlers.triggerTerrainExtenderItem(user.item,
+      duration += BattleHandlers.triggerTerrainExtenderItem(user.item,
          newTerrain,duration,user,self)
     end
     @field.terrainDuration = duration

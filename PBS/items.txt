@@ -284,106 +284,106 @@
 286,FRIENDBALL,Friend Ball,Friend Balls,3,300,"A Poké Ball that makes caught Pokémon more friendly.",0,4,4,
 287,MOONBALL,Moon Ball,Moon Balls,3,300,"A Poké Ball for catching Pokémon that evolve using the Moon Stone.",0,4,4,
 #-------------------------------
-288,TM01,TM01,TM01s,7,20000,"The user is roused, and its Attack and Sp. Atk stats increase.",3,0,0,WORKUP
-289,TM02,TM02,TM02s,7,20000,"The user slashes the target with huge sharp claws.",3,0,0,DRAGONCLAW
-290,TM03,TM03,TM03s,7,20000,"The user materializes an odd psychic wave to attack the target. This attack does physical damage.",3,0,0,PSYSHOCK
-291,TM04,TM04,TM04s,7,20000,"The user quietly focuses its mind and calms its spirit to raise its Sp. Atk and Sp. Def stats.",3,0,0,CALMMIND
-292,TM05,TM05,TM05s,7,20000,"The target is scared off, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.",3,0,0,ROAR
-293,TM06,TM06,TM06s,7,20000,"A move that leaves the target badly poisoned. Its poison damage worsens every turn.",3,0,0,TOXIC
-294,TM07,TM07,TM07s,7,20000,"The user summons a hailstorm lasting five turns. It damages all Pokémon except the Ice type.",3,0,0,HAIL
-295,TM08,TM08,TM08s,7,20000,"The user tenses its muscles to bulk up its body, raising both its Attack and Defense stats.",3,0,0,BULKUP
-296,TM09,TM09,TM09s,7,20000,"The user drenches the target in a special poisonous liquid. This move's power is doubled if the target is poisoned.",3,0,0,VENOSHOCK
-297,TM10,TM10,TM10s,7,20000,"A unique attack that varies in type depending on the Pokémon using it.",3,0,0,HIDDENPOWER
-298,TM11,TM11,TM11s,7,20000,"The user intensifies the sun for five turns, powering up Fire-type moves. It lowers the power of Water-type moves.",3,0,0,SUNNYDAY
-299,TM12,TM12,TM12s,7,20000,"The target is taunted into a rage that allows it to use only attack moves for three turns.",3,0,0,TAUNT
-300,TM13,TM13,TM13s,7,20000,"The target is struck with an icy-cold beam of energy. This may also leave the target frozen.",3,0,0,ICEBEAM
-301,TM14,TM14,TM14s,7,20000,"A howling blizzard is summoned to strike opposing Pokémon. This may also leave the opposing Pokémon frozen.",3,0,0,BLIZZARD
-302,TM15,TM15,TM15s,7,20000,"The target is attacked with a powerful beam. The user can't move on the next turn.",3,0,0,HYPERBEAM
-303,TM16,TM16,TM16s,7,20000,"A wondrous wall of light is put up to reduce damage from special attacks for five turns.",3,0,0,LIGHTSCREEN
-304,TM17,TM17,TM17s,7,20000,"Enables the user to evade all attacks. Its chance of failing rises if it is used in succession.",3,0,0,PROTECT
-305,TM18,TM18,TM18s,7,20000,"The user summons a heavy rain that falls for five turns, powering up Water-type moves. It lowers the power of Fire-type moves.",3,0,0,RAINDANCE
-306,TM19,TM19,TM19s,7,20000,"The user lands and rests its body. It restores the user's HP by up to half of its max HP.",3,0,0,ROOST
-307,TM20,TM20,TM20s,7,20000,"The user creates a protective field that prevents status conditions for five turns.",3,0,0,SAFEGUARD
-308,TM21,TM21,TM21s,7,20000,"This full-power attack grows more powerful the less the user likes its Trainer.",3,0,0,FRUSTRATION
-309,TM22,TM22,TM22s,7,20000,"In this two-turn attack, the user gathers light, then blasts a bundled beam on the next turn.",3,0,0,SOLARBEAM
-310,TM23,TM23,TM23s,7,20000,"The user throws a stone or similar projectile to attack an opponent. A flying Pokémon will fall to the ground when it's hit.",3,0,0,SMACKDOWN
-311,TM24,TM24,TM24s,7,20000,"A strong electric blast crashes down on the target. This may also leave the target with paralysis.",3,0,0,THUNDERBOLT
-312,TM25,TM25,TM25s,7,20000,"A wicked thunderbolt is dropped on the target to inflict damage. This may also leave the target with paralysis.",3,0,0,THUNDER
-313,TM26,TM26,TM26s,7,20000,"The user sets off an earthquake that strikes every Pokémon around it.",3,0,0,EARTHQUAKE
-314,TM27,TM27,TM27s,7,20000,"This full-power attack grows more powerful the more the user likes its Trainer.",3,0,0,RETURN
-315,TM28,TM28,TM28s,7,20000,"The user drains the target's blood. The user's HP is restored by half the damage taken by the target.",3,0,0,LEECHLIFE
-316,TM29,TM29,TM29s,7,20000,"The target is hit by a strong telekinetic force. This may also lower the target's Sp. Def stat.",3,0,0,PSYCHIC
-317,TM30,TM30,TM30s,7,20000,"The user hurls a shadowy blob at the target. This may also lower the target's Sp. Def stat.",3,0,0,SHADOWBALL
-318,TM31,TM31,TM31s,7,20000,"The user attacks with a swift chop. It can also break barriers, such as Light Screen and Reflect.",3,0,0,BRICKBREAK
-319,TM32,TM32,TM32s,7,20000,"By moving rapidly, the user makes illusory copies of itself to raise its evasiveness.",3,0,0,DOUBLETEAM
-320,TM33,TM33,TM33s,7,20000,"A wondrous wall of light is put up to reduce damage from physical attacks for five turns.",3,0,0,REFLECT
-321,TM34,TM34,TM34s,7,20000,"The user strikes everything around it by swamping the area with a giant sludge wave. This may also poison those hit.",3,0,0,SLUDGEWAVE
-322,TM35,TM35,TM35s,7,20000,"The target is scorched with an intense blast of fire. This may also leave the target with a burn.",3,0,0,FLAMETHROWER
-323,TM36,TM36,TM36s,7,20000,"Unsanitary sludge is hurled at the target. This may also poison the target.",3,0,0,SLUDGEBOMB
-324,TM37,TM37,TM37s,7,20000,"A five-turn sandstorm is summoned to hurt all combatants except the Rock, Ground, and Steel types. It raises the Sp. Def stat of Rock types.",3,0,0,SANDSTORM
-325,TM38,TM38,TM38s,7,20000,"The target is attacked with an intense blast of all-consuming fire. This may also leave the target with a burn.",3,0,0,FIREBLAST
-326,TM39,TM39,TM39s,7,20000,"Boulders are hurled at the target. This also lowers the target's Speed stat by preventing its movement.",3,0,0,ROCKTOMB
-327,TM40,TM40,TM40s,7,20000,"The user confounds the target with speed, then slashes. This attack never misses.",3,0,0,AERIALACE
-328,TM41,TM41,TM41s,7,20000,"The user torments and enrages the target, making it incapable of using the same move twice in a row.",3,0,0,TORMENT
-329,TM42,TM42,TM42s,7,20000,"This attack move doubles its power if the user is poisoned, burned, or paralyzed.",3,0,0,FACADE
-330,TM43,TM43,TM43s,7,20000,"Cloaking itself in flame, the user attacks. Then, building up more power, the user raises its Speed stat.",3,0,0,FLAMECHARGE
-331,TM44,TM44,TM44s,7,20000,"The user goes to sleep for two turns. This fully restores the user's HP and heals any status conditions.",3,0,0,REST
-332,TM45,TM45,TM45s,7,20000,"If it is the opposite gender of the user, the target becomes infatuated and less likely to attack.",3,0,0,ATTRACT
-333,TM46,TM46,TM46s,7,20000,"The user attacks and steals the target's held item simultaneously. The user can't steal anything if it already holds an item.",3,0,0,THIEF
-334,TM47,TM47,TM47s,7,20000,"The user makes a swift attack on the target's legs, which lowers the target's Speed stat.",3,0,0,LOWSWEEP
-335,TM48,TM48,TM48s,7,20000,"The user strengthens the wind for five turns, speeding up airborne Pokémon.",3,0,0,WINDS
-336,TM49,TM49,TM49s,7,20000,"The user attacks the target with an echoing voice. If this move is used every turn, its power is increased.",3,0,0,ECHOEDVOICE
-337,TM50,TM50,TM50s,7,20000,"The user attacks the target at full power. The attack's recoil harshly lowers the user's Sp. Atk stat.",3,0,0,OVERHEAT
-338,TM51,TM51,TM51s,7,20000,"The target is hit with wings of steel. This may also raise the user's Defense stat.",3,0,0,STEELWING
-339,TM52,TM52,TM52s,7,20000,"The user heightens its mental focus and unleashes its power. This may also lower the target's Sp. Def stat.",3,0,0,FOCUSBLAST
-340,TM53,TM53,TM53s,7,20000,"The user draws power from nature and fires it at the target. This may also lower the target's Sp. Def stat.",3,0,0,ENERGYBALL
-341,TM54,TM54,TM54s,7,20000,"A restrained attack that prevents the target from fainting. The target is left with at least 1 HP.",3,0,0,FALSESWIPE
-342,TM55,TM55,TM55s,7,20000,"The user shoots boiling hot water at its target. This may also leave the target with a burn.",3,0,0,SCALD
-343,TM56,TM56,TM56s,7,20000,"The user flings its held item at the target to attack. This move's power and effects depend on the item.",3,0,0,FLING
-344,TM57,TM57,TM57s,7,20000,"The user attacks with an electric charge. The user may use any remaining electricity to raise its Sp. Atk stat.",3,0,0,CHARGEBEAM
-345,TM58,TM58,TM58s,7,20000,"The user takes the target into the sky, then drops it during the next turn. The target cannot attack while in the sky.",3,0,0,SKYDROP
-346,TM59,TM59,TM59s,7,20000,"The user swings its body around violently to inflict damage on everything in its vicinity.",3,0,0,BRUTALSWING
-347,TM60,TM60,TM60s,7,20000,"The user suppresses the target and makes its move go last.",3,0,0,QUASH
-348,TM61,TM61,TM61s,7,20000,"The user shoots a sinister, bluish-white flame at the target to inflict a burn.",3,0,0,WILLOWISP
-349,TM62,TM62,TM62s,7,20000,"The user nimbly strikes the target. If the user is not holding an item, this attack inflicts massive damage.",3,0,0,ACROBATICS
-350,TM63,TM63,TM63s,7,20000,"This move prevents the target from using its held item for five turns. Its Trainer is also prevented from using items on it.",3,0,0,EMBARGO
-351,TM64,TM64,TM64s,7,20000,"The user attacks everything around it by causing a tremendous explosion. The user faints upon using this move.",3,0,0,EXPLOSION
-352,TM65,TM65,TM65s,7,20000,"The user slashes with a sharp claw made from shadows. Critical hits land more easily.",3,0,0,SHADOWCLAW
-353,TM66,TM66,TM66s,7,20000,"The user stores power, then attacks. If the user moves after the target, this attack's power will be doubled.",3,0,0,PAYBACK
-354,TM67,TM67,TM67s,7,20000,"The user stabs the target with a sharp horn. This attack never misses.",3,0,0,SMARTSTRIKE
-355,TM68,TM68,TM68s,7,20000,"The user charges at the target using every bit of its power. The user can't move on the next turn.",3,0,0,GIGAIMPACT
-356,TM69,TM69,TM69s,7,20000,"The user polishes its body to reduce drag. This can sharply raise the Speed stat.",3,0,0,ROCKPOLISH
-357,TM70,TM70,TM70s,7,20000,"This move reduces damage from physical and special moves for five turns. This can be used only in a hailstorm.",3,0,0,AURORAVEIL
-358,TM71,TM71,TM71s,7,20000,"The user stabs the target from below with sharpened stones. Critical hits land more easily.",3,0,0,STONEEDGE
-359,TM72,TM72,TM72s,7,20000,"After making its attack, the user rushes back to switch places with a party Pokémon in waiting.",3,0,0,VOLTSWITCH
-360,TM73,TM73,TM73s,7,20000,"The user launches a weak jolt of electricity that paralyzes the target.",3,0,0,THUNDERWAVE
-361,TM74,TM74,TM74s,7,20000,"The user tackles the target with a high-speed spin. The slower the user compared to the target, the greater the move's power.",3,0,0,GYROBALL
-362,TM75,TM75,TM75s,7,20000,"A frenetic dance to uplift the fighting spirit. This sharply raises the user's Attack stat.",3,0,0,SWORDSDANCE
-363,TM76,TM76,TM76s,7,20000,"The user soars and then strikes its target on the next turn.",3,0,0,FLY
-364,TM77,TM77,TM77s,7,20000,"The user hypnotizes itself into copying any stat change made by the target.",3,0,0,PSYCHUP
-365,TM78,TM78,TM78s,7,20000,"The user strikes everything around it by stomping down on the ground. This lowers the Speed stat of those hit.",3,0,0,BULLDOZE
-366,TM79,TM79,TM79s,7,20000,"The user blows its cold breath on the target. This attack always results in a critical hit.",3,0,0,FROSTBREATH
-367,TM80,TM80,TM80s,7,20000,"Large boulders are hurled at the opposing Pokémon to inflict damage. This may also make the opposing Pokémon flinch.",3,0,0,ROCKSLIDE
-368,TM81,TM81,TM81s,7,20000,"The user slashes at the target by crossing its scythes or claws as if they were a pair of scissors.",3,0,0,XSCISSOR
-369,TM82,TM82,TM82s,7,20000,"The target is knocked away, and a different Pokémon is dragged out. In the wild, this ends a battle against a single Pokémon.",3,0,0,DRAGONTAIL
-370,TM83,TM83,TM83s,7,20000,"The target is infested and attacked for four to five turns. The target can't flee during this time.",3,0,0,INFESTATION
-371,TM84,TM84,TM84s,7,20000,"The target is stabbed with a tentacle or arm steeped in poison. This may also poison the target.",3,0,0,POISONJAB
-372,TM85,TM85,TM85s,7,20000,"The user eats the dreams of a sleeping target. It absorbs half the damage caused to heal its own HP.",3,0,0,DREAMEATER
-373,TM86,TM86,TM86s,7,20000,"The user snares the target with grass and trips it. The heavier the target, the greater the move's power.",3,0,0,GRASSKNOT
-374,TM87,TM87,TM87s,7,20000,"The user enrages and confuses the target. However, this also sharply raises the target's Attack stat.",3,0,0,SWAGGER
-375,TM88,TM88,TM88s,7,20000,"While it is asleep, the user randomly uses one of the moves it knows.",3,0,0,SLEEPTALK
-376,TM89,TM89,TM89s,7,20000,"After making its attack, the user rushes back to switch places with a party Pokémon in waiting.",3,0,0,UTURN
-377,TM90,TM90,TM90s,7,20000,"The user makes a copy of itself using some of its HP. The copy serves as the user's decoy.",3,0,0,SUBSTITUTE
-378,TM91,TM91,TM91s,7,20000,"The user gathers all its light energy and releases it all at once. This may also lower the target's Sp. Def stat.",3,0,0,FLASHCANNON
-379,TM92,TM92,TM92s,7,20000,"The user creates a bizarre area in which slower Pokémon get to move first for five turns.",3,0,0,TRICKROOM
-380,TM93,TM93,TM93s,7,20000,"The user shrouds itself in electricity and smashes into its target. This also damages the user a little.",3,0,0,WILDCHARGE
-381,TM94,TM94,TM94s,7,20000,"The user attacks everything around it by swamping its surroundings with a giant wave.",3,0,0,SURF
-382,TM95,TM95,TM95s,7,20000,"The user yells as if it's ranting about something, which lowers the Sp. Atk stat of opposing Pokémon.",3,0,0,SNARL
-383,TM96,TM96,TM96s,7,20000,"This attack makes use of nature's power. Its effects vary depending on the user's environment.",3,0,0,NATUREPOWER
-384,TM97,TM97,TM97s,7,20000,"The user releases a horrible aura imbued with dark thoughts. This may also make the target flinch.",3,0,0,DARKPULSE
-385,TM98,TM98,TM98s,7,20000,"The user charges at the target and may make it flinch.",3,0,0,WATERFALL
-386,TM99,TM99,TM99s,7,20000,"The user damages opposing Pokémon by emitting a powerful flash.",3,0,0,DAZZLINGGLEAM
-387,TM100,TM100,TM100s,7,20000,"The user tells the target a secret, and the target loses its ability to concentrate. This lowers the target's Sp. Atk stat.",3,0,0,CONFIDE
+288,TM01,TM01,TM01s,7,20000,"The user attacks the foe with an echoing voice. If this move is used every turn, it does greater damage.",3,0,0,ECHOEDVOICE
+289,TM02,TM02,TM02s,7,20000,"A restrained attack that prevents the target from fainting. The target is left with at least 1 HP.",3,0,0,FALSESWIPE
+290,TM03,TM03,TM03s,7,20000,"An attack move that doubles its power if the user is poisoned, burned, or has paralysis.",3,0,0,FACADE
+291,TM04,TM04,TM04s,7,20000,"The user lets loose a horribly echoing shout with the power to inflict damage.",3,0,0,HYPERVOICE
+292,TM05,TM05,TM05s,7,20000,"A reckless, life-risking tackle. It also damages the user by a fairly large amount, however.",3,0,0,DOUBLEEDGE
+293,TM06,TM06,TM06s,7,20000,"Striking opponents repeatedly makes the user's fists harder, raising the user's Attack stat.",3,0,0,POWERUPPUNCH
+294,TM07,TM07,TM07s,7,20000,"The user attacks with a swift chop. It can also break any barrier such as Light Screen and Reflect.",3,0,0,BRICKBREAK
+295,TM08,TM08,TM08s,7,20000,"The user throws the target and drags out another Pokémon in its party. In the wild, the battle ends.",3,0,0,CIRCLETHROW
+296,TM09,TM09,TM09s,7,20000,"The user fights the foe up close without guarding itself. It also cuts the user's Defense and Sp. Def.",3,0,0,CLOSECOMBAT
+297,TM10,TM10,TM10s,7,20000,"The user heightens its mental focus and unleashes its power. It may also lower the target's Sp. Def.",3,0,0,FOCUSBLAST
+298,TM11,TM11,TM11s,7,20000,"The user nimbly strikes the foe. This attack does more damage if the user is not holding an item.",3,0,0,ACROBATICS
+299,TM12,TM12,TM12s,7,20000,"The user attacks with a blade of air that slices even the sky. It may also make the target flinch.",3,0,0,AIRSLASH
+300,TM13,TM13,TM13s,7,20000,"The user tucks in its wings and charges from a low altitude. The user also takes serious damage.",3,0,0,BRAVEBIRD
+301,TM14,TM14,TM14s,7,20000,"The user wraps its foe in a fierce wind that flies up into the sky. It may also confuse the foe.",3,0,0,HURRICANE
+302,TM15,TM15,TM15s,7,20000,"The user attacks by throwing a clump of special mud. All status changes are returned to normal.",3,0,0,CLEARSMOG
+303,TM16,TM16,TM16s,7,20000,"The user drenches the foe in a special poisonous liquid. Its power doubles if the target is poisoned.",3,0,0,VENOSHOCK
+304,TM17,TM17,TM17s,7,20000,"The target is stabbed with a tentacle or arm seeped with poison. It may also poison the target.",3,0,0,POISONJAB
+305,TM18,TM18,TM18s,7,20000,"Unsanitary sludge is hurled at the target. It may also poison the target.",3,0,0,SLUDGEBOMB
+306,TM19,TM19,TM19s,7,20000,"The user strikes everything around it by stomping on the ground. It reduces hit Pokémon's Speed.",3,0,0,BULLDOZE
+307,TM20,TM20,TM20s,7,20000,"The user makes the ground under the foe erupt with power. It may also lower the target's Sp. Def.",3,0,0,EARTHPOWER
+308,TM21,TM21,TM21s,7,20000,"The user fiercely attacks the target using its entire body.",3,0,0,HIGHHORSEPOWER
+309,TM22,TM22,TM22s,7,20000,"The user sets off an earthquake that strikes every Pokémon around it.",3,0,0,EARTHQUAKE
+310,TM23,TM23,TM23s,7,20000,"The user throws a stone or projectile to attack. A flying Pokémon will fall to the ground when hit.",3,0,0,SMACKDOWN
+311,TM24,TM24,TM24s,7,20000,"Large boulders are hurled at the foes to inflict damage. It may also make the targets flinch.",3,0,0,ROCKSLIDE
+312,TM25,TM25,TM25s,7,20000,"The user attacks with a ray of light that sparkles as if it were made of gemstones.",3,0,0,POWERGEM
+313,TM26,TM26,TM26s,7,20000,"The user stabs the foe with sharpened stones from below. It has a high critical-hit ratio.",3,0,0,STONEEDGE
+314,TM27,TM27,TM27s,7,20000,"While resisting, the user attacks the opposing Pokémon. The targets' Sp. Atk stat is reduced.",3,0,0,STRUGGLEBUG
+315,TM28,TM28,TM28s,7,20000,"After making its attack, the user rushes back to switch places with a party Pokémon in waiting.",3,0,0,UTURN
+316,TM29,TM29,TM29s,7,20000,"Fires an exploding pollen puff at enemies, or a HP-restoring one at allies.",3,0,0,POLLENPUFF
+317,TM30,TM30,TM30s,7,20000,"The user drains the target's blood. The user's HP is restored by half the damage taken by the target.",3,0,0,LEECHLIFE
+318,TM31,TM31,TM31s,7,20000,"This relentless attack does massive damage to a target affected by status problems.",3,0,0,HEX
+319,TM32,TM32,TM32s,7,20000,"The user slashes with a sharp claw made from shadows. Critical hits land more easily.",3,0,0,SHADOWCLAW
+320,TM33,TM33,TM33s,7,20000,"The user hurls a shadowy blob at the target. It may also lower the target's Sp. Def stat.",3,0,0,SHADOWBALL
+321,TM34,TM34,TM34s,7,20000,"The user vanishes somewhere, then strikes on the next turn. Hits through protections.",3,0,0,PHANTOMFORCE
+322,TM35,TM35,TM35s,7,20000,"The user tackles the target with a high-speed spin. The slower the user, the greater the damage.",3,0,0,GYROBALL
+323,TM36,TM36,TM36s,7,20000,"The user gathers all its light energy and releases it at once. It may also lower the target's Sp. Def stat.",3,0,0,FLASHCANNON
+324,TM37,TM37,TM37s,7,20000,"The foe slams the target with its steel-hard head. It may also make the target flinch.",3,0,0,IRONHEAD
+325,TM38,TM38,TM38s,7,20000,"Placeholder.",3,0,0,STEELBEAM
+326,TM39,TM39,TM39s,7,20000,"A column of fire hits opposing Pokémon. When used with its Grass equivalent, it makes a sea of fire.",3,0,0,FIREPLEDGE
+327,TM40,TM40,TM40s,7,20000,"The user cloaks itself in flame and attacks. Building up more power, it raises the user's Speed stat.",3,0,0,FLAMECHARGE
+328,TM41,TM41,TM41s,7,20000,"The target is scorched with an intense blast of fire. It may also leave the target with a burn.",3,0,0,FLAMETHROWER
+329,TM42,TM42,TM42s,7,20000,"The foe is attacked with an intense blast of all-consuming fire. It may also leave the target with a burn.",3,0,0,FIREBLAST
+330,TM43,TM43,TM43s,7,20000,"The user cloaks itself in fire and charges at the foe. The user also takes damage and may burn the target.",3,0,0,FLAREBLITZ
+331,TM44,TM44,TM44s,7,20000,"A column of water strikes the target. When combined with its fire equivalent, it makes a rainbow.",3,0,0,WATERPLEDGE
+332,TM45,TM45,TM45s,7,20000,"The user charges at the target and may make it flinch. It can also be used to climb a waterfall.",3,0,0,WATERFALL
+333,TM46,TM46,TM46s,7,20000,"The user shoots boiling hot water at its target. It may also leave the target with a burn.",3,0,0,SCALD
+334,TM47,TM47,TM47s,7,20000,"It swamps the area around the user with a giant wave. It can also be used for crossing water.",3,0,0,SURF
+335,TM48,TM48,TM48s,7,20000,"The target is blasted by a huge volume of water launched under great pressure.",3,0,0,HYDROPUMP
+336,TM49,TM49,TM49s,7,20000,"A column of grass hits the foes. When used with its water equivalent, it creates a vast swamp.",3,0,0,GRASSPLEDGE
+337,TM50,TM50,TM50s,7,20000,"The user handles a sharp leaf like a sword and attacks by slashing. It has a high critical-hit ratio.",3,0,0,LEAFBLADE
+338,TM51,TM51,TM51s,7,20000,"A nutrient-draining attack. The user's HP is restored by half the damage taken by the target.",3,0,0,GIGADRAIN
+339,TM52,TM52,TM52s,7,20000,"The user draws power from nature and fires it at the target. It may also lower the target's Sp. Def.",3,0,0,ENERGYBALL
+340,TM53,TM53,TM53s,7,20000,"A two-turn attack. The user gathers light, then blasts a bundled beam on the second turn.",3,0,0,SOLARBEAM
+341,TM54,TM54,TM54s,7,20000,"The user fires a concentrated bundle of electricity. It may also raise the user's Sp. Atk stat.",3,0,0,CHARGEBEAM
+342,TM55,TM55,TM55s,7,20000,"After making its attack, the user rushes back to switch places with a party Pokémon in waiting.",3,0,0,VOLTSWITCH
+343,TM56,TM56,TM56s,7,20000,"The user shrouds itself in electricity and smashes into its foe. It also damages the user a little.",3,0,0,WILDCHARGE
+344,TM57,TM57,TM57s,7,20000,"A strong electric blast is loosed at the target. It may also leave the target with paralysis.",3,0,0,THUNDERBOLT
+345,TM58,TM58,TM58s,7,20000,"A wicked thunderbolt is dropped on the foe to inflict damage. It may also leave the target paralyzed.",3,0,0,THUNDER
+346,TM59,TM59,TM59s,7,20000,"The user materializes an odd psychic wave to attack the target. This attack does physical damage.",3,0,0,PSYSHOCK
+347,TM60,TM60,TM60s,7,20000,"The target is hit by a strong telekinetic force. It may also reduce the target's Sp. Def stat.",3,0,0,PSYCHIC
+348,TM61,TM61,TM61s,7,20000,"The user focuses its willpower to its head and attacks the foe. It may also make the target flinch.",3,0,0,ZENHEADBUTT
+349,TM62,TM62,TM62s,7,20000,"Two turns after this move is used, a hunk of psychic energy attacks the target.",3,0,0,FUTURESIGHT
+350,TM63,TM63,TM63s,7,20000,"The user attacks with a gust of chilled air. It also lowers the targets' Speed stat.",3,0,0,ICYWIND
+351,TM64,TM64,TM64s,7,20000,"An attack move that inflicts double the damage if the user has been hurt by the foe in the same turn.",3,0,0,AVALANCHE
+352,TM65,TM65,TM65s,7,20000,"The target is struck with an icy-cold beam of energy. It may also freeze the target solid.",3,0,0,ICEBEAM
+353,TM66,TM66,TM66s,7,20000,"A howling blizzard is summoned to strike the opposing team. It may also freeze them solid.",3,0,0,BLIZZARD
+354,TM67,TM67,TM67s,7,20000,"Placeholder.",3,0,0,BREAKINGSWIPE
+355,TM68,TM68,TM68s,7,20000,"The user knocks away the target and drags out another Pokémon in its party. In the wild, the battle ends.",3,0,0,DRAGONTAIL
+356,TM69,TM69,TM69s,7,20000,"The user slashes the target with huge, sharp claws.",3,0,0,DRAGONCLAW
+357,TM70,TM70,TM70s,7,20000,"The target is attacked with a shock wave generated by the user's gaping mouth.",3,0,0,DRAGONPULSE
+358,TM71,TM71,TM71s,7,20000,"The user rampages and attacks for two to three turns. It then becomes confused, however.",3,0,0,OUTRAGE
+359,TM72,TM72,TM72s,7,20000,"The user yells as if it is ranting about something, making the target's Sp. Atk stat decrease.",3,0,0,SNARL
+360,TM73,TM73,TM73s,7,20000,"The user slaps down the target's held item, preventing that item from being used in the battle.",3,0,0,KNOCKOFF
+361,TM74,TM74,TM74s,7,20000,"The user releases a horrible aura imbued with dark thoughts. It may also make the target flinch.",3,0,0,DARKPULSE
+362,TM75,TM75,TM75s,7,20000,"The user attacks the target's throat. The target cannot use sound-based moves for two turns.",3,0,0,THROATCHOP
+363,TM76,TM76,TM76s,7,20000,"Placeholder.",3,0,0,SPIRITBREAK
+364,TM77,TM77,TM77s,7,20000,"The user damages opposing Pokémon by emitting a powerful flash.",3,0,0,DAZZLINGGLEAM
+365,TM78,TM78,TM78s,7,20000,"The user plays rough with the target and attacks it. This may also lower the target's Attack stat.",3,0,0,PLAYROUGH
+366,TM79,TM79,TM79s,7,20000,"The user attacks by borrowing the power of the moon. This may also lower the target's Sp. Atk stat.",3,0,0,MOONBLAST
+367,TM80,TM80,TM80s,7,20000,"The user works together with its teammate. Power is increased by 50% if affinity boosted, or by Helping Hand.",3,0,0,GENERICBOOST
+368,TM81,TM81,TM81s,7,20000,"The user shows off for its teammate. Raises attack if affinity boosted, or by Helping Hand.",3,0,0,MUSCLEBOOST
+369,TM82,TM82,TM82s,7,20000,"The user sweeps in to aid its teammate. Creates winds for two turns if affinity boosted, or by Helping Hand.",3,0,0,BREEZEBOOST
+370,TM83,TM83,TM83s,7,20000,"The user sneers at the target for opposing its teammate. Raises special attack if affinity boosted, or by Helping Hand.",3,0,0,VENOMBOOST
+371,TM84,TM84,TM84s,7,20000,"The user bolsters itself to protect its teammate. Raises special defense if affinity boosted, or by Helping Hand.",3,0,0,EARTHBOOST
+372,TM85,TM85,TM85s,7,20000,"The user braces itself to aid its teammate. Creates a sandstorm for two turns if affinity boosted, or by Helping Hand.",3,0,0,BOULDERBOOST
+373,TM86,TM86,TM86s,7,20000,"The user agressively nibbles the target for its teammate. Lowers target special attack if affinity boosted, or by Helping Hand.",3,0,0,VERMINBOOST
+374,TM87,TM87,TM87s,7,20000,"The user haunts the target for opposing its teammate. Lowers target defense if affinity boosted, or by Helping Hand.",3,0,0,SPIRITBOOST
+375,TM88,TM88,TM88s,7,20000,"The user steels itself to aid its teammate. Raises defense if affinity boosted, or by Helping Hand.",3,0,0,METALBOOST
+376,TM89,TM89,TM89s,7,20000,"The user passionately aids its teammate. Creates harsh sunlight for two turns if affinity boosted, or by Helping Hand.",3,0,0,FLAMEBOOST
+377,TM90,TM90,TM90s,7,20000,"The user gracefully aids its teammate. Creates rain for two turns if affinity boosted, or by Helping Hand.",3,0,0,AQUABOOST
+378,TM91,TM91,TM91s,7,20000,"The user's instinct tell it to aid its teammate. Creates grassy terrain for two turns if affinity boosted, or by Helping Hand.",3,0,0,FLORABOOST
+379,TM92,TM92,TM92s,7,20000,"The user and its teammate combine their energy. Creates electric terrain for two turns if affinity boosted, or by Helping Hand.",3,0,0,PLASMABOOST
+380,TM93,TM93,TM93s,7,20000,"The user attacks with support from its teammate. Creates psychic terrain for two turns if affinity boosted, or by Helping Hand.",3,0,0,MENTALBOOST
+381,TM94,TM94,TM94s,7,20000,"The user \"reluctantly\" aids its teammate. Creates hail for two turns if affinity boosted, or by Helping Hand.",3,0,0,FROSTBOOST
+382,TM95,TM95,TM95s,7,20000,"The user rages against the target for opposing its teammate. Lowers target attack if affinity boosted, or by Helping Hand.",3,0,0,MYSTICBOOST
+383,TM96,TM96,TM96s,7,20000,"The user punishes the target for opposing its teammate. Lowers target special defense if affinity boosted, or by Helping Hand.",3,0,0,GLOOMBOOST
+384,TM97,TM97,TM97s,7,20000,"The user kindly assists its teammate. Creates misty terrain for two turns if affinity boosted, or by Helping Hand.",3,0,0,HALLOWBOOST
+385,TM98,TM98,TM98s,7,20000,"A move that leaves the target badly poisoned. Its poison damage worsens every turn.",3,0,0,TOXIC
+386,TM99,TM99,TM99s,7,20000,"A weak electric charge is launched at the target. It causes paralysis if it hits.",3,0,0,THUNDERWAVE
+387,TM100,TM100,TM100s,7,20000,"The user shoots a sinister, bluish-white flame at the target to inflict a burn.",3,0,0,WILLOWISP
 #-------------------------------
 389,CHERIBERRY,Cheri Berry,Cheri Berries,8,20,"It may be used or held by a Pokémon to recover from paralysis.",1,1,5,
 390,CHESTOBERRY,Chesto Berry,Chesto Berries,8,20,"It may be used or held by a Pokémon to recover from sleep.",1,1,5,
@@ -684,6 +684,35 @@
 1062,AMETRINEGEMSTONE,Ametrine Gemstone,Ametrine Gemstones,2,9800,"A gemstone that emits a special aura. It can be used to change a Pokémon's nature.",1,0,0,
 1063,AEGIRINEGEMSTONE,Aegirine Gemstone,Aegirine Gemstones,2,9800,"A gemstone that emits a feeling of protection. It can be used to change a Pokémon's nature.",1,0,0,
 1064,PHENACITEGEMSTONE,Phenacite Gemstone,Phenacite Gemstones,2,9800,"A gemstone that gives of a swift breeze. It can be used to change a Pokémon's nature.",1,0,0,
+#-------------------------------
+1900,TM101,TM101,TM101s,7,20000,"The user tenses its muscles to bulk up its body, boosting both its Attack and Defense stats.",3,0,0,BULKUP
+1901,TM102,TM102,TM102s,7,20000,"The user quietly focuses its mind and calms its spirit to raise its Sp. Atk and Sp. Def stats.",3,0,0,CALMMIND
+1902,TM103,TM103,TM103s,7,20000,"The user is roused, and its Attack and Sp. Atk stats increase.",3,0,0,WORKUP
+1903,TM104,TM104,TM104s,7,20000,"The user sharpens its claws to boost its Attack stat and accuracy.",3,0,0,HONECLAWS
+1904,TM105,TM105,TM105s,7,20000,"The user stimulates its brain by thinking bad thoughts. It sharply raises the user's Sp. Atk.",3,0,0,NASTYPLOT
+1905,TM106,TM106,TM106s,7,20000,"A frenetic dance to uplift the fighting spirit. It sharply raises the user's Attack stat.",3,0,0,SWORDSDANCE
+1906,TM107,TM107,TM107s,7,20000,"The user relaxes and lightens its body to move faster. It sharply boosts the Speed stat.",3,0,0,AGILITY
+1907,TM108,TM108,TM108s,7,20000,"The user goes to sleep for two turns. It fully restores the user's HP and heals any status problem.",3,0,0,REST
+1908,TM109,TM109,TM109s,7,20000,"The user torments and enrages the foe, making it incapable of using the same move twice in a row.",3,0,0,TORMENT
+1909,TM110,TM110,TM110s,7,20000,"The target is taunted into a rage that allows it to use only attack moves for three turns.",3,0,0,TAUNT
+1910,TM111,TM111,TM111s,7,20000,"It enables the user to evade all attacks. Its chance of failing rises if it is used in succession.",3,0,0,PROTECT
+1911,TM112,TM112,TM112s,7,20000,"The user creates a protective field that prevents status problems for five turns.",3,0,0,SAFEGUARD
+1912,TM113,TM113,TM113s,7,20000,"A wondrous wall of light is put up to suppress damage from physical attacks for five turns.",3,0,0,REFLECT
+1913,TM114,TM114,TM114s,7,20000,"A wondrous wall of light is put up to suppress damage from special attacks for five turns.",3,0,0,LIGHTSCREEN
+1914,TM115,TM115,TM115s,7,20000,"The user whips up a turbulent whirlwind that ups the Speed of all party Pokémon for four turns.",3,0,0,TAILWIND
+1915,TM116,TM116,TM116s,7,20000,"A strong wind blows away the foe's obstacles such as Light Screen. It also lowers their evasion.",3,0,0,DEFOG
+1916,TM117,TM117,TM117s,7,20000,"The user summons a heavy rain that falls for five turns, powering up Water-type moves.",3,0,0,RAINDANCE
+1917,TM118,TM118,TM118s,7,20000,"The user intensifies the sun for five turns, powering up Fire-type moves.",3,0,0,SUNNYDAY
+1918,TM119,TM119,TM119s,7,20000,"Summons a five-turn sandstorm to hurt all combatants except the Rock, Ground, and Steel types.",3,0,0,SANDSTORM
+1919,TM120,TM120,TM120s,7,20000,"The user summons a hail storm lasting five turns. It damages all Pokémon except the Ice type.",3,0,0,HAIL
+1920,TM121,TM121,TM121s,7,20000,"The user strengthens the wind for five turns, speeding up airborne Pokémon.",3,0,0,WINDS
+1921,TM122,TM122,TM122s,7,20000,"The user turns the ground to grass for five turns. Grounded Pokémon restore a little HP every turn.",3,0,0,GRASSYTERRAIN
+1922,TM123,TM123,TM123s,7,20000,"The user electrifies the ground for five turns. Pokémon on the ground no longer fall asleep.",3,0,0,ELECTRICTERRAIN
+1923,TM124,TM124,TM124s,7,20000,"The user covers the ground with mist for five turns. Grounded Pokémon can't gain status conditions.",3,0,0,MISTYTERRAIN
+1924,TM125,TM125,TM125s,7,20000,"Protects grounded Pokémon from priority moves and powers up Psychic-type moves for five turns.",3,0,0,PSYCHICTERRAIN
+1925,TM126,TM126,TM126s,7,20000,"The user creates a bizarre area in which slower Pokémon get to move first for five turns.",3,0,0,TRICKROOM
+1926,TM127,TM127,TM127s,7,20000,"The user creates a bizarre area in which Pokémon's Defense and Sp. Def stats are swapped for 5 turns.",3,0,0,WONDERROOM
+1927,TM128,TM128,TM128s,7,20000,"The user creates a bizarre area in which Pokémon's held items lose their effects for five turns.",3,0,0,MAGICROOM
 #-------------------------------
 2000,PAY,Payitem,Payitem,1,1,"Item used for Icon only, should not be obtainable.",0,0,0,
 2001,GET,Getitem,Getitem,1,1,"Item used for Icon only, should not be obtainable.",0,0,0,

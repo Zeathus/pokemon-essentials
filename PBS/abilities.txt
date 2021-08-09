@@ -252,4 +252,4 @@
 316,LIVELYBOND,Lively Bond,"If an ally Pokémon (including itself) is Affinity Boosted, raises that Pokémon's Speed."
 317,AQUAVORTEX,Aqua Vortex,"Affinity boosted Water-type moves deal 60% more damage rather than 30%."
 318,FLORAVORTEX,Flora Vortex,"Affinity boosted Grass-type moves deal 60% more damage rather than 30%."
-319,FLAREVORTEX,Flare Vortex,"Affinity boosted Fire-type moves deal 60% more damage rather than 30%."
+319,FLAMEVORTEX,Flame Vortex,"Affinity boosted Fire-type moves deal 60% more damage rather than 30%."
