@@ -162,3 +162,15 @@ TIMBURR,5,8
 VULPIX,5,8
 NIDORANMA,5,7
 NIDORANFE,5,7
+###########################
+116 # Crosswoods Cave Ruins
+25,10,10
+Cave
+UNOWN,7,9
+UNOWN,7,9
+UNOWN,7,9
+UNOWN,7,9
+UNOWN,7,9
+UNOWN,7,9
+UNOWN,7,9
+UNOWN,7,9

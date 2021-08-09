@@ -11,6 +11,11 @@ OVERWORLD_WATER_FLOAT = [
   :DUCKLETT, :SWANNA
 ]
 
+# List of Pokemon to never mirror
+OVERWORLD_NO_MIRROR = [
+  :UNOWN
+]
+
 class OverworldPokemon
   attr_accessor :species
   attr_accessor :map_x
@@ -29,7 +34,9 @@ class OverworldPokemon
     @new_x = x
     @new_y = y
     @area = area
-    if terrain.can_surf
+    if terrain == -1
+      @terrain = 1
+    elsif terrain.can_surf
       @terrain = 2
     elsif $PokemonEncounters.has_cave_encounters?
       @terrain = 1
@@ -115,6 +122,7 @@ class OverworldPokemon
     @sprite.ox = 32
     @sprite.oy = 32
     @mirror = rand(2)==0
+    @mirror = false if OVERWORLD_NO_MIRROR.include?(@species)
     @lifetime = 600 + rand(300)
     @dead = false
     update
@@ -196,19 +204,19 @@ class OverworldPokemon
         if dir == 0
           @new_x = @map_x
           @new_y = @map_y + 1
-          @mirror = rand(2)==0
+          @mirror = rand(2)==0 if !OVERWORLD_NO_MIRROR.include?(@species)
         elsif dir == 1
           @new_x = @map_x - 1
           @new_y = @map_y
-          @mirror = false
+          @mirror = false if !OVERWORLD_NO_MIRROR.include?(@species)
         elsif dir == 2
           @new_x = @map_x + 1
           @new_y = @map_y
-          @mirror = true
+          @mirror = true if !OVERWORLD_NO_MIRROR.include?(@species)
         elsif dir == 3
           @new_x = @map_x
           @new_y = @map_y - 1
-          @mirror = rand(2)==0
+          @mirror = rand(2)==0 if !OVERWORLD_NO_MIRROR.include?(@species)
         end
         @moving = true
       end
@@ -274,7 +282,7 @@ class SpawnArea
     @height = maxY - @y
     divisor = 16.0
     if terrain == -1 || terrain.can_surf
-      divisor = 32.0
+      divisor = 24.0
     end
     @max_pkmn = (@tiles.length / divisor).ceil
   end
@@ -338,7 +346,9 @@ class SpawnArea
       return if !$PokemonEncounters.has_encounter_type?(encounterType)
       encounter = $PokemonEncounters.choose_wild_pokemon(encounterType)
       return if !encounter
-      #pbScaleWildEncounter(encounter)
+      if encounter[0] == :UNOWN && $game_variables[WILD_UNOWN_FORM].is_a?(Array)
+        encounter[2] = $game_variables[WILD_UNOWN_FORM].shuffle[0]
+      end
       pkmn = OverworldPokemon.new(@viewport,@map,encounter[0],encounter[1],encounter[2],
         x,y,@terrain,@pokemon,self)
       @pokemon.push(pkmn)

@@ -507,6 +507,7 @@ class PBAnimation < Array
       case i.timingType
       when 0   # Play SE
         if i.name && i.name!=""
+          i.name.gsub!(".wav",".ogg")
           pbSEPlay("Anim/"+i.name,i.volume,i.pitch)
         elsif user && user.pokemon
           name = GameData::Species.cry_filename_from_pokemon(user.pokemon)

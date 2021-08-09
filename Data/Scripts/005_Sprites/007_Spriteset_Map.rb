@@ -140,6 +140,7 @@ class Spriteset_Map
   end
 
   def dispose
+    despawnPokemon
     @tilemap.tileset.dispose
     for i in 0...7
       @tilemap.autotiles[i].dispose

@@ -44,7 +44,7 @@ def pbBossRuinNormal
   # If hit by a Special attack, +Sp.Def/-Defense
   pbModifier.moves=[
     :ROLLOUT,
-    :TAKEDOWN]
+    :DEFENSECURL]
   pbBoss.add(
     [:Start],
     [:Message,"NAME is preparing for your attacks."],
