@@ -54,8 +54,8 @@ class PokemonTemp
     when "base"                   then rules["base"]           = var
     when "outcome", "outcomevar"  then rules["outcomeVar"]     = var
     when "nopartner"              then rules["noPartner"]      = true
-    when "scalelevel"             then rules["scaleLevel"]     = true
-    when "fixedlevel"             then rules["scaleLevel"]     = false
+    when "scalelevel"             then rules["fixedLevel"]     = false
+    when "fixedlevel"             then rules["fixedLevel"]     = true
     when "specialmod"             then rules["specialMod"]     = var
     when "startover"              then rules["startOver"]      = var
     else
@@ -270,7 +270,7 @@ def pbWildBattleCore(*args)
   if isInParty && room_for_partner && !$PokemonTemp.battleRules["noPartner"]
     otherid = getPartyActive(1)
     otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
-    otherParty = getPartyPokemon(1)
+    otherParty = getActivePokemon(1)
     otherTrainer.party = otherParty
     otherTrainer.id = 50
     playerTrainers.push(otherTrainer)
@@ -422,9 +422,12 @@ def pbTrainerBattleCore(*args)
         raise _INTL("Expected NPCTrainer or array of trainer data, got {1}.", arg)
       end
     end
-    foeTrainers.each { |trainer|
-      pbScaleTrainer(trainer, $PokemonTemp.battleRules["specialMod"] || 0)
-    }
+    fixedLevel = $PokemonTemp.battleRules["fixedLevel"] || false
+    if !fixedLevel
+      foeTrainers.each { |trainer|
+        pbScaleTrainer(trainer, $PokemonTemp.battleRules["specialMod"] || 0)
+      }
+    end
     # Calculate who the player trainer(s) and their party are
     mainid = getPartyActive(0)
     mainTrainer = Trainer.new(PBParty.getName(mainid), PBParty.getTrainerType(mainid))
@@ -440,7 +443,7 @@ def pbTrainerBattleCore(*args)
     if isInParty && room_for_partner && !$PokemonTemp.battleRules["noPartner"]
       otherid = getPartyActive(1)
       otherTrainer = Trainer.new(PBParty.getName(otherid), PBParty.getTrainerType(otherid))
-      otherParty = getPartyPokemon(1)
+      otherParty = getActivePokemon(1)
       otherTrainer.party = otherParty
       otherTrainer.id = 50
       playerTrainers.push(otherTrainer)

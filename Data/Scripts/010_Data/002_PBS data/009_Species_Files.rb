@@ -173,7 +173,7 @@ module GameData
 
     #===========================================================================
 
-    def self.check_cry_file(species, form)
+    def self.check_cry_file(species, form = 0)
       species_data = self.get_species_form(species, form)
       return nil if species_data.nil?
       if form > 0
@@ -210,7 +210,7 @@ module GameData
       if pkmn.is_a?(Pokemon)
         self.play_cry_from_pokemon(pkmn, volume, pitch)
       else
-        self.play_cry_from_species(pkmn, nil, volume, pitch)
+        self.play_cry_from_species(pkmn, 0, volume, pitch)
       end
     end
 

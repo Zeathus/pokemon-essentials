@@ -219,6 +219,10 @@ def changeMainQuest(id, step=false)
   end
 end
 
+def pbMQ(id)
+  return pbMainQuest(id)
+end
+
 def pbMainQuest(id)
   id=getID(PBMainQuests,id) if id.is_a?(Symbol)
   return $game_variables[QUEST_MAIN][id]

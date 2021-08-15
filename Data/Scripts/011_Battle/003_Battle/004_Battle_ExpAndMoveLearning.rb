@@ -28,7 +28,7 @@ class PokeBattle_Battle
       exp = (exp*1.5).floor if trainerBattle?
       exp = (exp*3/2).floor if pbActiveDrink == "exp"
 
-      totalexp = (exp * 0.15).floor
+      totalexp = (exp * 0.20).floor
 
       if expshare
         @expgainedshared += totalexp

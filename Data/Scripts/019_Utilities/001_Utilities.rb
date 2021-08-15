@@ -245,6 +245,7 @@ def pbTrainerName(name = nil, outfit = 0)
 end
 
 def pbSuggestTrainerName(gender)
+  return "Alph"
   userName = pbGetUserName()
   userName = userName.gsub(/\s+.*$/,"")
   if userName.length>0 && userName.length<Settings::MAX_PLAYER_NAME_SIZE

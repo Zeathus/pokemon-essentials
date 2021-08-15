@@ -51,7 +51,7 @@ def pbInitTrainers
   
 end
 
-def pbFieldTrainer(trainerid,trainername,endspeech,doublebattle=true,min_lvl=0)
+def pbFieldTrainer(trainerid,trainername,endspeech=nil,doublebattle=true,min_lvl=0)
   partyid = 0
   trainers=load_data("Data/trainers.dat")
   for trainer in trainers

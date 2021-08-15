@@ -80,6 +80,7 @@ class Sprite_Reflection
         @sprite.opacity = @rsprite.opacity*3/4
         @sprite.visible = true
       end
+      @sprite.visible = false if $game_switches[HIDE_REFLECTIONS]
       @sprite.src_rect = @rsprite.src_rect
     end
   end

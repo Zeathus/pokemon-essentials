@@ -1666,11 +1666,10 @@ class PokeBattle_Move_14E < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip move immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end

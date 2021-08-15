@@ -416,6 +416,7 @@ class PokeBattle_TwoTurnMove < PokeBattle_Move
     @powerHerb = false
     @chargingTurn = false   # Assume damaging turn by default
     @damagingTurn = true
+    @timeSkip = false
     # 0 at start of charging turn, move's ID at start of damaging turn
     if !user.effects[PBEffects::TwoTurnAttack]
       @powerHerb = user.hasActiveItem?(:POWERHERB)
@@ -440,6 +441,10 @@ class PokeBattle_TwoTurnMove < PokeBattle_Move
     if @chargingTurn && @damagingTurn   # Move only takes one turn to use
       pbShowAnimation(@id,user,targets,1)   # Charging anim
       targets.each { |b| pbChargingTurnEffect(user,b) }
+      if @timeSkip
+        @battle.pbCommonAnimation("TimeSkip",user,nil)
+        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
+      end
       if @powerHerb
         # Moves that would make the user semi-invulnerable will hide the user
         # after the charging animation, so the "UseItem" animation shouldn't show

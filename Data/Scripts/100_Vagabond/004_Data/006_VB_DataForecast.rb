@@ -79,57 +79,57 @@ end
 
 def pbUpdateWeather
   map_metadata = GameData::MapMetadata.try_get($game_map.map_id)
-  if !map_metadata
-    PBDebug.log("pbUpdateWeather: Could not find map metadata")
-    return
-  end
-  if map_metadata.outdoor_map
+  outdoor_map = map_metadata ? map_metadata.outdoor_map : true
+  force_weather = false
+  if outdoor_map
     if $game_switches[WEATHER_RAIN]
       if $game_screen.weather_type != PBFieldWeather::Rain
         $game_screen.weather(PBFieldWeather::Rain,9,200)
-        return
+        force_weather = true
       end
     elsif $game_switches[WEATHER_SUN]
       if $game_screen.weather_type != PBFieldWeather::Sun
         $game_screen.weather(PBFieldWeather::Sun,1,200)
-        return
+        force_weather = true
       end
     elsif $game_switches[WEATHER_SNOW]
       if $game_screen.weather_type != PBFieldWeather::Snow
         $game_screen.weather(PBFieldWeather::Snow,9,200)
-        return
+        force_weather = true
       end
     elsif $game_switches[WEATHER_STORM]
       if $game_screen.weather_type != PBFieldWeather::Storm
         $game_screen.weather(PBFieldWeather::Storm,9,200)
-        return
+        force_weather = true
       end
     end
   end
-  forecast = pbGetForecast
-  if forecast[$game_map.map_id] && map_metadata.outdoor_map
-    if $game_screen.weather_type != forecast[$game_map.map_id]
-      weather=forecast[$game_map.map_id]
-      if weather==PBFieldWeather::None
-        $game_screen.weather(0,0,0)
-      elsif weather==PBFieldWeather::Sun
-        if pbGetTimeNow.hour<=17 && pbGetTimeNow.hour>=5
-          $game_screen.weather(weather,5,200)
-        else
+  if !force_weather
+    forecast = pbGetForecast
+    if forecast[$game_map.map_id] && outdoor_map
+      if $game_screen.weather_type != forecast[$game_map.map_id]
+        weather=forecast[$game_map.map_id]
+        if weather==:None
           $game_screen.weather(0,0,0)
-        end
-      elsif weather==PBFieldWeather::BloodMoon
-        if pbGetTimeNow.hour>=18
-          $game_screen.weather(weather,5,200)
+        elsif weather==:Sun
+          if pbGetTimeNow.hour<=17 && pbGetTimeNow.hour>=5
+            $game_screen.weather(weather,5,200)
+          else
+            $game_screen.weather(0,0,0)
+          end
+        elsif weather==:BloodMoon
+          if pbGetTimeNow.hour>=18
+            $game_screen.weather(weather,5,200)
+          else
+            $game_screen.weather(0,0,0)
+          end
         else
-          $game_screen.weather(0,0,0)
+          $game_screen.weather(weather,5,200)
         end
-      else
-        $game_screen.weather(weather,5,200)
       end
+    else
+      $game_screen.weather(0,0,0)
     end
-  else
-    $game_screen.weather(0,0,0)
   end
   pbUpdateVFX
 end

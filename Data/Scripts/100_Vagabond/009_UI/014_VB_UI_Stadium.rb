@@ -39,7 +39,7 @@ def pbStadiumStart(finish=false)
   sprites = {}
   
   sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/stadium_bg")
+  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
   sprites["bg"].z = 1
   sprites["bg"].opacity = 0
   sprites["bg"].update
@@ -78,7 +78,7 @@ def pbStadiumEnd
   sprites = {}
   
   sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/stadium_bg")
+  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
   sprites["bg"].z = 1
   sprites["bg"].update
   
@@ -105,23 +105,23 @@ def pbStadiumTrainers(trainers,index,title)
   sprites = {}
   
   sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/stadium_bg")
+  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
   sprites["bg"].z = 1
   sprites["bg"].update
   
   rows = [[1],[2],[3],[4],[3,2],[3,3],[4,3],[4,4]]
   rows = rows[trainers.length - 1]
-  xcoords = [0,201,148,97,44]
-  ycoords = rows.length == 1 ? [209,251,99] : [154,196,44,238]
+  xcoords = [128,329,269,218,165] #[0,201,148,97,44]
+  ycoords = rows.length == 1 ? [305,347,195] : [250,292,140,334] #[209,251,99] : [154,196,44,238]
   
   sprites["title"] = IconSprite.new(0,0,viewport)
-  sprites["title"].setBitmap("Graphics/Pictures/stadium_title")
+  sprites["title"].setBitmap("Graphics/Pictures/Stadium/title")
   sprites["title"].z = 2
   sprites["title"].x = xcoords[4]
   sprites["title"].y = ycoords[0]
   
   sprites["subtitle"] = IconSprite.new(0,0,viewport)
-  sprites["subtitle"].setBitmap("Graphics/Pictures/stadium_subtitle")
+  sprites["subtitle"].setBitmap("Graphics/Pictures/Stadium/subtitle")
   sprites["subtitle"].z = 2
   sprites["subtitle"].x = xcoords[4]
   sprites["subtitle"].y = ycoords[1]
@@ -129,23 +129,23 @@ def pbStadiumTrainers(trainers,index,title)
   # Drawing cup name and battle number
   pbSetSystemFont(sprites["title"].bitmap)
   pbDrawTextPositions(sprites["title"].bitmap,
-    [[title.upcase,212,6,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    [[title.upcase,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
   battletitle = _INTL("BATTLE {1}",index+1)
   battletitle = "SEMIFINAL" if (index+2)==trainers.length
   battletitle = "FINAL" if (index+1)==trainers.length
   pbSetSystemFont(sprites["subtitle"].bitmap)
   pbDrawTextPositions(sprites["subtitle"].bitmap,
-    [[battletitle,212,6,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    [[battletitle,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
   
   sprites["row1"] = IconSprite.new(0,0,viewport)
-  sprites["row1"].setBitmap(_INTL("Graphics/Pictures/stadium_bar{1}",rows[0]))
+  sprites["row1"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[0]))
   sprites["row1"].z = 2
   sprites["row1"].x = xcoords[rows[0]]
   sprites["row1"].y = ycoords[2]
   
   if rows.length == 2
     sprites["row2"] = IconSprite.new(0,0,viewport)
-    sprites["row2"].setBitmap(_INTL("Graphics/Pictures/stadium_bar{1}",rows[1]))
+    sprites["row2"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[1]))
     sprites["row2"].z = 2
     sprites["row2"].x = xcoords[rows[1]]
     sprites["row2"].y = ycoords[3]
@@ -154,17 +154,16 @@ def pbStadiumTrainers(trainers,index,title)
   
   for i in 0...trainers.length
     sprites[_INTL("lock{1}",i)] = IconSprite.new(0,0,viewport)
-    sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/stadium_locked")
+    sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/Stadium/locked")
     sprites[_INTL("lock{1}",i)].z = 5
     sprites[_INTL("lock{1}",i)].x = (i >= rows[0]) ? ((i-rows[0]) * 104) : (i * 104)
     sprites[_INTL("lock{1}",i)].x += xcoords[(i >= rows[0]) ? rows[1] : rows[0]] + 8
     sprites[_INTL("lock{1}",i)].y = ((i >= rows[0]) ? ycoords[3] : ycoords[2]) + 8
     if i <= index
-      trainers[i] = getID(PBTrainers,trainers[i]) if trainers[i].is_a?(Symbol)
       sprites[_INTL("trainer{1}",i)] = IconSprite.new(0,0,viewport)
       sprite = sprites[_INTL("trainer{1}",i)]
       sprite.setBitmap(
-        sprintf("Graphics/Characters/trainer%03d",trainers[i]))
+        sprintf("Graphics/Trainers/%s",trainers[i].to_s))
       sprite.src_rect = Rect.new(
         sprite.bitmap.width / 2 - 47,0,
         94,94)
@@ -177,7 +176,7 @@ def pbStadiumTrainers(trainers,index,title)
       sprites[_INTL("lock{1}",i)].src_rect = Rect.new(0,0,94,94)
       if i == index
         sprites["select"] = IconSprite.new(sprite.x,sprite.y,viewport)
-        sprites["select"].setBitmap("Graphics/Pictures/stadium_marker")
+        sprites["select"].setBitmap("Graphics/Pictures/Stadium/marker")
         sprites["select"].z = 4
       else
         sprite.tone = Tone.new(-60,-60,-60,140)
@@ -186,15 +185,15 @@ def pbStadiumTrainers(trainers,index,title)
   end
   
   if rows.length == 2
-    sprites["row1"].y -= 260
-    sprites["row2"].y += 260
-    sprites["title"].y -= 260
-    sprites["subtitle"].y += 260
+    sprites["row1"].y -= 300
+    sprites["row2"].y += 300
+    sprites["title"].y -= 300
+    sprites["subtitle"].y += 300
     for i in 0...trainers.length
       if i >= rows[0]
-        sprites[_INTL("lock{1}",i)].y += 260
+        sprites[_INTL("lock{1}",i)].y += 300
       else
-        sprites[_INTL("lock{1}",i)].y -= 260
+        sprites[_INTL("lock{1}",i)].y -= 300
       end
       if i <= index
         sprites[_INTL("trainer{1}",i)].y = sprites[_INTL("lock{1}",i)].y
@@ -204,16 +203,16 @@ def pbStadiumTrainers(trainers,index,title)
       end
     end
   else
-    sprites["row1"].y -= 260
-    sprites["title"].y += 260
-    sprites["subtitle"].y += 260
+    sprites["row1"].y -= 300
+    sprites["title"].y += 300
+    sprites["subtitle"].y += 300
     for i in 0...trainers.length
-      sprites[_INTL("lock{1}",i)].y -= 260
+      sprites[_INTL("lock{1}",i)].y -= 300
       if i <= index
-        sprites[_INTL("trainer{1}",i)].y -= 260
+        sprites[_INTL("trainer{1}",i)].y -= 300
       end
       if i == index
-        sprites["select"].y -= 260
+        sprites["select"].y -= 300
       end
     end
   end
@@ -229,7 +228,7 @@ def pbStadiumTrainers(trainers,index,title)
   
   pbSEPlay("Stadium Versus")
   
-  13.times do
+  15.times do
     Graphics.update
     viewport.update
     Input.update
@@ -393,7 +392,7 @@ def pbStadiumVictory(trainers,title)
   sprites = {}
   
   sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/stadium_bg")
+  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
   sprites["bg"].z = 1
   sprites["bg"].update
 
@@ -401,17 +400,17 @@ def pbStadiumVictory(trainers,title)
   
   rows = [[1],[2],[3],[4],[3,2],[3,3],[4,3],[4,4]]
   rows = rows[trainers.length - 1]
-  xcoords = [0,201,148,97,44]
-  ycoords = rows.length == 1 ? [209,251,99] : [154,196,44,238]
+  xcoords = [128,329,269,218,165] #[0,201,148,97,44]
+  ycoords = rows.length == 1 ? [305,347,195] : [250,292,140,334] #[209,251,99] : [154,196,44,238]
   
   sprites["title"] = IconSprite.new(0,0,viewport)
-  sprites["title"].setBitmap("Graphics/Pictures/stadium_title")
+  sprites["title"].setBitmap("Graphics/Pictures/Stadium/title")
   sprites["title"].z = 2
   sprites["title"].x = xcoords[4]
   sprites["title"].y = ycoords[0]
   
   sprites["subtitle"] = IconSprite.new(0,0,viewport)
-  sprites["subtitle"].setBitmap("Graphics/Pictures/stadium_subtitle")
+  sprites["subtitle"].setBitmap("Graphics/Pictures/Stadium/subtitle")
   sprites["subtitle"].z = 2
   sprites["subtitle"].x = xcoords[4]
   sprites["subtitle"].y = ycoords[1]
@@ -419,21 +418,21 @@ def pbStadiumVictory(trainers,title)
   # Drawing cup name and battle number
   pbSetSystemFont(sprites["title"].bitmap)
   pbDrawTextPositions(sprites["title"].bitmap,
-    [[title.upcase,212,6,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    [[title.upcase,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
   battletitle = "RESULTS"
   pbSetSystemFont(sprites["subtitle"].bitmap)
   pbDrawTextPositions(sprites["subtitle"].bitmap,
-    [[battletitle,212,6,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    [[battletitle,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
   
   sprites["row1"] = IconSprite.new(0,0,viewport)
-  sprites["row1"].setBitmap(_INTL("Graphics/Pictures/stadium_bar{1}",rows[0]))
+  sprites["row1"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[0]))
   sprites["row1"].z = 2
   sprites["row1"].x = xcoords[rows[0]]
   sprites["row1"].y = ycoords[2]
   
   if rows.length == 2
     sprites["row2"] = IconSprite.new(0,0,viewport)
-    sprites["row2"].setBitmap(_INTL("Graphics/Pictures/stadium_bar{1}",rows[1]))
+    sprites["row2"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[1]))
     sprites["row2"].z = 2
     sprites["row2"].x = xcoords[rows[1]]
     sprites["row2"].y = ycoords[3]
@@ -441,17 +440,16 @@ def pbStadiumVictory(trainers,title)
   
   for i in 0...trainers.length
     sprites[_INTL("lock{1}",i)] = IconSprite.new(0,0,viewport)
-    sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/stadium_defeat")
+    sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/Stadium/defeat")
     sprites[_INTL("lock{1}",i)].z = 5
     sprites[_INTL("lock{1}",i)].x = (i >= rows[0]) ? ((i-rows[0]) * 104) : (i * 104)
     sprites[_INTL("lock{1}",i)].x += xcoords[(i >= rows[0]) ? rows[1] : rows[0]] + 8
     sprites[_INTL("lock{1}",i)].y = ((i >= rows[0]) ? ycoords[3] : ycoords[2]) + 8
     if i <= index
-      trainers[i] = getID(PBTrainers,trainers[i]) if trainers[i].is_a?(Symbol)
       sprites[_INTL("trainer{1}",i)] = IconSprite.new(0,0,viewport)
       sprite = sprites[_INTL("trainer{1}",i)]
       sprite.setBitmap(
-        sprintf("Graphics/Characters/trainer%03d",trainers[i]))
+        sprintf("Graphics/Trainers/%s",trainers[i].to_s))
       sprite.src_rect = Rect.new(
         sprite.bitmap.width / 2 - 47,0,
         94,94)
@@ -467,28 +465,28 @@ def pbStadiumVictory(trainers,title)
   end
   
   if rows.length == 2
-    sprites["row1"].y -= 260
-    sprites["row2"].y += 260
-    sprites["title"].y -= 260
-    sprites["subtitle"].y += 260
+    sprites["row1"].y -= 300
+    sprites["row2"].y += 300
+    sprites["title"].y -= 300
+    sprites["subtitle"].y += 300
     for i in 0...trainers.length
       if i >= rows[0]
-        sprites[_INTL("lock{1}",i)].y += 260
+        sprites[_INTL("lock{1}",i)].y += 300
       else
-        sprites[_INTL("lock{1}",i)].y -= 260
+        sprites[_INTL("lock{1}",i)].y -= 300
       end
       if i <= index
         sprites[_INTL("trainer{1}",i)].y = sprites[_INTL("lock{1}",i)].y
       end
     end
   else
-    sprites["row1"].y -= 260
-    sprites["title"].y += 260
-    sprites["subtitle"].y += 260
+    sprites["row1"].y -= 300
+    sprites["title"].y += 300
+    sprites["subtitle"].y += 300
     for i in 0...trainers.length
-      sprites[_INTL("lock{1}",i)].y -= 260
+      sprites[_INTL("lock{1}",i)].y -= 300
       if i <= index
-        sprites[_INTL("trainer{1}",i)].y -= 260
+        sprites[_INTL("trainer{1}",i)].y -= 300
       end
     end
   end
@@ -502,7 +500,7 @@ def pbStadiumVictory(trainers,title)
     sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
   end
   
-  13.times do
+  15.times do
     Graphics.update
     viewport.update
     Input.update
@@ -594,11 +592,11 @@ def pbStadiumVictory(trainers,title)
     sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
   end
   
-  pbMEPlay("SlotsBigWin", 140)
+  pbMEPlay("Slots big win", 100)
   
   sprites["victory"] = IconSprite.new(
     0,Graphics.height/2-40,viewport)
-  sprites["victory"].setBitmap("Graphics/Pictures/stadium_victory")
+  sprites["victory"].setBitmap("Graphics/Pictures/Stadium/victory")
   sprites["victory"].opacity = 0
   sprites["victory"].z = 9
   
@@ -671,9 +669,8 @@ end
 
 def pbStadiumTeam(type,name,team=0)
   
-  type = getID(PBTrainers,type) if type.is_a?(Symbol)
   trainer = pbLoadTrainer(type,name,team)
-  party = trainer[2]
+  party = trainer.party
   
   viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
   viewport.z = 99999
@@ -681,28 +678,32 @@ def pbStadiumTeam(type,name,team=0)
   sprites = {}
   
   sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/stadium_bg")
+  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
   sprites["bg"].z = 1
   sprites["bg"].update
   
-  sprites["player"] = IconSprite.new(44,44,viewport)
-  sprites["player"].setBitmap("Graphics/Pictures/stadium_team_player")
+  sprites["player"] = IconSprite.new(44+128,44+96,viewport)
+  sprites["player"].setBitmap("Graphics/Pictures/Stadium/team_player")
   sprites["player"].z = 2
   
-  sprites["player_img"] = IconSprite.new(60,52,viewport)
+  player_type = PBParty.getTrainerType(getPartyActive(0))
+  offset = pbStadiumTrainerOffset(player_type)
+  sprites["player_img"] = IconSprite.new(60+128,52+96,viewport)
   sprites["player_img"].setBitmap(
-    sprintf("Graphics/Characters/trainer%03d",$Trainer.trainertype))
+    sprintf("Graphics/Trainers/%s",player_type.to_s))
   sprites["player_img"].z = 3
   sprites["player_img"].src_rect = Rect.new(
     sprites["player_img"].bitmap.width/2 - 47, 0, 94, 94)
+  sprites["player_img"].src_rect.x -= offset[0]
+  sprites["player_img"].src_rect.y -= offset[1]
   
-  sprites["opponent"] = IconSprite.new(44,196,viewport)
-  sprites["opponent"].setBitmap("Graphics/Pictures/stadium_team_opponent")
+  sprites["opponent"] = IconSprite.new(44+128,196+96,viewport)
+  sprites["opponent"].setBitmap("Graphics/Pictures/Stadium/team_opponent")
   sprites["opponent"].z = 2
   
-  sprites["opponent_img"] = IconSprite.new(358,246,viewport)
+  sprites["opponent_img"] = IconSprite.new(358+128,246+96,viewport)
   sprites["opponent_img"].setBitmap(
-    sprintf("Graphics/Characters/trainer%03d",type))
+    sprintf("Graphics/Trainers/%s",type.to_s))
   sprites["opponent_img"].z = 3
   sprites["opponent_img"].src_rect = Rect.new(
     sprites["opponent_img"].bitmap.width/2 - 47, 0, 94, 94)
@@ -710,12 +711,12 @@ def pbStadiumTeam(type,name,team=0)
   sprites["opponent_img"].src_rect.x -= offset[0]
   sprites["opponent_img"].src_rect.y -= offset[1]
     
-  sprites["vs"] = IconSprite.new(206,160,viewport)
-  sprites["vs"].setBitmap("Graphics/Pictures/stadium_vs")
+  sprites["vs"] = IconSprite.new(206+128,160+96,viewport)
+  sprites["vs"].setBitmap("Graphics/Pictures/Stadium/stadium_vs")
   sprites["vs"].z = 6
   sprites["vs"].opacity = 0
   
-  typename = PBTrainers.getName(type)
+  typename = GameData::TrainerType.get(type).name
   if typename.length > 11 && typename.include?(" ")
     typename = typename[(typename.index(" ")+1)..typename.length]
   end
@@ -723,31 +724,53 @@ def pbStadiumTeam(type,name,team=0)
   # Drawing cup name and battle number
   pbSetSmallFont(sprites["player"].bitmap)
   pbDrawTextPositions(sprites["player"].bitmap,
-    [["Trainer",14,102,0,Color.new(250,250,250),Color.new(40,40,40),1],
-     [$Trainer.name.upcase,14,124,0,Color.new(250,250,250),Color.new(40,40,40),1]])
+    [["Trainer",14,98,0,Color.new(250,250,250),Color.new(40,40,40),1],
+     [PBParty.getName(getPartyActive(0)).upcase,14,122,0,Color.new(250,250,250),Color.new(40,40,40),1]])
   pbSetSmallFont(sprites["opponent"].bitmap)
   pbDrawTextPositions(sprites["opponent"].bitmap,
-    [[typename,312,2,0,Color.new(250,250,250),Color.new(40,40,40),1],
-     [name.upcase,312,24,0,Color.new(250,250,250),Color.new(40,40,40),1]])
+    [[typename,312,0,0,Color.new(250,250,250),Color.new(40,40,40),1],
+     [name.upcase,312,20,0,Color.new(250,250,250),Color.new(40,40,40),1]])
   
-  x_coords = [180,280,380,180,280,380]
-  y_coords = [52,52,52,124,124,124]
+  x_coords = [308,408,508,308,408,508]
+  y_coords = [148,148,148,220,220,220]
   
   top_sprites = ["player", "player_img"]
   bottom_sprites = ["opponent", "opponent_img"]
   blue_sprites = ["player", "opponent"]
   
+  playerparty = []
+  for i in 0...3
+    if getActivePokemon(0)[i]
+      playerparty.push(getActivePokemon(0)[i])
+    else
+      playerparty.push(false)
+    end
+  end
+  if pbStadiumCup[4] # doubles
+    for i in 0...3
+      if getActivePokemon(1)[i]
+        playerparty.push(getActivePokemon(1)[i])
+      else
+        playerparty.push(false)
+      end
+    end
+  else
+    for i in 0...3
+      playerparty.push(false)
+    end
+  end
+
   for i in 0...6
     # Player party
     sprites[_INTL("plock{1}",i)] = IconSprite.new(358,246,viewport)
-    sprites[_INTL("plock{1}",i)].setBitmap("Graphics/Pictures/stadium_team_lock")
+    sprites[_INTL("plock{1}",i)].setBitmap("Graphics/Pictures/Stadium/team_lock")
     sprites[_INTL("plock{1}",i)].z = 5
     sprites[_INTL("plock{1}",i)].src_rect = Rect.new(0, 0, 90, 64)
     sprites[_INTL("plock{1}",i)].x = x_coords[i] - 12
     sprites[_INTL("plock{1}",i)].y = y_coords[i]
-    if $Trainer.party.length > i
+    if playerparty[i]
       sprites[_INTL("ppokemon{1}",i)] =
-        PokemonIconSprite.new($Trainer.party[i],viewport)
+        PokemonIconSprite.new(playerparty[i],viewport)
       sprites[_INTL("ppokemon{1}",i)].z = 4
       sprites[_INTL("ppokemon{1}",i)].x = x_coords[i]
       sprites[_INTL("ppokemon{1}",i)].y = y_coords[i]
@@ -756,7 +779,7 @@ def pbStadiumTeam(type,name,team=0)
     
     # Opponent party
     sprites[_INTL("olock{1}",i)] = IconSprite.new(358,246,viewport)
-    sprites[_INTL("olock{1}",i)].setBitmap("Graphics/Pictures/stadium_team_lock")
+    sprites[_INTL("olock{1}",i)].setBitmap("Graphics/Pictures/Stadium/team_lock")
     sprites[_INTL("olock{1}",i)].z = 5
     sprites[_INTL("olock{1}",i)].src_rect = Rect.new(0, 0, 90, 64)
     sprites[_INTL("olock{1}",i)].x = x_coords[i] - 126
@@ -776,14 +799,14 @@ def pbStadiumTeam(type,name,team=0)
   end
   
   for s in top_sprites
-    sprites[s].y -= 260
+    sprites[s].y -= 300
   end
   
   for s in bottom_sprites
-    sprites[s].y += 260
+    sprites[s].y += 300
   end
   
-  13.times do
+  15.times do
     Graphics.update
     viewport.update
     Input.update
@@ -813,7 +836,7 @@ def pbStadiumTeam(type,name,team=0)
     if i > 6
       for j in 0...6
         if (i-6) > j*6
-          if $Trainer.party.length > j
+          if playerparty[j]
             sprites[_INTL("plock{1}",j)].src_rect.y += 12
             sprites[_INTL("plock{1}",j)].src_rect.height -= 12
           end
@@ -827,7 +850,7 @@ def pbStadiumTeam(type,name,team=0)
     
     if i % 2 == 0
       for j in 0...6
-        if $Trainer.party.length > j
+        if playerparty[j]
           sprites[_INTL("ppokemon{1}",j)].update
         end
         if party.length > j
@@ -850,7 +873,7 @@ def pbStadiumTeam(type,name,team=0)
       end
     end
     
-    if i > 10 + ($Trainer.party.length * 6) && i > 10 + (party.length * 6) && i < 80
+    if i > 10 + (playerparty.length * 6) && i > 10 + (party.length * 6) && i < 80
       pbSEPlay("Harden",160) if !played_se
       played_se = true
       sprites["vs"].opacity += 16
@@ -918,7 +941,7 @@ def pbStadiumTrainerOffset(type)
   when :TWINS
     return [  4,-44]
   when :PKMNRANGER_M, :MINER, :GUITARIST,
-       :PKMNFAN_M, :MAID
+       :PKMNFAN_M, :MAID, :RIVAL, :FORETELLER
     return [  8,  0]
   when :GAMBLER
     return [ -8,  0]
@@ -928,6 +951,8 @@ def pbStadiumTrainerOffset(type)
     return [-36, -6]
   when :ACETRAINER_M
     return [  0,  4]
+  when :AMETHYST
+    return [ -4,-14]
   end
   
   return [0,0]
@@ -963,13 +988,13 @@ def pbStadiumMenu
   sprites["messagebox"].letterbyletter=false
   
   sprites["difficulty"]=IconSprite.new(384,342,viewport)
-  sprites["difficulty"].setBitmap("Graphics/Pictures/stadium_difficulty")
+  sprites["difficulty"].setBitmap("Graphics/Pictures/Stadium/difficulty")
   sprites["difficulty"].src_rect = Rect.new(0,0,120,22)
   sprites["difficulty"].z=999
   
   for i in 0...10
     sprites[_INTL("complete{1}",i)]=IconSprite.new(204,50+32*i,viewport)
-    sprites[_INTL("complete{1}",i)].setBitmap("Graphics/Pictures/quests_complete")
+    sprites[_INTL("complete{1}",i)].setBitmap("Graphics/Pictures/Quests/icon_complete")
     sprites[_INTL("complete{1}",i)].z=999
     sprites[_INTL("complete{1}",i)].visible=false
   end
@@ -1017,6 +1042,7 @@ def pbStadiumMenu
                cups[1][index],
                cups[2][index],
                cups[3][index],
+               cups[4][index],
                0
              ]
              break
@@ -1106,15 +1132,16 @@ end
 def pbStadiumCupTrainer
   cup = pbStadiumCup
   index = pbStadiumCupIndex
+  setBattleRule("fixedlevel")
+  setBattleRule("noPartner") if !cup[4]
   return pbTrainerBattle(
     cup[3][index][0],
     cup[3][index][1],
     _I(cup[3][index][3]),
-    false,
+    cup[4], # double battle
     cup[3][index][2] ? cup[3][index][2] : 0,
     true,
-    nil,
-    false)
+    nil)
 end
 
 def pbStadiumWin(cup)
@@ -1140,7 +1167,6 @@ def pbStadiumSetup
   cup = pbStadiumCup
   index = pbStadiumCupIndex
   trainer = cup[3][index][0]
-  trainer = getID(PBTrainers,trainer) if trainer.is_a?(Symbol)
   difficulty = cup[2][2]
   chance = 9 - difficulty
   chance -= 1 if cup[3].length - 2 == index
@@ -1149,18 +1175,18 @@ def pbStadiumSetup
   
   spectators = [
     "NPC 02", "NPC 04", "NPC 05", "NPC 06", "NPC 07",
-    "NPC 33", "NPC 35", "NPC 36", "NPC 37",
-    "trchar005", "trchar006", "trchar007", "trchar008",
-    "trchar012", "trchar013", "trchar011", "trchar019",
-    "trchar020", "trchar022", "trchar030", "trchar031",
-    "trchar032", "trchar036", "trchar037", "trchar048",
-    "trchar050", "trchar051", "trchar061"
+    "NPC 33", "NPC 35", "NPC 36", "NPC 37"#,
+    #"trchar005", "trchar006", "trchar007", "trchar008",
+    #"trchar012", "trchar013", "trchar011", "trchar019",
+    #"trchar020", "trchar022", "trchar030", "trchar031",
+    #"trchar032", "trchar036", "trchar037", "trchar048",
+    #"trchar050", "trchar051", "trchar061"
   ]
   
   rare_spectators = [
-    "NPC 08", "NPC 10", "NPC 11",
-    "trchar015", "trchar016", "trchar045", "trchar047",
-    "trchar052", "trchar053"
+    "NPC 08", "NPC 10", "NPC 11"#,
+    #"trchar015", "trchar016", "trchar045", "trchar047",
+    #"trchar052", "trchar053"
   ]
   
   for event in events
@@ -1168,7 +1194,7 @@ def pbStadiumSetup
     if event.id == 1 || event.id == 3 # Player Sprites
       event.character_name = $game_player.character_name
     elsif event.id == 2 || event.id == 4 # Opponent Sprites
-      event.character_name = sprintf("trchar%03d",trainer)
+      event.character_name = sprintf("trainer_%s",trainer.to_s)
     elsif event.name == "Spectator"
       if rand(chance)==0
         if rand(4)==0
@@ -1208,7 +1234,103 @@ def pbDisplayStadiumPointsWindow(msgwindow,goldwindow)
   return coinwindow
 end
 
+class Window_ComplexCommandPokemon < Window_DrawableCommand
+  attr_reader :commands
 
+  def initialize(commands,width=nil)
+    @starting=true
+    @commands=commands
+    dims=[]
+    getAutoDims(commands,dims,width)
+    super(0,0,dims[0],dims[1])
+    @selarrow=AnimatedBitmap.new("Graphics/Pictures/selarrow")
+    @starting=false
+  end
+
+  def self.newEmpty(x,y,width,height,viewport=nil)
+    ret=self.new([],width)
+    ret.x=x
+    ret.y=y
+    ret.width=width
+    ret.height=height
+    ret.viewport=viewport
+    return ret
+  end
+
+  def index=(value)
+    super
+    refresh if !@starting
+  end
+
+  def indexToCommand(index)
+    curindex=0
+    i=0; loop do break unless i<@commands.length
+      return [i/2,-1] if index==curindex
+      curindex+=1
+      return [i/2,index-curindex] if index-curindex<commands[i+1].length
+      curindex+=commands[i+1].length
+      i+=2
+    end
+    return [-1,-1]
+  end
+
+  def getText(array,index)
+    cmd=indexToCommand(index)
+    return "" if cmd[0]==-1
+    return array[cmd[0]*2] if cmd[1]<0
+    return array[cmd[0]*2+1][cmd[1]]
+  end
+
+  def commands=(value)
+    @commands=value
+    @item_max=commands.length  
+    self.index=self.index
+  end
+
+  def width=(value)
+    super
+    if !@starting
+      self.index=self.index
+    end
+  end
+
+  def height=(value)
+    super
+    if !@starting
+      self.index=self.index
+    end
+  end
+
+  def resizeToFit(commands)
+    dims=[]
+    getAutoDims(commands,dims)
+    self.width=dims[0]
+    self.height=dims[1]
+  end
+
+  def itemCount
+    mx=0
+    i=0; loop do break unless i<@commands.length
+      mx+=1+@commands[i+1].length
+      i+=2
+    end
+    return mx
+  end
+
+  def drawItem(index,count,rect)
+    command=indexToCommand(index)
+    return if command[0]<0
+    text=getText(@commands,index)
+    if command[1]<0
+      pbDrawShadowText(self.contents,rect.x+32,rect.y,rect.width,rect.height,text,
+         self.baseColor,self.shadowColor)
+    else
+      rect=drawCursor(index,rect)
+      pbDrawShadowText(self.contents,rect.x,rect.y,rect.width,rect.height,text,
+         self.baseColor,self.shadowColor)
+    end
+  end
+end
 
 
 

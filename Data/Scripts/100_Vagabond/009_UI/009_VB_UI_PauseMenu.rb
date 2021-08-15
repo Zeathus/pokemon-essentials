@@ -621,7 +621,7 @@ def pbPauseCommandSelect(command,toDispose)
     }
   when "Party"
     sscene=PokemonScreen_Scene.new
-    sscreen=PokemonScreen.new(sscene,$Trainer.party)
+    sscreen=PokemonScreen.new(sscene,getActivePokemon(0))
     hiddenmove=nil
     pbFadeOutIn(99999) { 
        hiddenmove=sscreen.pbPokemonScreen

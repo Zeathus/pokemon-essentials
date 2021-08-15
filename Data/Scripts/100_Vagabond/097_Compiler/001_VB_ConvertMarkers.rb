@@ -1,7 +1,7 @@
 module Compiler
   module_function
 
-  def pbLoadMarkerComments
+  def pbLoadMarkerComments(silent=false)
     mapdata=MapData.new
     t = Time.now.to_i
     Graphics.update
@@ -10,7 +10,7 @@ module Compiler
       $Markers[id]=[]
       map=mapdata.getMap(id)
       next if !map || !mapdata.mapinfos[id]
-      pbSetWindowText(_INTL("Processing markers on map {1} ({2})",id,mapdata.mapinfos[id].name))
+      pbSetWindowText(_INTL("Processing markers on map {1} ({2})",id,mapdata.mapinfos[id].name)) if !silent
       for key in map.events.keys
         if Time.now.to_i - t >= 5
           Graphics.update

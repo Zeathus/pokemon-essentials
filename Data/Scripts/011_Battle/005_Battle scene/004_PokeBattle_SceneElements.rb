@@ -293,7 +293,7 @@ class PokemonDataBox < SpriteWrapper
         pbDrawNumber(-1,@hpNumbers.bitmap,54,2)   # / char
         pbDrawNumber(@battler.totalhp,@hpNumbers.bitmap,70,2)
       else
-        hpPercent = (self.hp*100.0/@battler.totalhp)
+        hpPercent = (self.hp*100.0/@battler.totalhp).ceil
         hpText = self.hp>=@battler.totalhp ? sprintf("%d%%",hpPercent.round) : sprintf("%.1f%%",hpPercent)
         pbDrawNumber(hpText,@hpNumbers.bitmap,76,2,2)
       end

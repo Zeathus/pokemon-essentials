@@ -112,7 +112,7 @@ def pbUI_QuestAvailable(anim)
       else
         text += "<b>" + num.to_s + " NEW QUESTS AVAILABLE" + "</b>"
       end
-      sprites["locwindow"].x=512
+      sprites["locwindow"].x=512+256
       sprites["locwindow"].y=384/2 - sprites["locwindow"].lineHeight * lines / 2
       sprites["locwindow"].visible = true
       sprites["locwindow"].setTextToFit(text)
@@ -122,13 +122,13 @@ def pbUI_QuestAvailable(anim)
     end
     if frame>0
       sprites["locwindow"].x =
-        (512 - (190 * (0.5 + 0.5 * Math.sin(3.9*(frame*1.0/20) - 2)))).floor
+        (512+256 - (190 * (0.5 + 0.5 * Math.sin(3.9*(frame*1.0/20) - 2)))).floor
     end
   elsif frame >= 20 && frame < 80
     
   elsif frame >= 120 && frame < 140
     sprites["locwindow"].x =
-      (512 - (190 * (0.5 + 0.5 * Math.sin(3.9*((140-frame)*1.0/20) - 2)))).floor
+      (512+256 - (190 * (0.5 + 0.5 * Math.sin(3.9*((140-frame)*1.0/20) - 2)))).floor
   elsif frame >= 140
     pbDisposeSpriteHash(anim[4])
     anim[3].dispose
@@ -167,7 +167,7 @@ def pbUI_QuestDiscovery(anim)
       text += "<b><u>" + quest.name + "</b></u><br>"
       text += "Quest Discovered!<br>"
       text += "(X for more info)"
-      sprites["locwindow"].x=556
+      sprites["locwindow"].x=556+256
       sprites["locwindow"].y=384/2 - sprites["locwindow"].lineHeight * lines / 2
       sprites["locwindow"].visible = true
       sprites["locwindow"].setTextToFit(text)
@@ -177,13 +177,13 @@ def pbUI_QuestDiscovery(anim)
     end
     if frame>0
       sprites["locwindow"].x =
-        (556 - (190 * (0.5 + 0.5 * Math.sin(3.9*(frame*1.0/20) - 2)))).floor
+        (556 + 256 - (190 * (0.5 + 0.5 * Math.sin(3.9*(frame*1.0/20) - 2)))).floor
     end
   elsif frame >= 20 && frame < 80
     
   elsif frame >= 120 && frame < 140
     sprites["locwindow"].x =
-      (556 - (190 * (0.5 + 0.5 * Math.sin(3.9*((140-frame)*1.0/20) - 2)))).floor
+      (556 + 256 - (190 * (0.5 + 0.5 * Math.sin(3.9*((140-frame)*1.0/20) - 2)))).floor
   elsif frame >= 140
     pbDisposeSpriteHash(anim[4])
     anim[3].dispose
@@ -291,7 +291,7 @@ def pbUI_QuestProgress(anim)
       text += "<b><u>" + quest.name + "</b></u><br>"
       text += "Quest Updated<br>"
       text += "(X for more info)"
-      sprites["locwindow"].x=530
+      sprites["locwindow"].x=530+256
       sprites["locwindow"].y=384/2 - sprites["locwindow"].lineHeight * lines / 2
       sprites["locwindow"].visible = true
       sprites["locwindow"].setTextToFit(text)
@@ -301,13 +301,13 @@ def pbUI_QuestProgress(anim)
     end
     if frame>0
       sprites["locwindow"].x =
-        (530 - (190 * (0.5 + 0.5 * Math.sin(3.9*(frame*1.0/20) - 2)))).floor
+        (530+256 - (190 * (0.5 + 0.5 * Math.sin(3.9*(frame*1.0/20) - 2)))).floor
     end
   elsif frame >= 20 && frame < 80
     
   elsif frame >= 120 && frame < 140
     sprites["locwindow"].x =
-      (530 - (190 * (0.5 + 0.5 * Math.sin(3.9*((140-frame)*1.0/20) - 2)))).floor
+      (530+256 - (190 * (0.5 + 0.5 * Math.sin(3.9*((140-frame)*1.0/20) - 2)))).floor
   elsif frame >= 140
     pbDisposeSpriteHash(anim[4])
     anim[3].dispose

@@ -82,8 +82,8 @@ module RPG
       end
     end
 
-    def type=(type)
-      return if @type == type
+    def type(type,force=false)
+      return if !force && @type == type
       @type = type
       @type = 0 if !@type
       case @type
@@ -123,6 +123,10 @@ module RPG
       end
     end
 
+    def type=(type)
+      self.type(type,false)
+    end
+
     def ox=(ox)
       return if @ox == ox;
       @ox = ox
@@ -157,10 +161,10 @@ module RPG
       end
     end
 
-    def update
+    def update(force=false)
       # @max is (power+1)*4, where power is between 1 and 9
       @frame+=1
-      return if @type==PBVFX::None
+      return if !force && @type==PBVFX::None
       ensureSprites
       newplayerx = ($game_player.real_x / 4.0).floor
       newplayery = ($game_player.real_y / 4.0).floor
@@ -186,7 +190,7 @@ module RPG
             sprite.src_rect.y += 22
             sprite.src_rect.y = 0 if sprite.src_rect.y >= 88
           end
-          if $game_screen.weather_type==PBFieldWeather::Winds
+          if $game_screen.weather_type==:Winds
             sprite.x += 12
             sprite.y -= 3
           end

@@ -307,7 +307,7 @@ def pbEXPScreen(expgain,sharedexp,fulltoall=false)
             pbSetSmallFont(lvlbitmap)
             pbDrawTextPositions(lvlbitmap,textpos)
             
-            pbSEPlay("expfull")
+            pbSEPlay("Pkmn exp full")
             if !Input.press?(Input::B)
               frames = [-6,-4,-2,0,0,2,4,6]
               16.times do |i|

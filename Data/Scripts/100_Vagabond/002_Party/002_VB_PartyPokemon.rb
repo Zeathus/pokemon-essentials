@@ -59,6 +59,12 @@ def addTestPokemon2
   party = pbGet(PARTY_POKEMON)[PBParty::Kira]
   party.push(createPartyPokemon(
     PBParty::Kira,:TYRANTRUM,50,[],1,:ADAMANT,0,[31,31,16,10,5,16]))
+  party = pbGet(PARTY_POKEMON)[PBParty::Merrick]
+  party.push(createPartyPokemon(
+    PBParty::Merrick,:CELEBI,50,[],1,:SERIOUS,0,[31,31,16,16,31,16]))
+  party = pbGet(PARTY_POKEMON)[PBParty::Amethyst]
+  party.push(createPartyPokemon(
+    PBParty::Amethyst,:STARMIE,50,[],1,:TIMID,0,[31,31,16,10,5,16]))
 end
 
 def createPartyPokemon(id,species,level,moves,ability,nature,gender,ivs=nil)

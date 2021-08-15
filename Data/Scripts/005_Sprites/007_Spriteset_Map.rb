@@ -125,6 +125,7 @@ class Spriteset_Map
     @fog = AnimatedPlane.new(@@viewport1)
     @fog.z = 3000
     @character_sprites = []
+    $game_switches[HIDE_REFLECTIONS] = pbHideReflections?(@map.map_id)
     for i in @map.events.keys.sort
       sprite = Sprite_Character.new(@@viewport1,@map.events[i])
       @character_sprites.push(sprite)
@@ -135,6 +136,7 @@ class Spriteset_Map
     initSpawnAreas
     @weather = RPG::Weather.new(@@viewport1)
     @vfx = RPG::VFX.new(@viewport1b)
+    $game_screen.vfx(PBVFX::None)
     pbOnSpritesetCreate(self,@@viewport1)
     update
   end

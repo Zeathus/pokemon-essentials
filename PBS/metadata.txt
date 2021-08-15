@@ -95,7 +95,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,4,11
-BattleBack = Woodland
+BattleBack = woodland
 MapSize = 2,1111
 #-------------------------------
 [012]
@@ -105,7 +105,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,8,10
-BattleBack = MountainGrass
+BattleBack = mountain_grass
 MapSize = 1,1
 #-------------------------------
 [013]
@@ -124,7 +124,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,8,11
-BattleBack = MountainGrass
+BattleBack = mountain_grass
 MapSize = 1,1
 #-------------------------------
 [015]
@@ -195,7 +195,7 @@ MapSize = 1,1
 Outdoor = true
 ShowArea = true
 MapPosition = 0,25,15
-BattleBack = Beach
+BattleBack = beach
 #-------------------------------
 [025]
 # West Andes Isle
@@ -204,7 +204,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,16,15
-BattleBack = Beach
+BattleBack = beach
 MapSize = 2,11
 #-------------------------------
 [026]
@@ -214,7 +214,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,18,15
-BattleBack = Field
+BattleBack = field
 MapSize = 2,11
 #-------------------------------
 [027]
@@ -233,13 +233,14 @@ MapPosition = 0,8,9
 [056]
 # Pokécare Facility
 Outdoor = false
-BattleBack = GPO
+BattleBack = gpo
 #-------------------------------
 [062]
 # Breccia Trail
 Outdoor = true
 ShowArea = true
 MapPosition = 0,2,11
+BattleBack = field
 MapSize = 2,11
 #-------------------------------
 [072]
@@ -247,7 +248,7 @@ MapSize = 2,11
 Outdoor = true
 ShowArea = true
 MapPosition = 0,5,8
-BattleBack = MountainGrass
+BattleBack = mountain_grass
 MapSize = 3,111
 #-------------------------------
 [073]
@@ -255,7 +256,7 @@ MapSize = 3,111
 Outdoor = true
 ShowArea = true
 MapPosition = 0,4,8
-BattleBack = MountainGrass
+BattleBack = mountain_grass
 MapSize = 1,111
 #-------------------------------
 [074]
@@ -286,7 +287,7 @@ MapSize = 2,11
 #-------------------------------
 [149]
 # Uncanny Valley
-BattleBack = DistortionWorld
+BattleBack = distortion
 WildBattleBGM = Battle! Distortion World (Stardust).ogg
 #-------------------------------
 [151]
@@ -300,7 +301,7 @@ WildBattleBGM = Song of the Void.ogg
 #-------------------------------
 [156]
 # Giratina's Domain
-BattleBack = DistortionWorld
+BattleBack = distortion
 #-------------------------------
 [162]
 # Breccia City Gym
@@ -325,28 +326,10 @@ MapPosition = 0,6,12
 [187]
 # Sanctuary
 ShowArea = false
-BattleBack = Sanctuary
 #-------------------------------
 [188]
 # ?DarkVoid?
 ShowArea = true
-BattleBack = DarkVoid
-#-------------------------------
-[189]
-# ?DarkVoid?
-BattleBack = DarkVoid
-#-------------------------------
-[191]
-# ?DarkVoid?
-BattleBack = DarkVoid
-#-------------------------------
-[192]
-# ?DarkVoid?
-BattleBack = DarkVoid
-#-------------------------------
-[193]
-# Sanctuary
-BattleBack = Sanctuary
 #-------------------------------
 [198]
 # Scoria City
@@ -363,7 +346,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,15
-BattleBack = Woodland
+BattleBack = woodland
 MapSize = 1,1
 #-------------------------------
 [209]
@@ -373,7 +356,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,15
-BattleBack = Woodland
+BattleBack = woodland
 MapSize = 1,1
 #-------------------------------
 [210]
@@ -383,7 +366,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,15
-BattleBack = Woodland
+BattleBack = woodland
 MapSize = 1,1
 #-------------------------------
 [211]
@@ -393,8 +376,14 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,14
-BattleBack = Woodland
+BattleBack = woodland
 MapSize = 1,1
+#-------------------------------
+[212]
+# Schist Stadium Battle
+Outdoor = false
+ShowArea = false
+BattleBack = indoor_arena
 #-------------------------------
 [216]
 # Scoria Canyon
@@ -467,12 +456,12 @@ MapPosition = 0,22,3
 [231]
 # Training Facility
 Outdoor = false
-BattleBack = GPO
+BattleBack = gpo
 #-------------------------------
 [232]
 # Training Facility
 Outdoor = false
-BattleBack = GPO
+BattleBack = gpo
 #-------------------------------
 [233]
 # Ranger Outpost Scene
@@ -480,5 +469,5 @@ Outdoor = true
 #-------------------------------
 [240]
 # Distortion Abode
-BattleBack = DistortionWorld
+BattleBack = distortion
 WildBattleBGM = Battle! Distortion World (Stardust).ogg

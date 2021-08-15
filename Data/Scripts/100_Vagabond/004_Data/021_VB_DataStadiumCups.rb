@@ -4,10 +4,11 @@ def pbStadiumCups
   descriptions = []
   stats = [] # [max_level, max_pkmn, difficulty]
   trainers = [] # [type, name, party, win, *before, *after]
+  doubles = []
   
   titles.push("Tutorial Cup")
   descriptions.push("Get used to the Stadium battles with this Tutorial Cup.")
-  stats.push([10,2,1])
+  stats.push([20,2,1])
   trainers.push([
     [:YOUNGSTER, "Ichi", 0,
       "You beat me...",
@@ -25,9 +26,41 @@ def pbStadiumCups
       "Getting used to the stadium?WT I'm your final match this Cup!",
       "This was just the tutorial Cup.WT Just wait until you get to the really tough matches!"]
   ])
+  doubles.push(false)
   
   if pbStadiumHasWonCup("Tutorial Cup") || $DEBUG
     
+    titles.push("Double Trouble Cup")
+    descriptions.push("Go head to head against trainers in double battles.")
+    stats.push([30,4,2])
+    trainers.push([
+      [:NURSERYAID, "Margaret", 0,
+        "You're not just a kid...",
+        "I can handle an entire kindergarten. Two Pokémon at once should be easy!"],
+      [:TWINS, "Mia & Pia", 0,
+        "We need to work on our twin synergy.",
+        "Twogether we are stronger than anyone!"],
+      [:OFFICEWORKER, "Harold", 0,
+        "I need a break...",
+        "I work two jobs, and this is not one of them!"],
+      [:GUITARIST, "Randal", 0,
+        "Want to do another Round?",
+        "Go my Pokemon! Work together and create the perfect symphony!"]
+    ])
+    doubles.push(true)
+
+    # Affinity Cup
+    titles.push("Affinity Cup")
+    descriptions.push("Test your strength against opposing affinity boosts.")
+    stats.push([40,4,4])
+    trainers.push([
+      [:SCIENTIST_M, "Ralph", 0, "..."],
+      [:NURSE, "Holly", 0, "..."],
+      [:ENGINEER, "Victor", 0, "..."],
+      [:CRUSHGIRL, "Betty", 0, "..."]
+    ])
+    doubles.push(true)
+
     # Phantom Cup (Persona 5)
     titles.push("Phantom Cup")
     descriptions.push("Face off against rebellious thieves from another realm.")
@@ -42,8 +75,9 @@ def pbStadiumCups
       [:BURGLAR, "Morgana", 0, "..."],
       [:GAMBLER, "Ren", 0, "..."]
     ])
+    doubles.push(false)
     
-    # Phantom Cup (Persona 5)
+    # Aegis Cup (Xenoblade)
     titles.push("Aegis Cup")
     descriptions.push("Battle a foreign party of unique opponents.")
     stats.push([50,3,4])
@@ -54,6 +88,32 @@ def pbStadiumCups
       [:NURSE, "Nia", 0, "..."],
       [:MINER, "Rex", 0, "..."]
     ])
+    doubles.push(false)
+
+    # VGC Champions Cup
+    titles.push("VGC Champions Cup")
+    descriptions.push("Battle against previous champions of competitive Pokemon battling.")
+    stats.push([50,6,5])
+    trainers.push([
+      [:VETERAN_M, "Kazuyuki Tsuji", 0,
+        "..."],
+      [:VETERAN_M, "Ray Rizzo", 0,
+        "..."],
+      [:VETERAN_M, "Ray Rizzo", 1,
+        "..."],
+      [:VETERAN_M, "Arash Ommati", 0,
+        "..."],
+      [:VETERAN_M, "Sejun Park", 0,
+        "..."],
+      [:VETERAN_M, "Shoma Honami", 0,
+        "..."],
+      [:VETERAN_M, "Ryota Otsubo", 0,
+        "..."],
+      [:VETERAN_M, "Paul Ruiz", 0,
+        "..."]
+    ])
+    doubles.push(true)
+
     # No More Tutorial Cup
     titles.push("No More Tutorial")
     descriptions.push("The Tutorial Cup trainers are back for a long awaited rematch.")
@@ -75,10 +135,9 @@ def pbStadiumCups
         "I will go all out this time, for a rematch!",
         "You've come so far since the Tutorial Cup.WT This was a fun battle. "]
     ])
+    doubles.push(false)
   
   end
-  
-  #titles.push("Xenoblade 2 Cup")
   
   #titles.push("Kanto Cup")
   #titles.push("Johto Cup")
@@ -88,6 +147,6 @@ def pbStadiumCups
   #titles.push("Kalos Cup")
   #titles.push("Alola Cup")
   
-  return [titles,descriptions,stats,trainers]
+  return [titles,descriptions,stats,trainers,doubles]
   
 end

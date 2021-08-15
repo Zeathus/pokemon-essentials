@@ -316,7 +316,7 @@ class MoveSelectionSprite < SpriteWrapper
         textpos.push([eggstate,288,342,2,base,shadow])
       end
       if pokemon.hasItem?
-        smalltextpos.push([PBItems.getName(pokemon.item),288,268,2,base,shadow])
+        smalltextpos.push([GameData::Item.get(pokemon.item).name,288,268,2,base,shadow])
       else
         smalltextpos.push([_INTL("No Item"),288,268,2,Color.new(208,208,200),Color.new(120,144,184)])
       end
@@ -489,7 +489,7 @@ class MoveSelectionSprite < SpriteWrapper
         [_INTL("{1} Nature",GameData::Nature.get(pokemon.nature).name),180,280,2,base2,shadow2]
       ]
       if pokemon.hasItem?
-        smalltextpos.push([GameData::Items.get(pokemon.item).name,398,280,2,base2,shadow2])
+        smalltextpos.push([GameData::Item.get(pokemon.item).name,398,280,2,base2,shadow2])
       else
         smalltextpos.push([_INTL("No Item"),398,280,2,Color.new(208,208,200),Color.new(120,144,184)])
       end

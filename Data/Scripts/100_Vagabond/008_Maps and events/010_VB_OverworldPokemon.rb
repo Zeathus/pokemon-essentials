@@ -239,10 +239,7 @@ class OverworldPokemon
   end
 
   def screen_y_ground
-    #ret = 0#((@sprite.y - @area.map.display_y) / Game_Map::Y_SUBPIXELS).round
-    #ret += Game_Map::TILE_HEIGHT
-    ret = 0#@sprite.y / Game_Map::Y_SUBPIXELS
-    return ret
+    return @sprite.y + Game_Map::TILE_HEIGHT
   end
   
 end
@@ -343,7 +340,6 @@ class SpawnArea
       end
       encounterType = $PokemonEncounters.pbSpawnType(@terrain)
       return if encounterType == :None
-      echo encounterType.to_s
       return if !$PokemonEncounters.has_encounter_type?(encounterType)
       encounter = $PokemonEncounters.choose_wild_pokemon(encounterType)
       return if !encounter

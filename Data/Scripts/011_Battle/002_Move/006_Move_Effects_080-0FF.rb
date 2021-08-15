@@ -2051,11 +2051,10 @@ class PokeBattle_Move_0C3 < PokeBattle_TwoTurnMove
         return false
       end
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2084,11 +2083,10 @@ class PokeBattle_Move_0C4 < PokeBattle_TwoTurnMove
         return false
       end
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2116,11 +2114,10 @@ class PokeBattle_Move_0C5 < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2148,11 +2145,10 @@ class PokeBattle_Move_0C6 < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2182,11 +2178,10 @@ class PokeBattle_Move_0C7 < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2214,11 +2209,10 @@ class PokeBattle_Move_0C8 < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2255,11 +2249,10 @@ class PokeBattle_Move_0C9 < PokeBattle_TwoTurnMove
         return false
       end
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2282,11 +2275,10 @@ class PokeBattle_Move_0CA < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2309,11 +2301,10 @@ class PokeBattle_Move_0CB < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2339,11 +2330,10 @@ class PokeBattle_Move_0CC < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -2371,11 +2361,10 @@ class PokeBattle_Move_0CD < PokeBattle_TwoTurnMove
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack]
       if user.hasActiveAbility?(:TIMESKIP)
-        @battle.pbCommonAnimation("TimeSkip",user,nil)
-        @battle.pbDisplay(_INTL("{1} used Time Skip to attack immediately!",user.pbThis))
         @powerHerb = false
         @chargingTurn = true
         @damagingTurn = true
+        @timeSkip = true
         return false
       end
     end
@@ -3072,7 +3061,6 @@ class PokeBattle_Move_0E5 < PokeBattle_Move
     @timeskip = false
     if user.hasActiveAbility?(:TIMESKIP)
       @timeskip = true
-      @battle.pbCommonAnimation("TimeSkip",user,nil)
     end
   end
 
@@ -3097,9 +3085,10 @@ class PokeBattle_Move_0E5 < PokeBattle_Move
   def pbShowAnimation(id,user,targets,hitNum=0,showAnimation=true)
     super
     if @timeskip
-      @battle.pbDisplay(_INTL("All Pokémon that hear the song will faint in three turns!"))
-    else
+      @battle.pbCommonAnimation("TimeSkip",user,nil)
       @battle.pbDisplay(_INTL("All Pokémon that hear the song will faint at the end of turn!"))
+    else
+      @battle.pbDisplay(_INTL("All Pokémon that hear the song will faint in three turns!"))
     end
   end
 end

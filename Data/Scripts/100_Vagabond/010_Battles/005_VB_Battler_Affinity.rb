@@ -20,7 +20,7 @@ class PokeBattle_Battler
                     end
                 end
             elsif ally.hasActiveAbility?(:FIERCEBOND)
-                if pbCanRaiseStatStage?(PBStats::ATTACK,self,false)
+                if pbCanRaiseStatStage?(:ATTACK,self,false)
                     if ally == self
                         @battle.pbDisplay(_INTL("{1}'s Fierce Bond increased its Attack!", pbThis))
                     else
@@ -29,7 +29,7 @@ class PokeBattle_Battler
                     pbRaiseStatStage(:ATTACK,1,self,false)
                 end
             elsif ally.hasActiveAbility?(:GUARDINGBOND)
-                if pbCanRaiseStatStage?(PBStats::DEFENSE,self,false)
+                if pbCanRaiseStatStage?(:DEFENSE,self,false)
                     if ally == self
                         @battle.pbDisplay(_INTL("{1}'s Guarding Bond increased its Defense!", pbThis))
                     else
@@ -38,7 +38,7 @@ class PokeBattle_Battler
                     pbRaiseStatStage(:DEFENSE,1,self,false)
                 end
             elsif ally.hasActiveAbility?(:RADIANTBOND)
-                if pbCanRaiseStatStage?(PBStats::SPATK,self,false)
+                if pbCanRaiseStatStage?(:SPECIAL_ATTACK,self,false)
                     if ally == self
                         @battle.pbDisplay(_INTL("{1}'s Radiant Bond increased its Sp. Atk!", pbThis))
                     else
@@ -47,7 +47,7 @@ class PokeBattle_Battler
                     pbRaiseStatStage(:SPECIAL_ATTACK,1,self,false)
                 end
             elsif ally.hasActiveAbility?(:SPIRITUALBOND)
-                if pbCanRaiseStatStage?(PBStats::SPDEF,self,false)
+                if pbCanRaiseStatStage?(:SPECIAL_DEFENSE,self,false)
                     if ally == self
                         @battle.pbDisplay(_INTL("{1}'s Spiritual Bond increased its Sp. Def!", pbThis))
                     else
@@ -56,7 +56,7 @@ class PokeBattle_Battler
                     pbRaiseStatStage(:SPECIAL_DEFENSE,1,self,false)
                 end
             elsif ally.hasActiveAbility?(:LIVELYBOND)
-                if pbCanRaiseStatStage?(PBStats::SPEED,self,false)
+                if pbCanRaiseStatStage?(:SPEED,self,false)
                     if ally == self
                         @battle.pbDisplay(_INTL("{1}'s Lively Bond increased its Speed!", pbThis))
                     else

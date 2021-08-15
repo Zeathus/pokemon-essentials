@@ -196,6 +196,10 @@ def pbInitQuests
   #pbQuest(:NoviceBattler).hideitem = true
 end
 
+def pbSQ(id)
+  return pbQuest(id)
+end
+
 def pbQuest(id)
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   return $game_variables[QUEST_ARRAY][id]

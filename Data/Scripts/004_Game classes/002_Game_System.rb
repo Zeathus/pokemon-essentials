@@ -236,7 +236,7 @@ class Game_System
       vol = se.volume
       vol *= $PokemonSystem.sevolume/100.0
       vol = vol.to_i
-      Audio.se_play("Audio/SE/"+se.name,vol,se.pitch)
+      Audio.se_play("Audio/SE/"+se.name,vol,se.pitch ? se.pitch : 100)
     end
   end
 

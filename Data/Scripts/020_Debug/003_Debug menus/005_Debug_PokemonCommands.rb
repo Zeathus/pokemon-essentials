@@ -505,7 +505,18 @@ PokemonDebugMenuCommands.register("teachmove", {
   "name"        => _INTL("Teach move"),
   "always_show" => true,
   "effect"      => proc { |pkmn, pkmnid, heldpoke, settingUpBattle, screen|
-    move = pbChooseMoveList
+    move = nil
+    if Input.press?(Input::CTRL)
+      m = pbEnterText("Move Name",0,20,"",2,pkmn)
+      if m.length > 0
+        move = GameData::Move.exists?(eval(":" + m.upcase)) ? GameData::Move.get(eval(":" + m.upcase)) : nil
+        if !move
+          pbMessage("Invalid move name")
+        end
+      end
+    else
+      move = pbChooseMoveList
+    end
     if move
       pbLearnMove(pkmn, move)
       screen.pbRefreshSingle(pkmnid)

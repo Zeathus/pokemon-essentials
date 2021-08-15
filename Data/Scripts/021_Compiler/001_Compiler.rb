@@ -722,8 +722,6 @@ module Compiler
     compile_animations
     yield(_INTL("Converting events"))
     compile_trainer_events(mustCompile)
-    yield(_INTL("Converting markers"))
-    pbLoadMarkerComments
     yield(_INTL("Saving messages"))
     pbSetTextMessages
     MessageTypes.saveMessages

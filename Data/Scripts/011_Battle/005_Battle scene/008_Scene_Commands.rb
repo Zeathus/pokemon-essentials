@@ -210,7 +210,6 @@ class PokeBattle_Scene
           idxPartyRet = i
           break
         end
-        pbMessage(idxPartyRet.to_s)
         break if yield idxPartyRet, switchScreen
       elsif cmdSummary>=0 && command==cmdSummary   # Summary
         scene.pbSummary(idxParty,true)

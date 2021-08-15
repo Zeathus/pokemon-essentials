@@ -127,7 +127,7 @@ def pbScaleTrainer(trainer, modifier)
         pkmn.species = pbGetEvolvedEncounter(pkmn.species, new_level - 2) if trainer.name != "Joey"
         pkmn.species = pbCustomEvolutionLevel(pkmn.species, new_level - 2)
       end
-      pkmn.name = PBSpecies.getName(pkmn.species) if original_species != pkmn.species
+      pkmn.name = GameData::Pokemon.get(pkmn.species).name if original_species != pkmn.species
       pkmn.resetMoves if new_level - other_level > 20 and other_level < 30
       pkmn.calc_stats
     end

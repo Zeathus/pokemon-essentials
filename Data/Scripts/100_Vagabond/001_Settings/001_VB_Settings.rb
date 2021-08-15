@@ -53,6 +53,7 @@ WEATHER_STORM        = 113
 SMOKEY_FOREST       = 114
 STADIUM_POINT_SHOP  = 115
 STADIUM_PARTY_SEL   = 116
+HIDE_REFLECTIONS    = 117
 SHOW_COLLISION      = 124
 DEBUG_EXTRA         = 125
 UNSTOPPABLE          = 146
@@ -142,7 +143,11 @@ MINIQUESTDAY2       = 150
 # ----------------------------------------------------------------------
 SKIP_SCALING_MAPS = [92,93,94,95,96,97,98,99] # Mica Quarry
 
-
+def pbHideReflections?(map_id)
+    return [
+        120 # Breccia Outlook
+    ].include?(map_id)
+end
 
 
 
