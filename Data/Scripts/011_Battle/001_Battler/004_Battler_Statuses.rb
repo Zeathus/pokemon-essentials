@@ -23,6 +23,7 @@ class PokeBattle_Battler
   end
 
   def pbCanInflictStatus?(newStatus,user,showMessages,move=nil,ignoreStatus=false)
+    showMessages = false if @battle.predictingDamage
     return false if fainted?
     selfInflicted = (user && user.index==@index)
     # Already have that status problem
@@ -446,6 +447,7 @@ class PokeBattle_Battler
   #=============================================================================
   def pbCanConfuse?(user=nil,showMessages=true,move=nil,selfInflicted=false)
     return false if fainted?
+    showMessages = false if @battle.predictingDamage
     if @effects[PBEffects::Confusion]>0
       @battle.pbDisplay(_INTL("{1} is already confused.",pbThis)) if showMessages
       return false
@@ -516,6 +518,7 @@ class PokeBattle_Battler
   def pbCanAttract?(user,showMessages=true)
     return false if fainted?
     return false if !user || user.fainted?
+    showMessages = false if @battle.predictingDamage
     if @effects[PBEffects::Attract]>=0
       @battle.pbDisplay(_INTL("{1} is unaffected!",pbThis)) if showMessages
       return false

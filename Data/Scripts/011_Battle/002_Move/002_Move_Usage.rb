@@ -113,6 +113,7 @@ class PokeBattle_Move
   end
 
   def pbMoveFailedTargetAlreadyMoved?(target)
+    return false if @battle.predictingDamage
     if (@battle.choices[target.index][0]!=:UseMove &&
        @battle.choices[target.index][0]!=:Shift) || target.movedThisRound?
       @battle.pbDisplay(_INTL("But it failed!"))
@@ -123,6 +124,7 @@ class PokeBattle_Move
 
   def pbMoveFailedAromaVeil?(user,target,showMessage=true)
     return false if @battle.moldBreaker
+    showMessages = false if @battle.predictingDamage
     if target.hasActiveAbility?(:AROMAVEIL)
       if showMessage
         @battle.pbShowAbilitySplash(target)

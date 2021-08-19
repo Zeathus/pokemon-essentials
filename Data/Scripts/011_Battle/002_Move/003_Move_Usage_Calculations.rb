@@ -219,6 +219,7 @@ class PokeBattle_Move
     c += 1 if user.inHyperMode? && @type == :SHADOW
     c = ratios.length-1 if c>=ratios.length
     # Calculation
+    return false if @battle.predictingDamage && c < ratios.length - 1
     return @battle.pbRandom(ratios[c])==0
   end
 
@@ -444,6 +445,7 @@ class PokeBattle_Move
     # Random variance
     if !self.is_a?(PokeBattle_Confusion)
       random = ($PokemonSystem.damagerolls==1) ? 92 : (85+@battle.pbRandom(16))
+      random = 92 if @battle.predictingDamage
       multipliers[:final_damage_multiplier] *= random / 100.0
     end
     # STAB

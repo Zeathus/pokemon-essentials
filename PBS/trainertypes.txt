@@ -72,7 +72,7 @@
 76,BUGCATCHERDAN,Bug Catcher,16,,,,Male,64,
 77,BUGCATCHERJL,Bug Catcher,32,LJarryIntro,,,Male,,
 78,AMETHYST,Trainer,200,,,,Female,255,
-79,FORETELLER,Duke,200,,,,Male,255,
+79,FORETELLER,Foreteller,200,,,,Male,255,
 80,KIRA_Kid,Trainer,50,Battle! VS Kira (Sick),,,Male,50,
 83,NEKANE,Mystery Girl,50,Battle! VS Nekane (My Turn),,,Female,100,
 84,TEAM_DAO_YIN,Team Dao,48,Battle! VS Team Dao (Here I Come!),,,Male,100,

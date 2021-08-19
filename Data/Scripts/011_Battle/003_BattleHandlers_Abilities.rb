@@ -588,6 +588,7 @@ BattleHandlers::MoveBlockingAbility.copy(:DAZZLING,:QUEENLYMAJESTY)
 BattleHandlers::MoveImmunityTargetAbility.add(:BULLETPROOF,
   proc { |ability,user,target,move,type,battle|
     next false if !move.bombMove?
+    next true if battle.predictingDamage
     battle.pbShowAbilitySplash(target)
     if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
       battle.pbDisplay(_INTL("It doesn't affect {1}...",target.pbThis(true)))
@@ -604,6 +605,7 @@ BattleHandlers::MoveImmunityTargetAbility.add(:FLASHFIRE,
   proc { |ability,user,target,move,type,battle|
     next false if user.index==target.index
     next false if type != :FIRE
+    next true if battle.predictingDamage
     battle.pbShowAbilitySplash(target)
     if !target.effects[PBEffects::FlashFire]
       target.effects[PBEffects::FlashFire] = true
@@ -647,6 +649,7 @@ BattleHandlers::MoveImmunityTargetAbility.add(:SAPSIPPER,
 BattleHandlers::MoveImmunityTargetAbility.add(:SOUNDPROOF,
   proc { |ability,user,target,move,type,battle|
     next false if !move.soundMove?
+    next true if battle.predictingDamage
     battle.pbShowAbilitySplash(target)
     if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
       battle.pbDisplay(_INTL("It doesn't affect {1}...",target.pbThis(true)))
@@ -669,6 +672,7 @@ BattleHandlers::MoveImmunityTargetAbility.add(:TELEPATHY,
   proc { |ability,user,target,move,type,battle|
     next false if move.statusMove?
     next false if user.index==target.index || target.opposes?(user)
+    next true if battle.predictingDamage
     battle.pbShowAbilitySplash(target)
     if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
       battle.pbDisplay(_INTL("{1} avoids attacks by its ally Pokémon!",target.pbThis(true)))
@@ -699,6 +703,7 @@ BattleHandlers::MoveImmunityTargetAbility.add(:WONDERGUARD,
   proc { |ability,user,target,move,type,battle|
     next false if move.statusMove?
     next false if !type || Effectiveness.super_effective?(target.damageState.typeMod)
+    next true if battle.predictingDamage
     battle.pbShowAbilitySplash(target)
     if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
       battle.pbDisplay(_INTL("It doesn't affect {1}...",target.pbThis(true)))

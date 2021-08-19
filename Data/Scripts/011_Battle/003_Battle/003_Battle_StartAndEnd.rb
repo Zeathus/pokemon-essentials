@@ -540,7 +540,7 @@ class PokeBattle_Battle
       @peer.pbOnLeavingBattle(self,pkmn,@usedInBattle[0][i],true)   # Reset form
       pkmn.item = @initialItems[0][i]
     end
-    if isInParty
+    if isInParty && pbPartyStarts(2).length > 1
       getActivePokemon(1).each_with_index do |pkmn,i|
         next if !pkmn
         @peer.pbOnLeavingBattle(self,pkmn,@usedInBattle[0][i],true)   # Reset form

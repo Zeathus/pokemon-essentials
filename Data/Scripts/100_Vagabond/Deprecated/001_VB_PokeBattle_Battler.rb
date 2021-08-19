@@ -1,10 +1,5 @@
-=begin
 class PokeBattle_Battler
-  
-  #attr_accessor(:knownMoves)
-  #attr_accessor(:knownAbility)
-  #attr_accessor(:knownItem)
-  
+
   def hasKnownAbility?(ability)
     ability=getID(PBAbilities,ability) if ability.is_a?(Symbol)
     @knownAbility=true if !knownAbility && isOnlyAbility?(ability)
@@ -79,15 +74,12 @@ class PokeBattle_Battler
   end
   
   def pbRegisterKnownMove(moveid)
-    moveid=getID(PBMoves,moveid) if moveid.is_a?(Symbol)
-    @knownMoves[moveid]=true
+    @knownMoves.push(moveid)
     Kernel.pbMessage(pbThis + " has " + PBMoves.getName(moveid)) if debug_extra?
   end
   
   def pbIsMoveRevealed?(moveid)
-    moveid=getID(PBMoves,moveid) if moveid.is_a?(Symbol)
-    return @knownMoves[moveid]
+    return @knownMoves.include?(moveid)
   end
   
 end
-=end

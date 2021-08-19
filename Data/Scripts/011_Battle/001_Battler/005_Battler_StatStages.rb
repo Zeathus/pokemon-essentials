@@ -8,6 +8,7 @@ class PokeBattle_Battler
 
   def pbCanRaiseStatStage?(stat,user=nil,move=nil,showFailMsg=false,ignoreContrary=false)
     return false if fainted?
+    showFailMsg = false if @battle.predictingDamage
     # Contrary
     if hasActiveAbility?(:CONTRARY) && !ignoreContrary && !@battle.moldBreaker
       return pbCanLowerStatStage?(stat,user,move,showFailMsg,true)
@@ -116,6 +117,7 @@ class PokeBattle_Battler
 
   def pbCanLowerStatStage?(stat,user=nil,move=nil,showFailMsg=false,ignoreContrary=false)
     return false if fainted?
+    showFailMsg = false if @battle.predictingDamage
     # Contrary
     if hasActiveAbility?(:CONTRARY) && !ignoreContrary && !@battle.moldBreaker
       return pbCanRaiseStatStage?(stat,user,move,showFailMsg,true)

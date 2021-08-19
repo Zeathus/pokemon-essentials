@@ -188,6 +188,8 @@ class PokeBattle_Battle
     #       your actions in a round.
     actioned = []
     idxBattler = -1
+    idxBattlersToUseAI = []
+    idxPlayersToUseAI = []
     loop do
       break if @decision!=0   # Battle ended, stop choosing actions
       idxBattler += 1
@@ -197,7 +199,9 @@ class PokeBattle_Battle
       next if !pbCanShowCommands?(idxBattler)   # Action is forced, can't choose one
       # AI controls this battler
       if @controlPlayer || !pbOwnedByPlayer?(idxBattler)
-        @battleAI.pbDefaultChooseEnemyCommand(idxBattler)
+        #@battleAI.pbDefaultChooseEnemyCommand(idxBattler)
+        idxBattlersToUseAI.push(idxBattler) if idxBattler % 2 == 1
+        idxPlayersToUseAI.push(idxBattler) if idxBattler % 2 == 0
         next
       end
       # Player chooses an action
@@ -246,5 +250,7 @@ class PokeBattle_Battle
       end
       break if commandsEnd
     end
+    @battleAI.pbDefaultChooseEnemyCommand(idxBattlersToUseAI) if idxBattlersToUseAI.length > 0
+    @battleAI.pbDefaultChooseEnemyCommand(idxPlayersToUseAI) if idxPlayersToUseAI.length > 0
   end
 end

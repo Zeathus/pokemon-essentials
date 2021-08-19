@@ -407,6 +407,7 @@ class PokeBattle_Battler
     return false if @effects[PBEffects::Embargo]>0
     return false if @battle.field.effects[PBEffects::MagicRoom]>0
     return false if hasActiveAbility?(:KLUTZ,ignoreFainted)
+    return false if @battle.predictingDamage && !@knownItem
     return true
   end
 

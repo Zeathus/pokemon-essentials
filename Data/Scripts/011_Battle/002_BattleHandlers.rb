@@ -523,6 +523,7 @@ end
 def pbBattleMoveImmunityStatAbility(user,target,move,moveType,immuneType,stat,increment,battle)
   return false if user.index==target.index
   return false if moveType != immuneType
+  return true if battle.predictingDamage
   battle.pbShowAbilitySplash(target)
   if target.pbCanRaiseStatStage?(stat,target)
     if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
@@ -547,6 +548,7 @@ end
 def pbBattleMoveImmunityHealAbility(user,target,move,moveType,immuneType,battle)
   return false if user.index==target.index
   return false if moveType != immuneType
+  return true if battle.predictingDamage
   battle.pbShowAbilitySplash(target)
   if target.canHeal? && target.pbRecoverHP(target.totalhp/4)>0
     if PokeBattle_SceneConstants::USE_ABILITY_SPLASH
@@ -570,7 +572,7 @@ def pbBattleGem(user,type,move,mults,moveType)
   # Pledge moves never consume Gems
   return if move.is_a?(PokeBattle_PledgeMove)
   return if moveType != type
-  user.effects[PBEffects::GemConsumed] = user.item_id
+  user.effects[PBEffects::GemConsumed] = user.item_id if !user.battle.predictingDamage
   if Settings::MECHANICS_GENERATION >= 6
     mults[:base_damage_multiplier] *= 1.3
   else
@@ -582,8 +584,10 @@ def pbBattleTypeWeakingBerry(type,moveType,target,mults)
   return if moveType != type
   return if Effectiveness.resistant?(target.damageState.typeMod) && moveType != :NORMAL
   mults[:final_damage_multiplier] /= 2
-  target.damageState.berryWeakened = true
-  target.battle.pbCommonAnimation("EatBerry",target)
+  if !target.battle.predictingDamage
+    target.damageState.berryWeakened = true
+    target.battle.pbCommonAnimation("EatBerry",target)
+  end
 end
 
 def pbBattleWeatherAbility(weather,battler,battle,ignorePrimal=false)

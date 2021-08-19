@@ -5,7 +5,7 @@ class PokeBattle_Move_300 < PokeBattle_Move
   def pbMoveFailed?(user,targets)
     if target.effects[PBEffects::CorrosiveAcid] ||
       !target.pbHasType(:STEEL)
-      @battle.pbDisplay(_INTL("But it failed!"))
+      @battle.pbDisplay(_INTL("But it failed!")) if !@battle.predictingDamage
       return true
     end
     return false
@@ -192,4 +192,172 @@ class PokeBattle_Move_303 < PokeBattle_Move
     end
     return nil
   end
+end
+
+class PokeBattle_Move_404 < PokeBattle_Move
+  
+  def pbEffectGeneral(user)
+    
+    @battle.pbDisplay("Starting Unit Test")
+    
+    cpus = [@battle.battlers[1], @battle.battlers[3]]
+        
+    @battle.battlers[0].item = :LIFEORB
+    @battle.battlers[1].item = :LIFEORB
+    @battle.battlers[2].item = 0
+    @battle.battlers[3].item = 0
+    viewport = Viewport.new(0,0,640,480)
+    viewport.z = 999999
+    sprite = Sprite.new(viewport)
+    bitmap = Bitmap.new(512, 200)
+    pbSetSystemFont(bitmap)
+    sprite.bitmap = bitmap
+    sprite.x = Graphics.width / 2 - 256
+    sprite.y = Graphics.height / 2 - 100
+    base = Color.new(252,252,252)
+    shadow = Color.new(0,0,0)
+    
+    for c in cpus[1..1]
+      
+      @battle.pbDisplay(_INTL("Attacker = {1}", c.name))
+      
+      for i in 1..676
+        
+        move = self.pbCreateMove(@battle, i)
+
+        bitmap.clear
+        textpos=[["Move ID: "+i.to_s + " | " + move.name,256,100,2,base,shadow,1]]
+        pbDrawTextPositions(bitmap,textpos)
+        sprite.update
+        viewport.update
+        Graphics.update
+        Input.update
+        
+        actionable = [true, true, true, true]
+        fainted = [false, false, false, false]
+        
+        targets = @battle.pbPossibleTargets(c, move)
+        
+        damage = move.baseDamage
+        
+        statuses = [:NONE, :BURN, :PARALYSIS, :FROZEN, :SLEEP, :POISON]
+        hp = [1.0, 0.6, 0.3] #[1.0, 0.75, 0.50, 0.25, 0.0]
+        
+        for i in 0..3
+          @battle.battlers[i].status = statuses[i + 1]
+        end
+        
+        for hp0 in hp
+          @battle.battlers[0].hp = @battle.battlers[0].totalhp * hp0
+          for hp1 in hp
+            @battle.battlers[1].hp = @battle.battlers[1].totalhp * hp1
+            for hp2 in hp
+              @battle.battlers[2].hp = @battle.battlers[2].totalhp * hp2
+              for hp3 in hp
+                @battle.battlers[3].hp = @battle.battlers[3].totalhp * hp3
+                if targets.length <= 0
+                  @battle.pbGetEffectScore(move,damage,c,nil,actionable,fainted)
+                else
+                  for group in targets
+                    for t in group
+                      @battle.pbGetEffectScore(move,damage,c,t,actionable,fainted)
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+        
+        for i in 0..3
+          @battle.battlers[i].hp = @battle.battlers[i].totalhp * (4 - i) / 4
+        end
+        
+        @battle.battlers[0].ability = :CONTRARY
+        @battle.battlers[1].ability = :CONTRARY
+        
+        if targets.length <= 0
+          @battle.pbGetEffectScore(move,damage,c,nil,actionable,fainted)
+        else
+          for group in targets
+            for t in group
+              @battle.pbGetEffectScore(move,damage,c,t,actionable,fainted)
+            end
+          end
+        end
+        
+        @battle.battlers[0].ability = :MAGICBOUNCE
+        @battle.battlers[1].ability = :MAGICBOUNCE
+        
+        if targets.length <= 0
+          @battle.pbGetEffectScore(move,damage,c,nil,actionable,fainted)
+        else
+          for group in targets
+            for t in group
+              @battle.pbGetEffectScore(move,damage,c,t,actionable,fainted)
+            end
+          end
+        end
+        
+        @battle.battlers[0].ability = :GUTS
+        @battle.battlers[1].ability = :GUTS
+        @battle.battlers[2].ability = :MAGICGUARD
+        @battle.battlers[3].ability = :MAGICGUARD
+        
+        if targets.length <= 0
+          @battle.pbGetEffectScore(move,damage,c,nil,actionable,fainted)
+        else
+          for group in targets
+            for t in group
+              @battle.pbGetEffectScore(move,damage,c,t,actionable,fainted)
+            end
+          end
+        end
+        
+        for s0 in statuses[0..2]
+          @battle.battlers[0].status = s0
+          for s1 in statuses[3..5]
+            @battle.battlers[1].status = s1
+            for s2 in statuses[0..2]
+              @battle.battlers[2].status = s2
+              for s3 in statuses[3..5]
+                @battle.battlers[3].status = s3
+                if targets.length <= 0
+                  @battle.pbGetEffectScore(move,damage,c,nil,actionable,fainted)
+                else
+                  for group in targets
+                    for t in group
+                      @battle.pbGetEffectScore(move,damage,c,t,actionable,fainted)
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+        
+        for i in 0..3
+          @battle.battlers[i].status = :NONE
+        end
+      end
+    end
+    
+    sprite.dispose
+    viewport.dispose
+    
+    @battle.pbDisplay("Finished Unit Test")
+    
+    return 0
+  end
+  
+  def pbCreateMove(battle, id)
+    move=Pokemon::Move.new(id)
+    className=sprintf("PokeBattle_Move_%s", move.function_code)
+    if Object.const_defined?(className)
+      return Kernel.const_get(className).new(battle, move)
+    else
+      return PokeBattle_UnimplementedMove.new(battle, move)
+    end
+  end
+  
 end

@@ -60,10 +60,17 @@ class PokeBattle_AI
   # Choose an action
   #=============================================================================
   def pbDefaultChooseEnemyCommand(idxBattler)
-    return if pbEnemyShouldUseItem?(idxBattler)
-    return if pbEnemyShouldWithdraw?(idxBattler)
-    return if @battle.pbAutoFightMenu(idxBattler)
-    @battle.pbRegisterMegaEvolution(idxBattler) if pbEnemyShouldMegaEvolve?(idxBattler)
-    pbChooseMoves(idxBattler)
+    if idxBattler.is_a?(Array)
+      # Use new AI
+      #return if pbEnemyShouldUseItem?(idxBattler)
+      #@battle.pbRegisterMegaEvolution(idxBattler) if pbEnemyShouldMegaEvolve?(idxBattler)
+      @battle.pbChooseMoves2(idxBattler)
+    else
+      return if pbEnemyShouldUseItem?(idxBattler)
+      return if pbEnemyShouldWithdraw?(idxBattler)
+      return if @battle.pbAutoFightMenu(idxBattler)
+      @battle.pbRegisterMegaEvolution(idxBattler) if pbEnemyShouldMegaEvolve?(idxBattler)
+      pbChooseMoves(idxBattler)
+    end
   end
 end

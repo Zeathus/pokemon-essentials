@@ -6,7 +6,7 @@
 class PokeBattle_UnimplementedMove < PokeBattle_Move
   def pbMoveFailed?(user,targets)
     if statusMove?
-      @battle.pbDisplay(_INTL("But it failed!"))
+      @battle.pbDisplay(_INTL("But it failed!")) if !@battle.predictingDamage
       return true
     end
     return false
@@ -259,7 +259,7 @@ class PokeBattle_MultiStatUpMove < PokeBattle_Move
       break
     end
     if failed
-      @battle.pbDisplay(_INTL("{1}'s stats won't go any higher!",user.pbThis))
+      @battle.pbDisplay(_INTL("{1}'s stats won't go any higher!",user.pbThis)) if !@battle.predictingDamage
       return true
     end
     return false
@@ -346,14 +346,14 @@ class PokeBattle_TargetMultiStatDownMove < PokeBattle_Move
           canLower = true
           break
         end
-        @battle.pbDisplay(_INTL("{1}'s stats won't go any higher!",user.pbThis)) if !canLower
+        @battle.pbDisplay(_INTL("{1}'s stats won't go any higher!",user.pbThis)) if !canLower && !@battle.predictingDamage
       else
         for i in 0...@statDown.length/2
           next if target.statStageAtMin?(@statDown[i*2])
           canLower = true
           break
         end
-        @battle.pbDisplay(_INTL("{1}'s stats won't go any lower!",user.pbThis)) if !canLower
+        @battle.pbDisplay(_INTL("{1}'s stats won't go any lower!",user.pbThis)) if !canLower && !@battle.predictingDamage
       end
       if canLower
         target.pbCanLowerStatStage?(@statDown[0],user,self,true)
@@ -497,7 +497,7 @@ class PokeBattle_HealingMove < PokeBattle_Move
 
   def pbMoveFailed?(user,targets)
     if user.hp==user.totalhp
-      @battle.pbDisplay(_INTL("{1}'s HP is full!",user.pbThis))
+      @battle.pbDisplay(_INTL("{1}'s HP is full!",user.pbThis)) if !@battle.predictingDamage
       return true
     end
     return false
@@ -550,6 +550,7 @@ class PokeBattle_ProtectMove < PokeBattle_Move
   end
 
   def pbMoveFailed?(user,targets)
+    return false if @battle.predictingDamage
     if @sidedEffect
       if user.pbOwnSide.effects[@effect]
         user.effects[PBEffects::ProtectRate] = 1
@@ -608,16 +609,16 @@ class PokeBattle_WeatherMove < PokeBattle_Move
   def pbMoveFailed?(user,targets)
     case @battle.field.weather
     when :HarshSun
-      @battle.pbDisplay(_INTL("The extremely harsh sunlight was not lessened at all!"))
+      @battle.pbDisplay(_INTL("The extremely harsh sunlight was not lessened at all!")) if !@battle.predictingDamage
       return true
     when :HeavyRain
-      @battle.pbDisplay(_INTL("There is no relief from this heavy rain!"))
+      @battle.pbDisplay(_INTL("There is no relief from this heavy rain!")) if !@battle.predictingDamage
       return true
     when :StrongWinds
-      @battle.pbDisplay(_INTL("The mysterious air current blows on regardless!"))
+      @battle.pbDisplay(_INTL("The mysterious air current blows on regardless!")) if !@battle.predictingDamage
       return true
     when @weatherType
-      @battle.pbDisplay(_INTL("But it failed!"))
+      @battle.pbDisplay(_INTL("But it failed!")) if !@battle.predictingDamage
       return true
     end
     return false

@@ -719,3 +719,4 @@
 2000,BREAKINGSWIPE,Breaking Swipe,000,40,NORMAL,Physical,100,35,0,NearOther,0,abef,"Placeholder."
 2001,SPIRITBREAK,Breaking Swipe,000,40,NORMAL,Physical,100,35,0,NearOther,0,abef,"Placeholder."
 2002,STEELBEAM,Breaking Swipe,000,40,NORMAL,Physical,100,35,0,NearOther,0,abef,"Placeholder."
+3000,AIUNITTEST,AI Unit Test,404,0,NORMAL,Status,100,10,0,BothSides,0,,"Forcefully test most of the AI's possible scenarios for crashes"

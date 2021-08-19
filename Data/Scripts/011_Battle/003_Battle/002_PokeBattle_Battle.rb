@@ -83,6 +83,7 @@ class PokeBattle_Battle
   attr_reader   :endOfRound       # True during the end of round
   attr_accessor :moldBreaker      # True if Mold Breaker applies
   attr_reader   :struggle         # The Struggle move
+  attr_accessor :predictingDamage # Used to calc with less factors where needed
 
   include PokeBattle_BattleCommon
 
@@ -167,6 +168,7 @@ class PokeBattle_Battle
     else
       @struggle = PokeBattle_Struggle.new(self, nil)
     end
+    @predictingDamage = false
   end
 
   #=============================================================================

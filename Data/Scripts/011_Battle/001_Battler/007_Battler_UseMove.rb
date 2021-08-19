@@ -206,6 +206,10 @@ class PokeBattle_Battler
     end
     move = choice[2]   # In case disobedience changed the move to be used
     return if !move   # if move was not chosen somehow
+    # Register move as known
+    if !specialUsage
+      pbRegisterKnownMove(move.id)
+    end
     # Subtract PP
     if !specialUsage
       if !pbReducePP(move)
@@ -511,7 +515,8 @@ class PokeBattle_Battler
       targets.each { |b| move.pbEffectAfterAllHits(user,b) }
       # Affinity Boosts
       targets.each { |b|
-        if b.opposes?(user) && !Effectiveness.not_very_effective?(b.damageState.typeMod)
+        if b.opposes?(user) && !b.damageState.unaffected &&
+           (Effectiveness.normal?(b.damageState.typeMod) || Effectiveness.super_effective?(b.damageState.typeMod))
           user.eachAlly do |partner|
             if !partner.fainted?
               if partner.pokemon.hasAffinity?(move.calcType)

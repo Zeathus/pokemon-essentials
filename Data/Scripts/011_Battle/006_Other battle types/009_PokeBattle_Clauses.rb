@@ -1,6 +1,7 @@
 #===============================================================================
 # This script modifies the battle system to implement battle rules
 #===============================================================================
+=begin
 class PokeBattle_Battle
   unless @__clauses__aliased
     alias __clauses__pbDecisionOnDraw pbDecisionOnDraw
@@ -242,3 +243,4 @@ class PokeBattle_Move_0E7   # Destiny Bond
     return __clauses__pbFailsAgainstTarget?(user,target)
   end
 end
+=end
