@@ -154,7 +154,7 @@ class PokeBattle_Scene
     trainer = pbAddSprite("player_#{idxTrainer+1}",spriteX,spriteY,trainerFile,@viewport)
     return if !trainer.bitmap
     # Alter position of sprite
-    trainer.z  = 30+idxTrainer
+    trainer.z  = 130+idxTrainer
     if trainer.bitmap.width>trainer.bitmap.height*2
       trainer.src_rect.x     = 0
       trainer.src_rect.width = trainer.bitmap.width/5
