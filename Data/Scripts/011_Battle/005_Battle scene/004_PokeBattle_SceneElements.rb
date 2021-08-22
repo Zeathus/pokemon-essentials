@@ -11,7 +11,7 @@ class PokemonDataBox < SpriteWrapper
   EXP_BAR_FILL_TIME  = 1.75
   # Maximum time in seconds to make a change to the HP bar.
   HP_BAR_CHANGE_TIME = 1.0
-  STATUS_ICON_HEIGHT = 16
+  STATUS_ICON_HEIGHT = 32
   NAME_BASE_COLOR         = Color.new(248,248,248)
   NAME_SHADOW_COLOR       = Color.new(15,15,15)
   MALE_BASE_COLOR         = Color.new(48,96,216)
@@ -46,7 +46,7 @@ class PokemonDataBox < SpriteWrapper
                     "Graphics/Pictures/Battle/databox_normal_foe"][@battler.index%2]
       if onPlayerSide
         @showHP  = true
-        @showExp = true
+        @showExp = false
       end
     else   # Multiple Pokémon on side, use the thin dara box BG
       bgFilename = ["Graphics/Pictures/Battle/databox_thin",
@@ -216,6 +216,7 @@ class PokemonDataBox < SpriteWrapper
     textPos = []
     imagePos = []
     # Draw background panel
+    pbSetSystemFont(self.bitmap)
     self.bitmap.blt(0,0,@databoxBitmap.bitmap,Rect.new(0,0,@databoxBitmap.width,@databoxBitmap.height))
     # Draw Pokémon's level
     lvl_x = onPlayerSide ? 174 : 16
@@ -251,8 +252,8 @@ class PokemonDataBox < SpriteWrapper
     pbDrawTextPositions(self.bitmap,textPos)
     # Draw shiny icon
     if @battler.shiny?
-      shinyX = (@battler.opposes?(0)) ? 206 : -6   # Foe's/player's
-      imagePos.push(["Graphics/Pictures/shiny",@spriteBaseX+shinyX,36])
+      shinyX = (@battler.opposes?(0)) ? 204 : -8   # Foe's/player's
+      imagePos.push(["Graphics/Pictures/shiny",@spriteBaseX+shinyX,8])
     end
     # Draw Mega Evolution/Primal Reversion icon
     if @battler.mega?
@@ -275,7 +276,8 @@ class PokemonDataBox < SpriteWrapper
       if s == :POISON && @battler.statusCount > 0   # Badly poisoned
         s = GameData::Status::DATA.keys.length / 2
       end
-      imagePos.push(["Graphics/Pictures/Battle/icon_statuses",@spriteBaseX+24,36,
+      status_x = @spriteBaseX + (@battler.opposes?(0) ? 2 : 176)
+      imagePos.push(["Graphics/Pictures/Battle/icon_statuses",status_x,20,
          0,(s-1)*STATUS_ICON_HEIGHT,-1,STATUS_ICON_HEIGHT])
     end
     pbDrawImagePositions(self.bitmap,imagePos)
