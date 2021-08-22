@@ -518,7 +518,7 @@ class PokeBattle_Battler
         if b.opposes?(user) && !b.damageState.unaffected &&
            (Effectiveness.normal?(b.damageState.typeMod) || Effectiveness.super_effective?(b.damageState.typeMod))
           user.eachAlly do |partner|
-            if !partner.fainted?
+            if !partner.fainted? && !partner.movedThisRound? && @battle.choices[partner.index][0] == :UseMove
               if partner.pokemon.hasAffinity?(move.calcType)
                 partner.affinitybooster = self
                 partner.effects[PBEffects::MoveNext] = true

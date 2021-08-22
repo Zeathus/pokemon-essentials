@@ -281,6 +281,8 @@ class PokeBattle_Battle
 
             possible_target_groups = pbPossibleTargets(user, move)
 
+            next if possible_target_groups.length <= 0
+
             high_score = -99999
             high_target_group = 0
             high_damage = [0,0,0,0,0,0]
@@ -302,6 +304,7 @@ class PokeBattle_Battle
                   end
                   eff_score = pbGetEffectScore(move, damage, user, target, actionable, fainted)
                   this_score += [damage * 100 / target.totalhp, target.hp * 100 / target.totalhp - hurt_potential[target.index]].min
+                  this_score = 0 if this_score < 0
                   this_score += eff_score
                 end
                 all_damage[target.index] += damage
@@ -312,7 +315,10 @@ class PokeBattle_Battle
               end
               if group.length == 1 && !group[0].opposes?(user) && group[0] != user
                 # Ally target with negative score, never choose this
-                next if score <= 0
+                if score <= 0
+                  high_target_group += 1 if high_target_group == g && possible_target_groups.length > g + 1
+                  next
+                end
               end
               if score > high_score
                 high_target_group = g
@@ -404,18 +410,21 @@ class PokeBattle_Battle
       next if i1 && !pbCanChooseMove?(idxBattlers[1], i1, false)
       next if i2 && !pbCanChooseMove?(idxBattlers[2], i2, false)
       if single
+        next if targets[i0][0] < 0
         if scores[i0] > max_score
           max_score = scores[i0]
           max_index = [i0]
           max_target = targets[i0]
         end
       elsif double
+        next if targets[i0][i1][0] < 0 || targets[i0][i1][1] < 0
         if scores[i0][i1] > max_score
           max_score = scores[i0][i1]
           max_index = [i0, i1]
           max_target = targets[i0][i1]
         end
       elsif triple
+        next if targets[i0][i1][i2][0] < 0 || targets[i0][i1][i2][1] < 0 || targets[i0][i1][i2][2] < 0
         if scores[i0][i1][i2] > max_score
           max_score = scores[i0][i1][i2]
           max_index = [i0, i1, i2]
