@@ -691,6 +691,8 @@ class PokeBattle_Battle
         if user.turnCount < 1 && !target.hasActiveAbility?(:INNERFOCUS)
           score += 50
           actionable[target.index] = false if chosen
+        elsif target.opposes?(user)
+          score -= 100
         end
       when "018"
         # Refresh

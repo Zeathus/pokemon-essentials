@@ -722,10 +722,12 @@ module Compiler
     compile_animations
     yield(_INTL("Converting events"))
     compile_trainer_events(mustCompile)
-    yield(_INTL("Saving messages"))
-    pbSetTextMessages
-    MessageTypes.saveMessages
-    MessageTypes.loadMessageFile("Data/messages.dat") if safeExists?("Data/messages.dat")
+    if !IMPORT_EXPORT_MODE || IMPORT_EXPORT_MODE != 3
+      yield(_INTL("Saving messages"))
+      pbSetTextMessages
+      MessageTypes.saveMessages
+      MessageTypes.loadMessageFile("Data/messages.dat") if safeExists?("Data/messages.dat")
+    end
     System.reload_cache
     echoln ""
     echoln _INTL("*** Finished full compile ***")

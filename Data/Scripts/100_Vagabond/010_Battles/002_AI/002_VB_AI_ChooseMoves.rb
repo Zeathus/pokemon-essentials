@@ -605,17 +605,17 @@ class PokeBattle_Battle
                 
                 for m in o.moves
                   # Check that the move is valid
-                  if m.id > 0 && m.pp > 0 && (o.effects[PBEffects::Disable] <= 0 || o.effects[PBEffects::DisableMove] != m.id)
+                  if m.pp > 0 && (o.effects[PBEffects::Disable] <= 0 || o.effects[PBEffects::DisableMove] != m.id)
                     if fixed_move
                       if m.id == fixed_move
                         dmg = m.pbPredictDamage(o, pkmnbattler, 1, [i, o.index], false)
-                        hurt_score = dmg if dmg > hurt_score
+                        hurt_score = dmg if dmg && dmg > hurt_score
                         break
                       end
                     elsif o.pbIsMoveRevealed?(m.id) ||
                           o.pbHasType?(m.type)
                       dmg = m.pbPredictDamage(o, pkmnbattler, 1, [i, o.index], false)
-                      hurt_score = dmg if dmg > hurt_score
+                      hurt_score = dmg if dmg && dmg > hurt_score
                     end
                   end
                 end
@@ -623,9 +623,9 @@ class PokeBattle_Battle
                 # Determine how much damage the new Pokemon can deal to the opponent
                 for m in pkmnbattler.moves
                   # Check that the move is valid
-                  if m.id > 0 && m.pp > 0
+                  if m.pp > 0
                     dmg = m.pbPredictDamage(pkmnbattler, o, 1, [i, o.index], false)
-                    if dmg > dmg_score
+                    if dmg && dmg > dmg_score
                       dmg_score = dmg
                       dmg_target = o.index
                     end

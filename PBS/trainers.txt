@@ -3043,7 +3043,6 @@ Pokemon = DELPHOX,50
     AbilityIndex = 0
     IV = 31,31,31,31,31,31
     Happiness = 255
-    Shadow = yes
 Pokemon = EMPOLEON,50
     Gender = M
     Item = STEELGEM

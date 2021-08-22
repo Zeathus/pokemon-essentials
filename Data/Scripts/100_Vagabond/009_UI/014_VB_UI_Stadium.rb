@@ -583,7 +583,7 @@ def pbStadiumVictory(trainers,title)
     i+=1
   end
   
-  ((index % 2 == 0) ? (speed*1.5) : speed).times do
+  (((index % 2 == 0) ? (speed*1.5) : speed).round).times do
     Graphics.update
     viewport.update
     Input.update
