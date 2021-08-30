@@ -26,6 +26,17 @@ class PokeBattle_RealBattlePeer
     if !player.party_full?
       player.party[player.party.length] = pkmn
       return -1
+    elsif !$Trainer.inactive_full?
+      while 1 != (x = pbMessage(_INTL("Would you like to add {1} to your inactive party?", pkmn.name), ["Yes", "No", "Help"]))
+        if x == 0
+          $Trainer.inactive_party[$Trainer.inactive_party.length] = pkmn
+          return -2
+        elsif x == 2
+          pbMessage("In addition to your regular party, you have an inactive party.")
+          pbMessage("Your inactive party cannot be used in battle, neither do they gain experience through battles.")
+          pbMessage("However, these Pokémon can be delivered for quests or to meet similar requirements. Eggs can also hatch in the inactive party.")
+        end
+      end
     end
     pkmn.heal
     oldCurBox = pbCurrentBox

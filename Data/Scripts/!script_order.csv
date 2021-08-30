@@ -478,6 +478,7 @@
 @@099_Overrides
 001_VB_OverrideObject
 002_Game_Character
+003_Player
 ---------------------------~blank
 @999_Main
 999_Main

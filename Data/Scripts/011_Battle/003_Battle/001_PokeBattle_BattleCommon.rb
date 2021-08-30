@@ -18,7 +18,10 @@ module PokeBattle_BattleCommon
     # Store the Pokémon
     currentBox = @peer.pbCurrentBox
     storedBox  = @peer.pbStorePokemon(pbPlayer,pkmn)
-    if storedBox<0
+    if storedBox==-2
+      pbDisplayPaused(_INTL("{1} has been added to your inactive party.",pkmn.name))
+      return
+    elsif storedBox<0
       pbDisplayPaused(_INTL("{1} has been added to your party.",pkmn.name))
       @initialItems[0][pbPlayer.party.length-1] = pkmn.item_id if @initialItems
       return

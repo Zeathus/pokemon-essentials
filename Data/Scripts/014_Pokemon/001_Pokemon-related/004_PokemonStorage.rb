@@ -122,6 +122,7 @@ class PokemonStorage
   end
 
   def party_full?
+    return false if $Trainer.inactive_party.length < 3
     return $Trainer.party_full?
   end
 
@@ -131,7 +132,7 @@ class PokemonStorage
 
   def maxPokemon(box)
     return 0 if box >= self.maxBoxes
-    return (box < 0) ? Settings::MAX_PARTY_SIZE : self[box].length
+    return (box < 0) ? Settings::MAX_PARTY_BOX_SIZE : self[box].length
   end
 
   def full?
@@ -159,13 +160,17 @@ class PokemonStorage
       for i in @boxes
         raise "Box is a Pokémon, not a box" if i.is_a?(Pokemon)
       end
-      return (x==-1) ? self.party[y] : @boxes[x][y]
+      return (x==-1) ? (y < Settings::MAX_PARTY_SIZE ? self.party[y] : $Trainer.inactive_party[y-Settings::MAX_PARTY_SIZE]) : @boxes[x][y]
     end
   end
 
   def []=(x,y,value)
     if x==-1
-      self.party[y] = value
+      if y < Settings::MAX_PARTY_SIZE
+        self.party[y] = value
+      else
+        $Trainer.inactive_party[y-3] = value
+      end
     else
       @boxes[x][y] = value
     end
@@ -184,8 +189,13 @@ class PokemonStorage
     end
     if boxDst==-1   # Copying into party
       return false if party_full?
-      self.party[self.party.length] = self[boxSrc,indexSrc]
-      self.party.compact!
+      if self.party.length < Settings::MAX_PARTY_SIZE
+        self.party[self.party.length] = self[boxSrc,indexSrc]
+        self.party.compact!
+      else
+        $Trainer.inactive_party[$Trainer.inactive_party.length] = self[boxSrc,indexSrc]
+        $Trainer.inactive_party.compact!
+      end
     else   # Copying into box
       pkmn = self[boxSrc,indexSrc]
       raise "Trying to copy nil to storage" if !pkmn
@@ -250,7 +260,8 @@ class PokemonStorage
   def pbDelete(box,index)
     if self[box,index]
       self[box,index] = nil
-      self.party.compact! if box==-1
+      self.party.compact! if box==-1 && index < Settings::MAX_PARTY_SIZE
+      $Trainer.inactive_party.compact! if box==-1 && index >= Settings::MAX_PARTY_SIZE
     end
   end
 
