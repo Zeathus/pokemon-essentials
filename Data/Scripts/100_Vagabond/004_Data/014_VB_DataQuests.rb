@@ -218,39 +218,39 @@ def pbCheckQuestUnlocks
 end
   
 def pbSetQuestStatus(id, status)
-  $game_switches[MARKER_UPDATE]=true
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   pbQuest(id).status = status
+  pbUpdateMarkers
 end
 
 def pbDiscoverQuest(id, notif=true)
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   if pbQuest(id).status<1
-    $game_switches[MARKER_UPDATE]=true
     pbQuest(id).status=1
     pbDisplayQuestDiscovery(pbQuest(id)) if notif
+    pbUpdateMarkers
   end
 end
 
 def pbUnlockQuest(id)
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   if $game_variables[QUEST_ARRAY][id].status == -1
-    $game_switches[MARKER_UPDATE]=true
     $game_variables[QUEST_ARRAY][id].status = 0
+    pbUpdateMarkers
   end
 end
 
 def pbSetQuestStep(id, step)
-  $game_switches[MARKER_UPDATE]=true
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   $game_variables[QUEST_ARRAY][id].step = step
+  pbUpdateMarkers
 end
 
 def pbAdvanceQuest(id)
-  $game_switches[MARKER_UPDATE]=true
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   $game_variables[QUEST_ARRAY][id].step = $game_variables[QUEST_ARRAY][id].step + 1
   pbDisplayQuestProgress($game_variables[QUEST_ARRAY][id])
+  pbUpdateMarkers
 end
 
 def pbGetQuestStatus(id)
@@ -282,11 +282,11 @@ end
 
 def pbFinishQuest(id, silent=false)
   return if !$game_switches[HAS_QUEST_LIST]
-  $game_switches[MARKER_UPDATE]=true
   id=getID(PBQuests,id) if id.is_a?(Symbol)
   quest = pbQuest(id)
   $Trainer.stats.quests_completed += 1
   quest.status = 2
+  pbUpdateMarkers
   pbTitleDisplay(quest.name, "Quest Completed!") if !silent
   money = quest.money
   item = quest.item
@@ -295,13 +295,13 @@ def pbFinishQuest(id, silent=false)
   pbEXPScreen(0,exp,true) if exp > 0
   if item
     if item.is_a?(Array)
-      Kernel.pbReceiveItem(item[0],item[1])
+      pbReceiveItem(item[0],item[1])
     else
-      Kernel.pbReceiveItem(item)
+      pbReceiveItem(item)
     end
   end
   if money > 0
-    Kernel.pbMessage(_INTL("{1} received ${2}!",$Trainer.name,money))
+    pbMessage(_INTL("{1} received ${2}!",$Trainer.name,money))
     $Trainer.money += money
   end
   pbCheckQuestUnlocks

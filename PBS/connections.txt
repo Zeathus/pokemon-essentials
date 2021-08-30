@@ -1,22 +1,2 @@
 ﻿# See the documentation on the wiki to learn how to edit this file.
 #-------------------------------
-# Shale Town (3) - Shale Path (6)
-3,West,9,6,East,0
-# Mt. Pegma Hillside (14) - Mica Town (12)
-14,North,0,12,South,4
-# Feldspar Town (21) - Quartz Passing (72)
-21,West,6,72,East,0
-# Canjon Valley (106) - Lapis Town [OLD] (23)
-106,South,0,23,North,21
-# East Andes Isle (26) - West Andes Isle (25)
-26,West,0,25,East,8
-# Quartz Falls (73) - Quartz Passing (72)
-73,East,0,72,West,4
-# Canjon Valley (106) - Scoria City (198)
-106,North,0,198,South,7
-# Lake Canjon (107) - Canjon Valley (106)
-107,West,0,106,East,7
-# Evergone Ruins (211) - Evergone Stairway (210)
-211,South,4,210,North,0
-# Amphi Town (221) - South Gabbro River (220)
-221,South,24,220,North,0

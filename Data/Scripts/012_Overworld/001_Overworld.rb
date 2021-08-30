@@ -710,7 +710,7 @@ end
 # Picking up an item found on the ground
 #===============================================================================
 def pbItemBall(item,quantity=1,switch="A")
-  $game_switches[MARKER_UPDATE]=true
+  pbUpdateMarkers
   event_id = nil
   event_id = @event_id if $game_map.events[@event_id].character_name=="Object ball"
   item = GameData::Item.get(item)

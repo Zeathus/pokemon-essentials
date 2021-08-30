@@ -8,7 +8,7 @@ def pbNumericUpDown(text,min=1,max=100,init=1,cancel=0)
 end
 
 def pbShowSpeciesPicture(specie,message="",playcry=true)
-  battlername=sprintf("Graphics/Battlers/%03d%s",specie,"")
+  battlername=sprintf("Graphics/Pokemon/Front/%s",specie.to_s)
   bitmap=pbResolveBitmap(battlername)
   pbPlayCry(specie) if playcry
   if bitmap # to prevent crashes

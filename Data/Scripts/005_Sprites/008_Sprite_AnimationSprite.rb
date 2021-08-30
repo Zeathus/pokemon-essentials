@@ -12,7 +12,6 @@ class AnimationSprite < RPG::Sprite
     self.bitmap = Bitmap.new(1, 1)
     self.bitmap.clear
     @map = map
-    @animID = animID
     setCoords
     pbDayNightTint(self) if tinting
     self.animation($data_animations[animID],true,height)
@@ -30,16 +29,16 @@ class AnimationSprite < RPG::Sprite
     super
   end
 
+  def animID
+    return @animID
+  end
+
   def update
     if !self.disposed?
       setCoords
       super
       if !self.effect?
-        if (@animID>=8 && @animID<=10) && !$game_switches[MARKER_UPDATE]
-          self.animation($data_animations[@animID],true,height)
-        else
-          self.dispose
-        end
+        self.dispose
       end
     end
   end

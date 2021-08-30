@@ -229,21 +229,21 @@ def pbMainQuest(id)
 end
 
 def pbAdvanceStory(id, silent=false)
-  $game_switches[MARKER_UPDATE]=true
   id=getID(PBMainQuests,id) if id.is_a?(Symbol)
   $game_variables[QUEST_MAIN][id].step += 1
   if $game_variables[QUEST_MAIN][id].step >= $game_variables[QUEST_MAIN][id].steps.length
     $game_variables[QUEST_MAIN][id].step = $game_variables[QUEST_MAIN][id].steps.length - 1
   end
+  pbUpdateMarkers
   pbDisplayQuestProgress($game_variables[QUEST_MAIN][id]) if !silent
 end
 
 def pbFinishChapter(id, silent=false)
   return if !$game_switches[HAS_QUEST_LIST]
-  $game_switches[MARKER_UPDATE]=true
   id=getID(PBMainQuests,id) if id.is_a?(Symbol)
   $Trainer.stats.quests_completed += 1
   $game_variables[QUEST_MAIN][id].status = 2
+  pbUpdateMarkers
   pbTitleDisplay(pbMainQuest(id).name, "Quest Completed!") if !silent
   #pbDisplayQuestCompletion($game_variables[QUEST_MAIN][id]) if !silent
   grandure = ($game_variables[QUEST_MAIN][id].exp*1.0)/100
@@ -255,8 +255,8 @@ end
 def pbNewMainQuest(id, silent=false)
   id=getID(PBMainQuests,id) if id.is_a?(Symbol)
   if pbMainQuest(id).status<1
-    $game_switches[MARKER_UPDATE]=true
     pbMainQuest(id).status=1
+    pbUpdateMarkers
     pbTitleDisplay("Main Quest", pbMainQuest(id).name) if !silent
     #pbDisplayQuestDiscovery(pbMainQuest(id)) if notif
   end

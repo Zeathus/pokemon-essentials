@@ -58,6 +58,8 @@ module Settings
   MAX_PLAYER_NAME_SIZE = 10
   # The maximum number of Pokémon that can be in the party.
   MAX_PARTY_SIZE       = 3
+  # The maximum number of Pokémon that can be in the party from the box.
+  MAX_PARTY_BOX_SIZE   = 6
 
   #=============================================================================
 

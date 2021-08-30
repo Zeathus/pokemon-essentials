@@ -716,6 +716,7 @@ module Compiler
   # player passes through.
   #=============================================================================
   def update_door_event(event,mapData)
+    return
     changed = false
     return false if event.is_a?(RPG::CommonEvent)
     # Check if event has 2+ pages and the last page meets all of these criteria:

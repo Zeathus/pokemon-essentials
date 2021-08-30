@@ -137,7 +137,9 @@ class Spriteset_Map
     @weather = RPG::Weather.new(@@viewport1)
     @vfx = RPG::VFX.new(@viewport1b)
     $game_screen.vfx(PBVFX::None)
+    $game_screen.weather(0,0,0)
     pbOnSpritesetCreate(self,@@viewport1)
+    pbUpdateMarkers
     update
   end
 

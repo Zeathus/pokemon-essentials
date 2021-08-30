@@ -62,6 +62,8 @@ class Sprite_Character < RPG::Sprite
     super(viewport)
     @character    = character
     @partner      = nil
+    @marker_id    = -1
+    @markerSprite = nil
     @isPartner    = @character.is_a?(String)
     @oldbushdepth = 0
     @spriteoffset = false
@@ -128,6 +130,9 @@ class Sprite_Character < RPG::Sprite
     if @partner
       @partner.dispose
       @partner = nil
+    end
+    if @markerSprite
+      @markerSprite.dispose
     end
     super
   end
@@ -213,6 +218,26 @@ class Sprite_Character < RPG::Sprite
     @surfbase.update if @surfbase
     if @partner
       @partner.updatePartner(self, sx, sy, @character_name[/run/])
+    end
+    if @marker_id != @character.marker_id
+      @marker_id = @character.marker_id
+      if @marker_id == -1 && @markerSprite
+        @markerSprite.dispose
+        @markerSprite = nil
+      else
+        if !@markerSprite
+          @markerSprite = IconSprite.new(0, 0, self.viewport)
+          @markerSprite.setBitmap("Graphics/Pictures/Quests/markers")
+        end
+        @markerSprite.src_rect = Rect.new(32 * @marker_id, 0, 32, 48)
+        @markerSprite.ox = 16
+        @markerSprite.oy = @ch + 40
+      end
+    end
+    if @markerSprite
+      @markerSprite.x = self.x
+      @markerSprite.y = self.y
+      @markerSprite.z = self.z
     end
   end
 

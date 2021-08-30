@@ -125,16 +125,16 @@ class QuestBarSprite < Sprite
       if @quest.item
         if @quest.hideitem
           imagepos.push(
-            ["Graphics/Icons/item000",
+            ["Graphics/Items/000",
              12,184,0,0,48,48,24,24])
           pbDrawTextPositions(content,
             [["SECRET TO EVERYBODY",40,182,0,white,shadow]],false)
         else
           imagepos.push(
-            [sprintf("Graphics/Icons/item%03d",@quest.item),
+            [sprintf("Graphics/Items/%s",@quest.item.to_s),
              12,184,0,0,48,48,24,24])
           pbDrawTextPositions(content,
-            [[PBItems.getName(@quest.item).upcase,40,182,0,white,shadow]],false)
+            [[GameData::Item.get(@quest.item).name.upcase,40,182,0,white,shadow]],false)
         end
       end
       offset = 0

@@ -449,7 +449,7 @@ class PokemonBoxPartySprite < SpriteWrapper
     @party = party
     @boxbitmap = AnimatedBitmap.new("Graphics/Pictures/Storage/overlay_party")
     @pokemonsprites = []
-    for i in 0...Settings::MAX_PARTY_SIZE
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
       @pokemonsprites[i] = nil
       pokemon = @party[i]
       if pokemon
@@ -459,13 +459,13 @@ class PokemonBoxPartySprite < SpriteWrapper
     @contents = BitmapWrapper.new(172,352)
     self.bitmap = @contents
     self.x = 182
-    self.y = Graphics.height-352
+    self.y = 384-352
     pbSetSystemFont(self.bitmap)
     refresh
   end
 
   def dispose
-    for i in 0...Settings::MAX_PARTY_SIZE
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
       @pokemonsprites[i].dispose if @pokemonsprites[i]
     end
     @boxbitmap.dispose
@@ -485,7 +485,7 @@ class PokemonBoxPartySprite < SpriteWrapper
 
   def color=(value)
     super
-    for i in 0...Settings::MAX_PARTY_SIZE
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
       if @pokemonsprites[i] && !@pokemonsprites[i].disposed?
         @pokemonsprites[i].color = pbSrcOver(@pokemonsprites[i].color,value)
       end
@@ -494,7 +494,7 @@ class PokemonBoxPartySprite < SpriteWrapper
 
   def visible=(value)
     super
-    for i in 0...Settings::MAX_PARTY_SIZE
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
       if @pokemonsprites[i] && !@pokemonsprites[i].disposed?
         @pokemonsprites[i].visible = value
       end
@@ -533,17 +533,17 @@ class PokemonBoxPartySprite < SpriteWrapper
     pbDrawTextPositions(self.bitmap,[
        [_INTL("Back"), 86, 240, 2, Color.new(248, 248, 248), Color.new(80, 80, 80), 1]
     ])
-    xvalues = []   # [18, 90, 18, 90, 18, 90]
-    yvalues = []   # [2, 18, 66, 82, 130, 146]
-    for i in 0...Settings::MAX_PARTY_SIZE
-      xvalues.push(18 + 72 * (i % 2))
-      yvalues.push(2 + 16 * (i % 2) + 64 * (i / 2))
+    xvalues = []   # [18, 18, 18, 90, 90, 90]
+    yvalues = []   # [2, 66, 130, 18, 82, 146]
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
+      xvalues.push(18 + 72 * (i > 2 ? 1 : 0))
+      yvalues.push(2 + 16 * (i > 2 ? 1 : 0) + 64 * (i % 3))
     end
-    for j in 0...Settings::MAX_PARTY_SIZE
+    for j in 0...Settings::MAX_PARTY_BOX_SIZE
       @pokemonsprites[j] = nil if @pokemonsprites[j] && @pokemonsprites[j].disposed?
     end
     @pokemonsprites.compact!
-    for j in 0...Settings::MAX_PARTY_SIZE
+    for j in 0...Settings::MAX_PARTY_BOX_SIZE
       sprite = @pokemonsprites[j]
       if sprite && !sprite.disposed?
         sprite.viewport = self.viewport
@@ -556,7 +556,7 @@ class PokemonBoxPartySprite < SpriteWrapper
 
   def update
     super
-    for i in 0...Settings::MAX_PARTY_SIZE
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
       @pokemonsprites[i].update if @pokemonsprites[i] && !@pokemonsprites[i].disposed?
     end
   end
@@ -585,16 +585,37 @@ class PokemonStorageScene
     @arrowviewport.z = 99999
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
     @viewport.z = 99999
+    @borderviewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @borderviewport.z = 99999
+    @bgviewport.ox = -128
+    @bgviewport.oy = -48
+    @boxviewport.ox = -128
+    @boxviewport.oy = -48
+    @boxsidesviewport.ox = -128
+    @boxsidesviewport.oy = -48
+    @arrowviewport.ox = -128
+    @arrowviewport.oy = -48
+    @viewport.ox = -128
+    @viewport.oy = -48
     @selection = 0
     @quickswap = false
     @sprites = {}
     @choseFromParty = false
     @command = command
     addBackgroundPlane(@sprites,"background","Storage/bg",@bgviewport)
+    @sprites["border"] = IconSprite.new(0,0,@borderviewport)
+    @sprites["border"].setBitmap("Graphics/Pictures/Storage/border")
+    @sprites["helptext"] = Window_UnformattedTextPokemon.newWithSize("",
+      128, 442, 500, 128, @borderviewport)
+    @sprites["helptext"].baseColor   = Color.new(252,252,252)
+    @sprites["helptext"].shadowColor = Color.new(60,60,80)
+    @sprites["helptext"].visible     = true
+    @sprites["helptext"].windowskin  = nil
+    @sprites["helptext"].text = "Welcome to the Pokemon Storage system, this screen will provide you with extra information when assumed necessary."
     @sprites["box"] = PokemonBoxSprite.new(@storage,@storage.currentBox,@boxviewport)
     @sprites["boxsides"] = IconSprite.new(0,0,@boxsidesviewport)
     @sprites["boxsides"].setBitmap("Graphics/Pictures/Storage/overlay_main")
-    @sprites["overlay"] = BitmapSprite.new(Graphics.width,Graphics.height,@boxsidesviewport)
+    @sprites["overlay"] = BitmapSprite.new(512,384,@boxsidesviewport)
     pbSetSystemFont(@sprites["overlay"].bitmap)
     @sprites["pokemon"] = AutoMosaicPokemonSprite.new(@boxsidesviewport)
     @sprites["pokemon"].setOffset(PictureOrigin::Center)
@@ -603,13 +624,13 @@ class PokemonStorageScene
     @sprites["boxparty"] = PokemonBoxPartySprite.new(@storage.party,@boxsidesviewport)
     if command!=2   # Drop down tab only on Deposit
       @sprites["boxparty"].x = 182
-      @sprites["boxparty"].y = Graphics.height
+      @sprites["boxparty"].y = 384
     end
     @markingbitmap = AnimatedBitmap.new("Graphics/Pictures/Storage/markings")
     @sprites["markingbg"] = IconSprite.new(292,68,@boxsidesviewport)
     @sprites["markingbg"].setBitmap("Graphics/Pictures/Storage/overlay_marking")
     @sprites["markingbg"].visible = false
-    @sprites["markingoverlay"] = BitmapSprite.new(Graphics.width,Graphics.height,@boxsidesviewport)
+    @sprites["markingoverlay"] = BitmapSprite.new(512,384,@boxsidesviewport)
     @sprites["markingoverlay"].visible = false
     pbSetSystemFont(@sprites["markingoverlay"].bitmap)
     @sprites["arrow"] = PokemonBoxArrow.new(@arrowviewport)
@@ -634,16 +655,19 @@ class PokemonStorageScene
     @boxviewport.dispose
     @boxsidesviewport.dispose
     @arrowviewport.dispose
+    @borderviewport.dispose
   end
 
   def pbDisplay(message)
-    msgwindow = Window_UnformattedTextPokemon.newWithSize("",180,0,Graphics.width-180,32)
+    msgwindow = Window_UnformattedTextPokemon.newWithSize("",180,0,512-180,32)
     msgwindow.viewport       = @viewport
     msgwindow.visible        = true
     msgwindow.letterbyletter = false
-    msgwindow.resizeHeightToFit(message,Graphics.width-180)
+    msgwindow.resizeHeightToFit(message,512-180)
     msgwindow.text           = message
     pbBottomRight(msgwindow)
+    msgwindow.x              -= 256
+    msgwindow.y              -= 192
     loop do
       Graphics.update
       Input.update
@@ -659,21 +683,25 @@ class PokemonStorageScene
 
   def pbShowCommands(message,commands,index=0)
     ret = -1
-    msgwindow = Window_UnformattedTextPokemon.newWithSize("",180,0,Graphics.width-180,32)
+    msgwindow = Window_UnformattedTextPokemon.newWithSize("",180,0,512-180,32)
     msgwindow.viewport       = @viewport
     msgwindow.visible        = true
     msgwindow.letterbyletter = false
     msgwindow.text           = message
-    msgwindow.resizeHeightToFit(message,Graphics.width-180)
+    msgwindow.resizeHeightToFit(message,512-180)
     pbBottomRight(msgwindow)
     cmdwindow = Window_CommandPokemon.new(commands)
     cmdwindow.viewport = @viewport
     cmdwindow.visible  = true
     cmdwindow.resizeToFit(cmdwindow.commands)
-    cmdwindow.height   = Graphics.height-msgwindow.height if cmdwindow.height>Graphics.height-msgwindow.height
+    cmdwindow.height   = 384-msgwindow.height if cmdwindow.height>384-msgwindow.height
     pbBottomRight(cmdwindow)
     cmdwindow.y        -= msgwindow.height
     cmdwindow.index    = index
+    cmdwindow.x        -= 256
+    cmdwindow.y        -= 192
+    msgwindow.x        -= 256
+    msgwindow.y        -= 192
     loop do
       Graphics.update
       Input.update
@@ -773,9 +801,16 @@ class PokemonStorageScene
     return if selection < 0
     xvalues = []   # [200, 272, 200, 272, 200, 272, 236]
     yvalues = []   # [2, 18, 66, 82, 130, 146, 220]
-    for i in 0...Settings::MAX_PARTY_SIZE
-      xvalues.push(200 + 72 * (i % 2))
-      yvalues.push(2 + 16 * (i % 2) + 64 * (i / 2))
+    for i in 0...Settings::MAX_PARTY_BOX_SIZE
+      xvalues.push(200 + 72 * (i > 2 ? 1 : 0))
+      yvalues.push(2 + 16 * (i > 2 ? 1 : 0) + 64 * (i % 3))
+    end
+    if selection < 3
+      @sprites["helptext"].text = "These are the Pokémon in your active party. They are used in battle together with your partner's Pokémon."
+    elsif selection < Settings::MAX_PARTY_BOX_SIZE
+      @sprites["helptext"].text = "These are the Pokémon in your inactive party. They cannot be used in battle, but they can be delivered for quests and such."
+    else
+      @sprites["helptext"].text = "Exit the current party menu."
     end
     xvalues.push(236)
     yvalues.push(220)
@@ -790,24 +825,24 @@ class PokemonStorageScene
   def pbPartyChangeSelection(key,selection)
     case key
     when Input::LEFT
-      selection -= 1
-      selection = Settings::MAX_PARTY_SIZE if selection < 0
+      selection -= 3
+      selection = Settings::MAX_PARTY_BOX_SIZE if selection < 0
     when Input::RIGHT
-      selection += 1
-      selection = 0 if selection > Settings::MAX_PARTY_SIZE
+      selection += 3
+      selection = 0 if selection > Settings::MAX_PARTY_BOX_SIZE
     when Input::UP
-      if selection == Settings::MAX_PARTY_SIZE
-        selection = Settings::MAX_PARTY_SIZE - 1
+      if selection == Settings::MAX_PARTY_BOX_SIZE
+        selection = Settings::MAX_PARTY_BOX_SIZE - 1
       else
-        selection -= 2
-        selection = Settings::MAX_PARTY_SIZE if selection < 0
+        selection -= 1
+        selection = Settings::MAX_PARTY_BOX_SIZE if selection < 0
       end
     when Input::DOWN
-      if selection == Settings::MAX_PARTY_SIZE
+      if selection == Settings::MAX_PARTY_BOX_SIZE
         selection = 0
       else
-        selection += 2
-        selection = Settings::MAX_PARTY_SIZE if selection > Settings::MAX_PARTY_SIZE
+        selection += 1
+        selection = Settings::MAX_PARTY_BOX_SIZE if selection > Settings::MAX_PARTY_BOX_SIZE
       end
     end
     return selection
@@ -955,7 +990,10 @@ class PokemonStorageScene
         if selection >= 0 && selection < Settings::MAX_PARTY_SIZE
           @selection = selection
           return selection
-        elsif selection == Settings::MAX_PARTY_SIZE   # Close Box
+        elsif selection >= Settings::MAX_PARTY_SIZE && selection < Settings::MAX_PARTY_BOX_SIZE
+          # Add to off-party
+
+        elsif selection == Settings::MAX_PARTY_BOX_SIZE   # Close Box
           @selection = selection
           return (depositing) ? -3 : -1
         end
@@ -1072,12 +1110,14 @@ class PokemonStorageScene
       Input.update
       @sprites["boxparty"].y -= distancePerFrame
       self.update
-      break if @sprites["boxparty"].y<=Graphics.height-352
+      break if @sprites["boxparty"].y<=384-352
     end
-    @sprites["boxparty"].y = Graphics.height-352
+    @sprites["boxparty"].y = 384-352
   end
 
   def pbHidePartyTab
+    commandName = ["Organizing Boxes", "Withdrawing Pokemon", "Depositing Pokemon"][@command]
+    @sprites["helptext"].text = _INTL("You are currently {1}.", commandName)
     pbSEPlay("GUI storage hide party panel")
     distancePerFrame = 48*20/Graphics.frame_rate
     loop do
@@ -1085,9 +1125,9 @@ class PokemonStorageScene
       Input.update
       @sprites["boxparty"].y += distancePerFrame
       self.update
-      break if @sprites["boxparty"].y>=Graphics.height
+      break if @sprites["boxparty"].y>=384
     end
-    @sprites["boxparty"].y = Graphics.height
+    @sprites["boxparty"].y = 384
   end
 
   def pbHold(selected)
@@ -1285,12 +1325,12 @@ class PokemonStorageScene
     @sprites["markingbg"].visible      = true
     @sprites["markingoverlay"].visible = true
     msg = _INTL("Mark your Pokémon.")
-    msgwindow = Window_UnformattedTextPokemon.newWithSize("",180,0,Graphics.width-180,32)
+    msgwindow = Window_UnformattedTextPokemon.newWithSize("",180,0,512-180,32)
     msgwindow.viewport       = @viewport
     msgwindow.visible        = true
     msgwindow.letterbyletter = false
     msgwindow.text           = msg
-    msgwindow.resizeHeightToFit(msg,Graphics.width-180)
+    msgwindow.resizeHeightToFit(msg,512-180)
     pbBottomRight(msgwindow)
     base   = Color.new(248,248,248)
     shadow = Color.new(80,80,80)

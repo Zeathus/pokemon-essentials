@@ -5,7 +5,7 @@ def pbLoadQuestMarkers
   return if !$Markers || !$Markers[$game_map.map_id]
   for marker in $Markers[$game_map.map_id]
     next if !marker || marker.length < 3
-    event = get_character(marker[0])
+    event = $game_map.events[marker[0]]
     page = marker[1]
     next if event.pageNum != page
     type = marker[2]
@@ -30,8 +30,14 @@ def pbLoadQuestMarkers
       end
     end
     if active
-      pbQuestBubble(event,type+8)
+      pbQuestBubble(event,type)
     end
+  end
+end
+
+def pbUnloadQuestMarkers
+  for e in $game_map.events.values
+    e.marker_id = -1
   end
 end
 
@@ -44,8 +50,8 @@ def pbLoadItemSparkles
   end
 end
 
-def pbUpdateQuestMarkers
-  pbWait(2)
+def pbUpdateMarkers
+  pbUnloadQuestMarkers
   pbLoadQuestMarkers
   #if (pbPartyAbilityCount(:KEENEYE)+
   #    pbPartyAbilityCount(:COMPOUNDEYES)+
@@ -54,17 +60,19 @@ def pbUpdateQuestMarkers
   #end
 end
 
-def pbQuestBubble(event,id=8,tinting=false)
+def pbQuestBubble(event,id=0,tinting=false)
+  event.marker_id = id
+  return
   if event.is_a?(Array)
     sprite=nil
     done=[]
     for i in event
       if !done.include?(i.id)
-        sprite=$scene.spriteset.addUserAnimation(id,i.x,i.y,tinting,event)
+        sprite=$scene.spriteset.addUserAnimation(id,i.x,i.y,tinting,3,event)
         done.push(i.id)
       end
     end
   else
-    sprite=$scene.spriteset.addUserAnimation(id,event.x,event.y,tinting,event)
+    sprite=$scene.spriteset.addUserAnimation(id,event.x,event.y,tinting,3,event)
   end
 end

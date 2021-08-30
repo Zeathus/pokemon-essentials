@@ -27,6 +27,7 @@ class Game_Character
   attr_writer   :bob_height
   attr_accessor :step_anime
   attr_accessor :direction_fix
+  attr_accessor :marker_id
 
   def initialize(map=nil)
     @map                       = map
@@ -77,6 +78,11 @@ class Game_Character
     @moved_this_frame          = false
     @locked                    = false
     @prelock_direction         = 0
+    @marker_id                 = -1
+  end
+
+  def marker_id
+    return @marker_id ? @marker_id : -1
   end
   
   def step_anime
@@ -334,6 +340,7 @@ class Game_Character
         raise "Event's graphic is an out-of-range tile (event #{@id}, map #{self.map.map_id})"
       end
     end
+    z += 1 if self == $game_player
     # Add z if height exceeds 32
     return z + ((height > Game_Map::TILE_HEIGHT) ? Game_Map::TILE_HEIGHT - 1 : 0)
   end
