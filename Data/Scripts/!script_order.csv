@@ -408,6 +408,7 @@
 006_VB_PuzzleAmphiWoods
 007_VB_PuzzleLightMirrors
 008_VB_Gloom
+009_VB_WhosThatPokemon
 @@008_Maps and events
 001_VB_EventUtils
 002_VB_EventBoulders
@@ -420,6 +421,7 @@
 009_VB_MapUtils
 010_VB_OverworldPokemon
 011_VB_TileStairs
+012_VB_Dialog
 @@009_UI
 001_VB_CharData
 002_VB_UI_Overlay
@@ -472,6 +474,7 @@
 003_VB_LevelUpAnimation
 @@097_Compiler
 001_VB_ConvertMarkers
+002_VB_CompileDialog
 @@098_Debug
 001_VB_Debug
 002_VB_DebugMenu

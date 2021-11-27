@@ -1,0 +1,22 @@
+[CW_DOCTOR,0]
+/speaker Marty
+> I came here to find some medicinal herbs.
+> While I am here, I can heal your Pokémon for you if need be.
+
+[CW_DOCTOR,1]
+/speaker Marty
+?> Would you like me to heal your Pokémon?
+    /choice Yes
+        > Very well, now let's see here...
+        /return true
+    /cancelchoice No
+        /return false
+?/>
+
+[CW_DOCTOR,2]
+/speaker Marty
+> That should do the trick.WT Good luck out there!
+
+[CW_DOCTOR,3]
+/speaker Marty
+> You need to be careful out there.WT\nLuckily I was around this time.

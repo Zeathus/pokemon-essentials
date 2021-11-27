@@ -760,7 +760,8 @@ module Compiler
          "trainer_lists.dat",
          "trainer_types.dat",
          "trainers.dat",
-         "types.dat"
+         "types.dat",
+         "dialog.dat"
       ]
       textFiles = [
          "abilities.txt",
@@ -829,6 +830,25 @@ module Compiler
       end
       # Recompile all data
       compile_all(mustCompile) { |msg| pbSetWindowText(msg); echoln(msg) }
+      # Recompile dialog data
+      if !mustCompile
+        latestTextTime = 0
+        dialogFiles = []
+        for file in DIALOG_FILES
+          dialogFiles.push("Dialog/" + file + ".dlg")
+        end
+        dialogFiles.each do |filename|
+          next if !safeExists?("PBS/" + filename)
+          begin
+            File.open("PBS/#{filename}") { |file|
+              latestTextTime = [latestTextTime, file.mtime.to_i].max
+            }
+          rescue SystemCallError
+          end
+        end
+      end
+      mustCompile |= (latestTextTime >= latestDataTime)
+      compile_dialog if mustCompile
     rescue Exception
       e = $!
       raise e if "#{e.class}"=="Reset" || e.is_a?(Reset) || e.is_a?(SystemExit)

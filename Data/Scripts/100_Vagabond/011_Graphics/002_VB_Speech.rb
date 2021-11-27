@@ -18,10 +18,6 @@ def pbTextEffect(type, startc=false, endc=false, speed=false)
   
 end
 
-def pbText(text)
-  pbSpeech("none", "none", text)
-end
-
 def pbFormat(phrase)
   
   #Removing automatic line breaks
@@ -34,11 +30,9 @@ def pbFormat(phrase)
     phrase.gsub!("PLAYER","(player name undefined!)")
   end
   
-  phrase.gsub!("DRAGON","Vahirom")
-  
   #Replacing text variables
-  phrase.gsub!("MONEY","\\G")
-  phrase.gsub!("BREAK","\\n")
+  phrase.gsub!("<MONEY>","\\G")
+  phrase.gsub!("<BR>","\\n")
   phrase.gsub!("WTNP","\\wtnp[20]")
   phrase.gsub!("WT","\\wt[10]")
   phrase.gsub!("STP","\\!")
@@ -160,28 +154,192 @@ def pbFormat(phrase)
     
   end
   
-  #Placing variables
-  for i in 100..150
-    var = _INTL("VAR{1}",i.to_s)
-    out = _INTL("\\v[{1}]",i.to_s)
-    phrase.gsub!(var,out)
-  end
-  for i in 10..99
-    var = _INTL("VAR{1}",i.to_s)
-    out = _INTL("\\v[{1}]",i.to_s)
-    phrase.gsub!(var,out)
-  end
-  for i in 1..9
-    var = _INTL("VAR{1}",i.to_s)
-    out = _INTL("\\v[{1}]",i.to_s)
-    phrase.gsub!(var,out)
-  end
-  
   return phrase
   
 end
 
-def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
+def pbTalk(text, opts={})
+  format_text = pbFormat(text)
+
+  window_type = opts["window_type"]
+  speaker = opts["speaker"]
+  speaker = nil if speaker == "none"
+  name_tag = opts["name_tag"] || speaker
+  name_tag = $Trainer.name if name_tag == "PLAYER"
+  namepos = opts["namepos"] || ["right", "center", "left"][$game_system.message_position]
+  portrait = opts["portrait"] || speaker
+  emotion = opts["emotion"] || "neutral"
+  hide_name = opts["hide_name"] || 0
+  shout = opts["shout"]
+  textpos = opts["textpos"]
+  lines = opts["lines"] || 3
+
+  # Only show portrait if message boxes are at the bottom and frame visible
+  if $game_system.message_position != 2 ||
+     $game_system.message_frame == 1 ||
+     text.include?("\\ch[")
+    portrait = nil
+  end
+
+  # Set speaker character specific properties if there is one
+  if speaker
+    window_type = getTextWindow(speaker) if !window_type
+  end
+
+  # Defining the viewport
+  viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+  viewport.z = 999999
+  sprites = {}
+
+  color = nil
+  if speaker
+    color = "<c2="
+    if $game_system.message_frame != 1
+      color += colorToRgb16(getCharColor(speaker, 0)).to_s
+      color += colorToRgb16(getCharColor(speaker, 1)).to_s
+    else
+      color += colorToRgb16(getCharColor(speaker, 1)).to_s
+      color += colorToRgb16(getCharColor(speaker, 0)).to_s
+    end
+    color += ">"
+  end
+
+  if opts["choices"]
+    choices = opts["choices"]
+    format_text += "\\ch[1,"
+    format_text += choices.length.to_s
+    for choice in choices
+      format_text += ","
+      format_text += choice
+    end
+    format_text += "]"
+  end
+
+  format_text = _INTL("\\l[{1}]{2}", lines, format_text) if lines != 3 && !shout
+
+  window_height = 32 * (lines + 1)
+
+  # Create portrait sprite
+  if portrait && emotion && emotion != "none"
+    file = _INTL("Graphics/Messages/Faces/portrait_{1}_{2}", portrait.downcase, emotion.downcase)
+    backup = _INTL("Graphics/Messages/Faces/portrait_{1}_{2}", portrait.downcase, "neutral")
+    final_file = nil
+    if pbResolveBitmap(file)
+      final_file = file
+    elsif pbResolveBitmap(backup)
+      final_file = backup
+    end
+    if final_file
+      sprites["portrait"] = IconSprite.new(0, 0, viewport)
+      sprites["portrait"].setBitmap(final_file)
+      sprites["portrait"].x = (namepos == "right") ? 50 : 490
+      sprites["portrait"].y = Graphics.height - window_height - sprites["portrait"].bitmap.height + 2
+    end
+  end
+
+  # Create name tag sprite
+  if name_tag && hide_name != 2
+    # Background
+    sprites["namebox"] = IconSprite.new(0, 0, viewport)
+    sprites["namebox"].setBitmap("Graphics/Messages/name_box")
+    case namepos
+    when "left"
+      sprites["namebox"].x = 94
+    when "center"
+      sprites["namebox"].x = Graphics.width / 2 - sprites["namebox"].bitmap.width / 2
+    when "right"
+      sprites["namebox"].x = 520
+    end
+    case $game_system.message_position
+    when 0
+      sprites["namebox"].y = window_height - 16
+    when 1
+      sprites["namebox"].y = Graphics.height / 2 - window_height / 2 - 48
+    when 2
+      sprites["namebox"].y = Graphics.height - window_height - 48
+    end
+    sprites["namebox"].z = 1
+    # Actual Name
+    sprites["name"] = Sprite.new(viewport)
+    sprites["name"].bitmap = Bitmap.new(Graphics.width, Graphics.height)
+    sprites["name"].z = 2
+    pbSetSystemFont(sprites["name"].bitmap)
+    sprites["name"].bitmap.clear
+    text_x = sprites["namebox"].x + sprites["namebox"].bitmap.width / 2
+    text_y = sprites["namebox"].y + 10
+    textpos = [[(hide_name == 0 ? name_tag : "???"), text_x, text_y, 2, getCharColor(name_tag, 1), Color.new(0, 0, 0), 1]]
+    pbDrawTextPositions(sprites["name"].bitmap, textpos)
+  end
+
+  if !shout
+    # Apply formatting for text
+    if textpos
+      if textpos == "center"
+        format_text = _INTL("<ac>{1}</ac>", format_text)
+      elsif textpos == "right"
+        format_text = _INTL("<ar>{1}</ar>", format_text)
+      else
+        format_text = _INTL("<al>{1}</al>", format_text)
+      end
+    end
+    format_text = _INTL("{1}{2}</c2>", color, format_text) if color
+    format_text = _INTL("\\w[{1}]{2}", window_type, format_text) if window_type
+    
+    pbMessage(format_text)
+    $game_system.message_effect = false
+  else
+    # Real textbox has commands only, actual message is drawn manually
+    command = ""
+    if format_text.downcase.include?("\\wtnp")
+      temp_text = format_text[(format_text.index("\\wtnp"))...format_text.length]
+      temp_text = temp_text[0..temp_text.index("]")]
+      command = temp_text
+      format_text = format_text[0...format_text.index(temp_text)] +
+        format_text[(format_text.index(temp_text)+temp_text.length)...format_text.length]
+    end
+    command = _INTL("\\w[{1}]{2}", window_type, command) if window_type
+    command = _INTL("\\l[{1}]{2}", lines, command) if lines != 3
+    
+    # Create actual text
+    sprites["text"] = Sprite.new(viewport)
+    sprites["text"].bitmap = Bitmap.new(Graphics.width, Graphics.height)
+    pbSetSystemFont(sprites["text"].bitmap)
+    sprites["text"].bitmap.font.size = 52
+    sprites["text"].bitmap.clear
+    text_y = 0
+    case $game_system.message_position
+    when 0
+      text_y = window_height / 2 - 36
+    when 1
+      text_y = Graphics.height / 2 - 36
+    when 2
+      text_y = Graphics.height - window_height / 2 - 36
+    end
+    textpos = [[format_text, 128, text_y, false, getCharColor(speaker, 0), getCharColor(speaker, 1)]]
+    sprites["text"].z = 3
+
+    $PokemonTemp.textSize = 4
+    pbDrawTextPositions(sprites["text"].bitmap,textpos)
+    $PokemonTemp.textSize = 2
+    
+    pbSEPlay("Damage1",100,100)
+    $game_screen.start_shake(2, 25, 10)
+    pbMessage(command)
+
+  end
+
+  pbDisposeSpriteHash(sprites)
+  viewport.dispose
+end
+
+def pbText(text)
+  pbTalk(text)
+end
+
+def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil, opts={})
+  name = "none" if !name
+  emotion = "none" if !emotion
+
   if phrase==nil
     phrase = name
     for event in $game_map.events.values
@@ -189,106 +347,13 @@ def pbSpeech(name, emotion="neutral", phrase=nil, unknown=false, choices=nil)
     end
   end
   
-  player = false
-  if name == "PLAYER"
-    name = $Trainer.name
-    player = true
-  end
-  
-  phrase = pbFormat(phrase)
-  
-  #Getting the window type
-  window_type = getTextWindow(name)
-  if window_type
-    phrase = _INTL("{1}{2}", "\\w[" + window_type + "]", phrase)
-  end
-  
-  #Defining the viewport
-  viewport_y = $game_system.message_position==0 ? -22 : 142
-  viewport=Viewport.new(0,viewport_y,Graphics.width,Graphics.height)
-  viewport.z=99999
-  
-  #Checking if portrait exists
-  if !name.downcase.include?("sign") && $game_system.message_position==2 &&
-     $game_system.message_frame!=1
-    imgname = name.downcase
-    if imgname == "nekane" && $game_variables && $game_variables[NEKANE_STATE]>0
-      imgname = _INTL("nekane{1}",$game_variables[NEKANE_STATE])
-    end
-    file=_INTL("Graphics/Messages/Faces/portrait_{1}_{2}",imgname,emotion)
-    if name.include?("?")
-      filename = name + ""
-      filename.gsub!("?","")
-      file=_INTL("Graphics/Messages/Faces/portrait_{1}_{2}",filename,emotion)
-    end
-    backup=_INTL("Graphics/Messages/Faces/portrait_{1}_neutral",imgname)
-    face=Sprite.new(viewport)
-    if pbResolveBitmap(file)
-      #Showing the portrait
-      face.bitmap=RPG::Cache.load_bitmap("",file)
-    elsif pbResolveBitmap(backup) && emotion != "none"
-      #Showing neutral portrait if emotion isn't found
-      face.bitmap=RPG::Cache.load_bitmap("",backup)
-    end
-    face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 50 : 490
-    face.y = 158
-  end
-  
-  #Checks if the message is a sign
-  if !name.downcase.include?("sign") && !name.downcase.include?("none") &&
-     $game_system.message_position!=1 && $game_system.message_frame!=1
-    #Showing the box for the name
-    name_box=Sprite.new(viewport)
-    file="Graphics/Messages/name_box"
-    name_box.bitmap=RPG::Cache.load_bitmap("",file)
-    name_box.x = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 326 : 94
-    name_box.y = 256
+  opts = {}
+  opts["speaker"] = name
+  opts["emotion"] = emotion
+  opts["choices"] = choices if choices
+  opts["hide_name"] = 1 if unknown
 
-    #Showing the name
-    sprites={}
-    sprites["name"]=Sprite.new(viewport)
-    sprites["name"].bitmap=BitmapWrapper.new(Graphics.width,Graphics.height)
-    sprites["name"].z=1
-    pbSetSystemFont(sprites["name"].bitmap)
-    bitmap=sprites["name"].bitmap
-    bitmap.clear
-    #Switches name if unknown
-    name2 = name
-    name2 = "???" if unknown == true
-    textx = (SPEECH_DISPLAY_LEFT.include?(name) || $game_system.message_position==0) ? 404 : 172
-    texty = name_box.y + 6
-    textpos=[[name2,textx,texty,2,getCharColor(name, 1),Color.new(0,0,0),1]]
-    pbDrawTextPositions(bitmap,textpos)
-  end
-  
-  color = "<c2="
-  if $game_system.message_position!=1 && $game_system.message_frame!=1
-    color += colorToRgb16(getCharColor(name, 0)).to_s
-    color += colorToRgb16(getCharColor(name, 1)).to_s
-  else
-    color += colorToRgb16(getCharColor(name, 1)).to_s
-    color += colorToRgb16(getCharColor(name, 0)).to_s
-  end
-  color += ">"
-  
-  if choices != nil
-    phrase+="\\ch[1,"
-    phrase+=choices.length.to_s
-    for choice in choices
-      phrase+=","
-      phrase+=choice
-    end
-    phrase+="]"
-  end
-  
-  pbMessage(_INTL("{1}{2}</c2>",color,phrase))
-  $game_system.message_effect = false
-  
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  if choices != nil
-    return $game_variables[1]
-  end
+  pbTalk(phrase, opts)
 end
 
 def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
@@ -298,102 +363,14 @@ def pbShout(name, emotion="neutral", phrase=nil, unknown=false)
       name = event.name if @event_id == event.id
     end
   end
-  #Removing automatic line breaks
-  phrase.gsub!("\n","")
-  
-  #Replacing text variables
-  command = "\\wt[20]"
-  command = "\\wtnp[20]" if phrase.include?("WTNP")
-  phrase.gsub!("WTNP","")
-  
-  #Getting the window type
-  window_type = getTextWindow(name)
-  if window_type
-    command = _INTL("{1}{2}", "\\w[" + window_type + "]", command)
-  end
-  
-  #Placing variables
-  for i in 100..150
-    var = _INTL("VAR{1}",i.to_s)
-    out = _INTL("\\v[{1}]",i.to_s)
-    phrase.gsub!(var,out)
-  end
-  for i in 10..99
-    var = _INTL("VAR{1}",i.to_s)
-    out = _INTL("\\v[{1}]",i.to_s)
-    phrase.gsub!(var,out)
-  end
-  for i in 1..9
-    var = _INTL("VAR{1}",i.to_s)
-    out = _INTL("\\v[{1}]",i.to_s)
-    phrase.gsub!(var,out)
-  end
-  
-  #Defining the viewport
-  viewport=Viewport.new(0,142,Graphics.width,Graphics.height)
-  viewport.z=99999
-  
-  #Checking if portrait exists
-  file=_INTL("Graphics/Messages/Faces/portrait_{1}_{2}",name,emotion)
-  backup=_INTL("Graphics/Messages/Faces/portrait_{1}_neutral",name)
-  face=Sprite.new(viewport)
-  if pbResolveBitmap(file)
-    #Showing the portrait
-    face.bitmap=RPG::Cache.load_bitmap("",file)
-  elsif pbResolveBitmap(backup) && emotion != "none"
-    #Showing neutral portrait if emotion isn't found
-    face.bitmap=RPG::Cache.load_bitmap("",backup)
-  end
-  face.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 50 : 490
-  face.y = 158
-  
-  #Checks if the message is a sign
-  if !name.downcase.include?("sign") && $game_system.message_position==2
-    #Showing the box for the name
-    name_box=Sprite.new(viewport)
-    file="Graphics/Messages/name_box"
-    name_box.bitmap=RPG::Cache.load_bitmap("",file)
-    name_box.x = (SPEECH_DISPLAY_LEFT.include?(name)) ? 326 : 94
-    name_box.y = 256
-  
-    #Showing the name
-    @sprites={}
-    @sprites["name"]=Sprite.new(viewport)
-    @sprites["name"].bitmap=BitmapWrapper.new(Graphics.width,Graphics.height)
-    @sprites["name"].z=1
-    pbSetSystemFont(@sprites["name"].bitmap)
-    bitmap=@sprites["name"].bitmap
-    bitmap.clear
-    #Switches name if unknown
-    name2 = name
-    name2 = "???" if unknown == true
-    textx = (SPEECH_DISPLAY_LEFT.include?(name)) ? 404 : 172
-    texty = name_box.y + 6
-    textpos=[[name2,textx,texty,2,getCharColor(name, 1),Color.new(0,0,0),true]]
-    pbDrawTextPositions(bitmap,textpos)
-  end
-  
-  viewport2=Viewport.new(10,200,Graphics.width,Graphics.height)
-  viewport2.z=999999
-  
-  @sprites["text"]=Sprite.new(viewport2)
-  @sprites["text"].bitmap=BitmapWrapper.new(Graphics.width,Graphics.height)
-  pbSetSystemFont(@sprites["text"].bitmap)
-  @sprites["text"].bitmap.font.size=52
-  @sprites["text"].bitmap.clear
-  textpos = [[phrase,128,274,false,getCharColor(name,0),getCharColor(name,1)]]
-  
-  $PokemonTemp.textSize = 4
-  pbDrawTextPositions(@sprites["text"].bitmap,textpos)
-  $PokemonTemp.textSize = 2
 
-  pbSEPlay("Damage1",100,100)
-  $game_screen.start_shake(2, 25, 10)
-  pbMessage(command)
-  
-  pbDisposeSpriteHash(@sprites)
-  viewport.dispose
-  viewport2.dispose
+  opts = {}
+  opts["speaker"] = name
+  opts["emotion"] = emotion
+  opts["hide_name"] = 1 if unknown
+  opts["shout"] = true
+
+  pbTalk(phrase, opts)
 end
 
 def pbShowUnownText(text)
@@ -437,19 +414,6 @@ end
 def pbEndCutscene
   $PokemonSystem.lock_fps = false
   Graphics.frame_rate = $PokemonSystem.old_fps
-end
-
-def pbDoubleSpeech(name,emotion,phrase,name2,phrase2)
-  
-  phrase = "\\wd" + phrase
-  phrase2 = "\\wu" + phrase2
-  
-  thr = Thread.new {
-    pbSpeech(name2,"none",phrase2)
-  }
-  pbSpeech(name, emotion, phrase)
-  thr.join
-  
 end
 
 
