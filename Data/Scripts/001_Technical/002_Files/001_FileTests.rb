@@ -108,8 +108,8 @@ end
 
 def pbResolveAudioSE(file)
   return nil if !file
-  if RTP.exists?("Audio/SE/" + file, ["", ".wav", ".ogg"])   # ".mp3"
-    return RTP.getPath("Audio/SE/" + file, ["", ".wav", ".ogg"])   # ".mp3"
+  if RTP.exists?("Audio/SE/"+file,["",".wav",".mp3",".ogg"])
+    return RTP.getPath("Audio/SE/"+file,["",".wav",".mp3",".ogg"])
   end
   return nil
 end
@@ -196,7 +196,7 @@ module RTP
   end
 
   def self.getAudioPath(filename)
-    return self.getPath(filename,["",".wav",".wma",".mid",".ogg",".midi"])   # ".mp3"
+    return self.getPath(filename,["",".mp3",".wav",".wma",".mid",".ogg",".midi"])
   end
 
   def self.getPath(filename,extensions=[])
@@ -261,7 +261,7 @@ end
 
 module FileTest
   Image_ext = ['.png', '.gif']   # '.jpg', '.jpeg', '.bmp',
-  Audio_ext = ['.mid', '.midi', '.ogg', '.wav', '.wma']   # '.mp3'
+  Audio_ext = ['.mp3', '.mid', '.midi', '.ogg', '.wav', '.wma']
 
   def self.audio_exist?(filename)
     return RTP.exists?(filename,Audio_ext)

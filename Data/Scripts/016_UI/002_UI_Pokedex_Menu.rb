@@ -96,7 +96,7 @@ class PokemonPokedexMenuScreen
     commands  = []
     commands2 = []
     dexnames = Settings.pokedex_names
-    $player.pokedex.accessible_dexes.each do |dex|
+    $Trainer.pokedex.accessible_dexes.each do |dex|
       if dexnames[dex].nil?
         commands.push(_INTL("Pokédex"))
       elsif dexnames[dex].is_a?(Array)
@@ -104,8 +104,8 @@ class PokemonPokedexMenuScreen
       else
         commands.push(dexnames[dex])
       end
-      commands2.push([$player.pokedex.seen_count(dex),
-                      $player.pokedex.owned_count(dex),
+      commands2.push([$Trainer.pokedex.seen_count(dex),
+                      $Trainer.pokedex.owned_count(dex),
                       pbGetRegionalDexLength(dex)])
     end
     if $game_switches && $game_switches[HAS_HABITAT_DEX]
@@ -115,7 +115,6 @@ class PokemonPokedexMenuScreen
     @scene.pbStartScene(commands,commands2)
     loop do
       cmd = @scene.pbScene
-<<<<<<< HEAD
       break if cmd<0 || cmd>=commands.length-1   # Cancel/Exit
       if $game_switches && $game_switches[HAS_HABITAT_DEX] && cmd == commands.length-2
         pbFadeOutIn {
@@ -131,15 +130,6 @@ class PokemonPokedexMenuScreen
           screen.pbStartScreen
         }
       end
-=======
-      break if cmd<0 || cmd>=commands2.length   # Cancel/Exit
-      $PokemonGlobal.pokedexDex = $player.pokedex.accessible_dexes[cmd]
-      pbFadeOutIn {
-        scene = PokemonPokedex_Scene.new
-        screen = PokemonPokedexScreen.new(scene)
-        screen.pbStartScreen
-      }
->>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     end
     @scene.pbEndScene
   end

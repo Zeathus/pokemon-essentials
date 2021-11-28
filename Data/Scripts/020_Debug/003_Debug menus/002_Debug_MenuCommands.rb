@@ -65,7 +65,7 @@ DebugMenuCommands.register("warp", {
         $scene.transfer_player
       else
         pbCancelVehicles
-        $map_factory.setup(map[0])
+        $MapFactory.setup(map[0])
         $game_player.moveto(map[1], map[2])
         $game_player.turn_down
         $game_map.update
@@ -160,17 +160,6 @@ DebugMenuCommands.register("daycare", {
   }
 })
 
-DebugMenuCommands.register("skipcredits", {
-  "parent"      => "fieldmenu",
-  "name"        => _INTL("Skip Credits"),
-  "description" => _INTL("Toggle whether credits can be ended early by pressing the Use input."),
-  "effect"      => proc {
-    $PokemonGlobal.creditsPlayed = !$PokemonGlobal.creditsPlayed
-    pbMessage(_INTL("Credits can be skipped when played in future.")) if $PokemonGlobal.creditsPlayed
-    pbMessage(_INTL("Credits cannot be skipped when next played.")) if !$PokemonGlobal.creditsPlayed
-  }
-})
-
 DebugMenuCommands.register("relicstone", {
   "parent"      => "fieldmenu",
   "name"        => _INTL("Use Relic Stone"),
@@ -212,7 +201,7 @@ DebugMenuCommands.register("testwildbattle", {
       level = pbMessageChooseNumber(_INTL("Set the wild {1}'s level.",
          GameData::Species.get(species).name), params)
       if level > 0
-        $game_temp.encounter_type = nil
+        $PokemonTemp.encounterType = nil
         pbWildBattle(species, level)
       end
     end
@@ -242,7 +231,7 @@ DebugMenuCommands.register("testwildbattleadvanced", {
           next
         end
         setBattleRule(sprintf("%dv%d", size0, pkmn.length))
-        $game_temp.encounter_type = nil
+        $PokemonTemp.encounterType = nil
         pbWildBattleCore(*pkmn)
         break
       elsif pkmnCmd == pkmnCmds.length - 2   # Set player side size
@@ -275,7 +264,8 @@ DebugMenuCommands.register("testwildbattleadvanced", {
           scr.pbPokemonDebug(pkmn[pkmnCmd], -1, nil, true)
           scr.pbEndScreen
         elsif pbConfirmMessage(_INTL("Delete this Pokémon?"))
-          pkmn.delete_at(pkmnCmd)
+          pkmn[pkmnCmd] = nil
+          pkmn.compact!
         end
       end
     end
@@ -376,7 +366,8 @@ DebugMenuCommands.register("testtrainerbattleadvanced", {
             trainers[trainerCmd] = [0, tr]
           end
         elsif pbConfirmMessage(_INTL("Delete this trainer?"))
-          trainers.delete_at(trainerCmd)
+          trainers[trainerCmd] = nil
+          trainers.compact!
         end
       end
     end
@@ -481,7 +472,7 @@ DebugMenuCommands.register("additem", {
         qty = pbMessageChooseNumber(_INTL("Add how many {1}?",
            GameData::Item.get(item).name_plural), params)
         if qty > 0
-          $bag.add(item, qty)
+          $PokemonBag.pbStoreItem(item, qty)
           pbMessage(_INTL("Gave {1}x {2}.", qty, GameData::Item.get(item).name))
         end
       end
@@ -492,7 +483,7 @@ DebugMenuCommands.register("additem", {
 DebugMenuCommands.register("fillbag", {
   "parent"      => "itemsmenu",
   "name"        => _INTL("Fill Bag"),
-  "description" => _INTL("Empties the Bag and then fills it with a certain number of every item."),
+  "description" => _INTL("Add a certain number of every item to the Bag."),
   "effect"      => proc {
     params = ChooseNumberParams.new
     params.setRange(1, Settings::BAG_MAX_PER_SLOT)
@@ -500,19 +491,7 @@ DebugMenuCommands.register("fillbag", {
     params.setCancelValue(0)
     qty = pbMessageChooseNumber(_INTL("Choose the number of items."), params)
     if qty > 0
-      $bag.clear
-      # NOTE: This doesn't simply use $bag.add for every item in turn, because
-      #       that's really slow when done in bulk.
-      pocket_sizes = Settings::BAG_MAX_POCKET_SIZE
-      bag = $bag.pockets   # Called here so that it only rearranges itself once
-      GameData::Item.each do |i|
-        next if !pocket_sizes[i.pocket - 1] || pocket_sizes[i.pocket - 1] == 0
-        next if pocket_sizes[i.pocket - 1] > 0 && bag[i.pocket].length >= pocket_sizes[i.pocket - 1]
-        item_qty = (i.is_important?) ? 1 : qty
-        bag[i.pocket].push([i.id, item_qty])
-      end
-      # NOTE: Auto-sorting pockets don't need to be sorted afterwards, because
-      #       items are added in the same order they would be sorted into.
+      GameData::Item.each { |i| $PokemonBag.pbStoreItem(i.id, qty) }
       pbMessage(_INTL("The Bag was filled with {1} of each item.", qty))
     end
   }
@@ -523,7 +502,7 @@ DebugMenuCommands.register("emptybag", {
   "name"        => _INTL("Empty Bag"),
   "description" => _INTL("Remove all items from the Bag."),
   "effect"      => proc {
-    $bag.clear
+    $PokemonBag.clear
     pbMessage(_INTL("The Bag was cleared."))
   }
 })
@@ -564,13 +543,13 @@ DebugMenuCommands.register("demoparty", {
     for id in species
       party.push(id) if GameData::Species.exists?(id)
     end
-    $player.party.clear
+    $Trainer.party.clear
     # Generate Pokémon of each species at level 20
     party.each do |species|
       pkmn = Pokemon.new(species, 20)
-      $player.party.push(pkmn)
-      $player.pokedex.register(pkmn)
-      $player.pokedex.set_owned(species)
+      $Trainer.party.push(pkmn)
+      $Trainer.pokedex.register(pkmn)
+      $Trainer.pokedex.set_owned(species)
       case species
       when :PIDGEOTTO
         pkmn.learn_move(:FLY)
@@ -602,7 +581,7 @@ DebugMenuCommands.register("healparty", {
   "name"        => _INTL("Heal Party"),
   "description" => _INTL("Fully heal the HP/status/PP of all Pokémon in the party."),
   "effect"      => proc {
-    $player.party.each { |pkmn| pkmn.heal }
+    $Trainer.party.each { |pkmn| pkmn.heal }
     pbMessage(_INTL("Your Pokémon were fully healed."))
   }
 })
@@ -612,7 +591,7 @@ DebugMenuCommands.register("quickhatch", {
   "name"        => _INTL("Quick Hatch"),
   "description" => _INTL("Make all eggs in the party require just one more step to hatch."),
   "effect"      => proc {
-    $player.party.each { |pkmn| pkmn.steps_to_hatch = 1 if pkmn.egg? }
+    $Trainer.party.each { |pkmn| pkmn.steps_to_hatch = 1 if pkmn.egg? }
     pbMessage(_INTL("All eggs in your party now require one step to hatch."))
   }
 })
@@ -630,21 +609,17 @@ DebugMenuCommands.register("fillboxes", {
       f = species_data.form
       # Record each form of each species as seen and owned
       if f == 0
-        if species_data.single_gendered?
+        if [:AlwaysMale, :AlwaysFemale, :Genderless].include?(species_data.gender_ratio)
           g = (species_data.gender_ratio == :AlwaysFemale) ? 1 : 0
-          $player.pokedex.register(sp, g, f, 0, false)
-          $player.pokedex.register(sp, g, f, 1, false)
+          $Trainer.pokedex.register(sp, g, f, false)
         else   # Both male and female
-          $player.pokedex.register(sp, 0, f, 0, false)
-          $player.pokedex.register(sp, 0, f, 1, false)
-          $player.pokedex.register(sp, 1, f, 0, false)
-          $player.pokedex.register(sp, 1, f, 1, false)
+          $Trainer.pokedex.register(sp, 0, f, false)
+          $Trainer.pokedex.register(sp, 1, f, false)
         end
-        $player.pokedex.set_owned(sp, false)
+        $Trainer.pokedex.set_owned(sp, false)
       elsif species_data.real_form_name && !species_data.real_form_name.empty?
         g = (species_data.gender_ratio == :AlwaysFemale) ? 1 : 0
-        $player.pokedex.register(sp, g, f, 0, false)
-        $player.pokedex.register(sp, g, f, 1, false)
+        $Trainer.pokedex.register(sp, g, f, false)
       end
       # Add Pokémon (if form 0, i.e. one of each species)
       next if f != 0
@@ -655,7 +630,7 @@ DebugMenuCommands.register("fillboxes", {
       added += 1
       $PokemonStorage[(added - 1) / box_qty, (added - 1) % box_qty] = Pokemon.new(sp, 50)
     end
-    $player.pokedex.refresh_accessible_dexes
+    $Trainer.pokedex.refresh_accessible_dexes
     pbMessage(_INTL("Storage boxes were filled with one Pokémon of each species."))
     if !completed
       pbMessage(_INTL("Note: The number of storage spaces ({1} boxes of {2}) is less than the number of species.",
@@ -711,16 +686,16 @@ DebugMenuCommands.register("setbadges", {
       badgecmds.push(_INTL("Give all"))
       badgecmds.push(_INTL("Remove all"))
       for i in 0...24
-        badgecmds.push(_INTL("{1} Badge {2}", $player.badges[i] ? "[Y]" : "[  ]", i + 1))
+        badgecmds.push(_INTL("{1} Badge {2}", $Trainer.badges[i] ? "[Y]" : "[  ]", i + 1))
       end
       badgecmd = pbShowCommands(nil, badgecmds, -1, badgecmd)
       break if badgecmd < 0
       if badgecmd == 0   # Give all
-        24.times { |i| $player.badges[i] = true }
+        24.times { |i| $Trainer.badges[i] = true }
       elsif badgecmd == 1   # Remove all
-        24.times { |i| $player.badges[i] = false }
+        24.times { |i| $Trainer.badges[i] = false }
       else
-        $player.badges[badgecmd - 2] = !$player.badges[badgecmd - 2]
+        $Trainer.badges[badgecmd - 2] = !$Trainer.badges[badgecmd - 2]
       end
     end
   }
@@ -733,9 +708,9 @@ DebugMenuCommands.register("setmoney", {
   "effect"      => proc {
     params = ChooseNumberParams.new
     params.setRange(0, Settings::MAX_MONEY)
-    params.setDefaultValue($player.money)
-    $player.money = pbMessageChooseNumber(_INTL("Set the player's money."), params)
-    pbMessage(_INTL("You now have ${1}.", $player.money.to_s_formatted))
+    params.setDefaultValue($Trainer.money)
+    $Trainer.money = pbMessageChooseNumber(_INTL("Set the player's money."), params)
+    pbMessage(_INTL("You now have ${1}.", $Trainer.money.to_s_formatted))
   }
 })
 
@@ -746,9 +721,9 @@ DebugMenuCommands.register("setcoins", {
   "effect"      => proc {
     params = ChooseNumberParams.new
     params.setRange(0, Settings::MAX_COINS)
-    params.setDefaultValue($player.coins)
-    $player.coins = pbMessageChooseNumber(_INTL("Set the player's Coin amount."), params)
-    pbMessage(_INTL("You now have {1} Coins.", $player.coins.to_s_formatted))
+    params.setDefaultValue($Trainer.coins)
+    $Trainer.coins = pbMessageChooseNumber(_INTL("Set the player's Coin amount."), params)
+    pbMessage(_INTL("You now have {1} Coins.", $Trainer.coins.to_s_formatted))
   }
 })
 
@@ -759,9 +734,9 @@ DebugMenuCommands.register("setbp", {
   "effect"      => proc {
     params = ChooseNumberParams.new
     params.setRange(0, Settings::MAX_BATTLE_POINTS)
-    params.setDefaultValue($player.battle_points)
-    $player.battle_points = pbMessageChooseNumber(_INTL("Set the player's BP amount."), params)
-    pbMessage(_INTL("You now have {1} BP.", $player.battle_points.to_s_formatted))
+    params.setDefaultValue($Trainer.battle_points)
+    $Trainer.battle_points = pbMessageChooseNumber(_INTL("Set the player's BP amount."), params)
+    pbMessage(_INTL("You now have {1} BP.", $Trainer.battle_points.to_s_formatted))
   }
 })
 
@@ -770,9 +745,9 @@ DebugMenuCommands.register("toggleshoes", {
   "name"        => _INTL("Toggle Running Shoes"),
   "description" => _INTL("Toggle possession of running shoes."),
   "effect"      => proc {
-    $player.has_running_shoes = !$player.has_running_shoes
-    pbMessage(_INTL("Gave Running Shoes.")) if $player.has_running_shoes
-    pbMessage(_INTL("Lost Running Shoes.")) if !$player.has_running_shoes
+    $Trainer.has_running_shoes = !$Trainer.has_running_shoes
+    pbMessage(_INTL("Gave Running Shoes.")) if $Trainer.has_running_shoes
+    pbMessage(_INTL("Lost Running Shoes.")) if !$Trainer.has_running_shoes
   }
 })
 
@@ -781,9 +756,9 @@ DebugMenuCommands.register("togglepokegear", {
   "name"        => _INTL("Toggle Pokégear"),
   "description" => _INTL("Toggle possession of the Pokégear."),
   "effect"      => proc {
-    $player.has_pokegear = !$player.has_pokegear
-    pbMessage(_INTL("Gave Pokégear.")) if $player.has_pokegear
-    pbMessage(_INTL("Lost Pokégear.")) if !$player.has_pokegear
+    $Trainer.has_pokegear = !$Trainer.has_pokegear
+    pbMessage(_INTL("Gave Pokégear.")) if $Trainer.has_pokegear
+    pbMessage(_INTL("Lost Pokégear.")) if !$Trainer.has_pokegear
   }
 })
 
@@ -795,23 +770,23 @@ DebugMenuCommands.register("dexlists", {
     dexescmd = 0
     loop do
       dexescmds = []
-      dexescmds.push(_INTL("Have Pokédex: {1}", $player.has_pokedex ? "[YES]" : "[NO]"))
+      dexescmds.push(_INTL("Have Pokédex: {1}", $Trainer.has_pokedex ? "[YES]" : "[NO]"))
       dex_names = Settings.pokedex_names
       for i in 0...dex_names.length
         name = (dex_names[i].is_a?(Array)) ? dex_names[i][0] : dex_names[i]
-        unlocked = $player.pokedex.unlocked?(i)
+        unlocked = $Trainer.pokedex.unlocked?(i)
         dexescmds.push(_INTL("{1} {2}", unlocked ? "[Y]" : "[  ]", name))
       end
       dexescmd = pbShowCommands(nil, dexescmds, -1, dexescmd)
       break if dexescmd < 0
       dexindex = dexescmd - 1
       if dexindex < 0   # Toggle Pokédex ownership
-        $player.has_pokedex = !$player.has_pokedex
+        $Trainer.has_pokedex = !$Trainer.has_pokedex
       else   # Toggle Regional Dex accessibility
-        if $player.pokedex.unlocked?(dexindex)
-          $player.pokedex.lock(dexindex)
+        if $Trainer.pokedex.unlocked?(dexindex)
+          $Trainer.pokedex.lock(dexindex)
         else
-          $player.pokedex.unlock(dexindex)
+          $Trainer.pokedex.unlock(dexindex)
         end
       end
     end
@@ -823,22 +798,24 @@ DebugMenuCommands.register("setplayer", {
   "name"        => _INTL("Set Player Character"),
   "description" => _INTL("Edit the player's character, as defined in \"metadata.txt\"."),
   "effect"      => proc {
-    index = 0
-    cmds = []
-    ids = []
-    GameData::PlayerMetadata.each do |player|
-      index = cmds.length if player.id == $player.character_ID
-      cmds.push(player.id.to_s)
-      ids.push(player.id)
-    end
-    if cmds.length == 1
-      pbMessage(_INTL("There is only one player character defined."))
+    limit = 0
+    for i in 0...8
+      meta = GameData::Metadata.get_player(i)
+      next if meta
+      limit = i
       break
     end
-    cmd = pbShowCommands(nil, cmds, -1, index)
-    if cmd >= 0 && cmd != index
-      pbChangePlayer(ids[cmd])
-      pbMessage(_INTL("The player character was changed."))
+    if limit <= 1
+      pbMessage(_INTL("There is only one player defined."))
+    else
+      params = ChooseNumberParams.new
+      params.setRange(0, limit - 1)
+      params.setDefaultValue($Trainer.character_ID)
+      newid = pbMessageChooseNumber(_INTL("Choose the new player character."), params)
+      if newid != $Trainer.character_ID
+        pbChangePlayer(newid)
+        pbMessage(_INTL("The player character was changed."))
+      end
     end
   }
 })
@@ -848,12 +825,12 @@ DebugMenuCommands.register("changeoutfit", {
   "name"        => _INTL("Set Player Outfit"),
   "description" => _INTL("Edit the player's outfit number."),
   "effect"      => proc {
-    oldoutfit = $player.outfit
+    oldoutfit = $Trainer.outfit
     params = ChooseNumberParams.new
     params.setRange(0, 99)
     params.setDefaultValue(oldoutfit)
-    $player.outfit = pbMessageChooseNumber(_INTL("Set the player's outfit."), params)
-    pbMessage(_INTL("Player's outfit was changed.")) if $player.outfit != oldoutfit
+    $Trainer.outfit = pbMessageChooseNumber(_INTL("Set the player's outfit."), params)
+    pbMessage(_INTL("Player's outfit was changed.")) if $Trainer.outfit != oldoutfit
   }
 })
 
@@ -862,17 +839,17 @@ DebugMenuCommands.register("renameplayer", {
   "name"        => _INTL("Set Player Name"),
   "description" => _INTL("Rename the player."),
   "effect"      => proc {
-    trname = pbEnterPlayerName("Your name?", 0, Settings::MAX_PLAYER_NAME_SIZE, $player.name)
+    trname = pbEnterPlayerName("Your name?", 0, Settings::MAX_PLAYER_NAME_SIZE, $Trainer.name)
     if nil_or_empty?(trname) && pbConfirmMessage(_INTL("Give yourself a default name?"))
-      trainertype = $player.trainer_type
+      trainertype = $Trainer.trainer_type
       gender      = pbGetTrainerTypeGender(trainertype)
       trname      = pbSuggestTrainerName(gender)
     end
     if nil_or_empty?(trname)
-      pbMessage(_INTL("The player's name remained {1}.", $player.name))
+      pbMessage(_INTL("The player's name remained {1}.", $Trainer.name))
     else
-      $player.name = trname
-      pbMessage(_INTL("The player's name was changed to {1}.", $player.name))
+      $Trainer.name = trname
+      pbMessage(_INTL("The player's name was changed to {1}.", $Trainer.name))
     end
   }
 })
@@ -882,8 +859,8 @@ DebugMenuCommands.register("randomid", {
   "name"        => _INTL("Randomize Player ID"),
   "description" => _INTL("Generate a random new ID for the player."),
   "effect"      => proc {
-    $player.id = rand(2 ** 16) | rand(2 ** 16) << 16
-    pbMessage(_INTL("The player's ID was changed to {1} (full ID: {2}).", $player.public_ID, $player.id))
+    $Trainer.id = rand(2 ** 16) | rand(2 ** 16) << 16
+    pbMessage(_INTL("The player's ID was changed to {1} (full ID: {2}).", $Trainer.public_ID, $Trainer.id))
   }
 })
 
@@ -900,20 +877,10 @@ DebugMenuCommands.register("editorsmenu", {
 DebugMenuCommands.register("setmetadata", {
   "parent"      => "editorsmenu",
   "name"        => _INTL("Edit Metadata"),
-  "description" => _INTL("Edit global metadata and player character metadata."),
+  "description" => _INTL("Edit global and map metadata."),
   "always_show" => true,
   "effect"      => proc {
-    pbMetadataScreen
-  }
-})
-
-DebugMenuCommands.register("setmapmetadata", {
-  "parent"      => "editorsmenu",
-  "name"        => _INTL("Edit Map Metadata"),
-  "description" => _INTL("Edit map metadata."),
-  "always_show" => true,
-  "effect"      => proc {
-    pbMapMetadataScreen(pbDefaultMap)
+    pbMetadataScreen(pbDefaultMap)
   }
 })
 
@@ -1114,7 +1081,7 @@ DebugMenuCommands.register("compiledata", {
   "always_show" => true,
   "effect"      => proc {
     msgwindow = pbCreateMessageWindow
-    Compiler.compile_all(true)
+    Compiler.compile_all(true) { |msg| pbMessageDisplay(msgwindow, msg, false); echoln(msg) }
     pbMessageDisplay(msgwindow, _INTL("All game data was compiled."))
     pbDisposeMessageWindow(msgwindow)
   }
@@ -1130,24 +1097,22 @@ DebugMenuCommands.register("createpbs", {
     cmds = [
       _INTL("[Create all]"),
       "abilities.txt",
-      "battle_facility_lists.txt",
-      "berry_plants.txt",
+      "berryplants.txt",
+      "connections.txt",
       "encounters.txt",
       "items.txt",
-      "map_connections.txt",
-      "map_metadata.txt",
       "metadata.txt",
       "moves.txt",
       "phone.txt",
       "pokemon.txt",
-      "pokemon_forms.txt",
-      "pokemon_metrics.txt",
-      "regional_dexes.txt",
+      "pokemonforms.txt",
+      "regionaldexes.txt",
       "ribbons.txt",
-      "shadow_pokemon.txt",
-      "town_map.txt",
-      "trainer_types.txt",
+      "shadowmoves.txt",
+      "townmap.txt",
+      "trainerlists.txt",
       "trainers.txt",
+      "trainertypes.txt",
       "types.txt"
     ]
     loop do
@@ -1155,29 +1120,37 @@ DebugMenuCommands.register("createpbs", {
       case cmd
       when 0  then Compiler.write_all
       when 1  then Compiler.write_abilities
-      when 2  then Compiler.write_trainer_lists
-      when 3  then Compiler.write_berry_plants
+      when 2  then Compiler.write_berry_plants
+      when 3  then Compiler.write_connections
       when 4  then Compiler.write_encounters
       when 5  then Compiler.write_items
-      when 6  then Compiler.write_connections
-      when 7  then Compiler.write_map_metadata
-      when 8  then Compiler.write_metadata
-      when 9  then Compiler.write_moves
-      when 10 then Compiler.write_phone
-      when 11 then Compiler.write_pokemon
-      when 12 then Compiler.write_pokemon_forms
-      when 13 then Compiler.write_pokemon_metrics
-      when 14 then Compiler.write_regional_dexes
-      when 15 then Compiler.write_ribbons
-      when 16 then Compiler.write_shadow_pokemon
-      when 17 then Compiler.write_town_map
-      when 18 then Compiler.write_trainer_types
-      when 19 then Compiler.write_trainers
-      when 20 then Compiler.write_types
+      when 6  then Compiler.write_metadata
+      when 7  then Compiler.write_moves
+      when 8  then Compiler.write_phone
+      when 9  then Compiler.write_pokemon
+      when 10 then Compiler.write_pokemon_forms
+      when 11 then Compiler.write_regional_dexes
+      when 12 then Compiler.write_ribbons
+      when 13 then Compiler.write_shadow_movesets
+      when 14 then Compiler.write_town_map
+      when 15 then Compiler.write_trainer_lists
+      when 16 then Compiler.write_trainers
+      when 17 then Compiler.write_trainer_types
+      when 18 then Compiler.write_types
       else break
       end
       pbMessage(_INTL("File written."))
     end
+  }
+})
+
+DebugMenuCommands.register("renamesprites", {
+  "parent"      => "othermenu",
+  "name"        => _INTL("Rename Old Sprites"),
+  "description" => _INTL("Renames and moves Pokémon/item/trainer sprites from their old places."),
+  "always_show" => true,
+  "effect"      => proc {
+    SpriteRenamer.convert_files
   }
 })
 
@@ -1188,29 +1161,5 @@ DebugMenuCommands.register("invalidtiles", {
   "always_show" => true,
   "effect"      => proc {
     pbDebugFixInvalidTiles
-  }
-})
-
-DebugMenuCommands.register("renamefiles", {
-  "parent"      => "othermenu",
-  "name"        => _INTL("Rename Outdated Files"),
-  "description" => _INTL("Check for files with outdated names and rename/move them. Can alter map data."),
-  "always_show" => true,
-  "effect"      => proc {
-    if pbConfirmMessage(_INTL("Are you sure you want to automatically rename outdated files?"))
-      FilenameUpdater.rename_files
-      pbMessage(_INTL("Done."))
-    end
-  }
-})
-
-DebugMenuCommands.register("reloadsystemcache", {
-  "parent"      => "othermenu",
-  "name"        => _INTL("Reload System Cache"),
-  "description" => _INTL("Refreshes the system's file cache. Use if you change a file while playing."),
-  "always_show" => true,
-  "effect"      => proc {
-    System.reload_cache
-    pbMessage(_INTL("Done."))
   }
 })

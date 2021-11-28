@@ -232,7 +232,7 @@ end
 def pbRepositionMessageWindow(msgwindow, linecount=2)
   msgwindow.height=32*linecount+msgwindow.borderY
   msgwindow.y=(Graphics.height)-(msgwindow.height)
-  if $game_system
+  if $game_system && $game_system.respond_to?("message_position")
     case $game_system.message_position
     when 0  # up
       msgwindow.y=0
@@ -241,7 +241,11 @@ def pbRepositionMessageWindow(msgwindow, linecount=2)
     when 2
      msgwindow.y=(Graphics.height)-(msgwindow.height)
     end
-    msgwindow.opacity = 0 if $game_system.message_frame != 0
+  end
+  if $game_system && $game_system.respond_to?("message_frame")
+    if $game_system.message_frame != 0
+      msgwindow.opacity = 0
+    end
   end
 end
 
@@ -284,7 +288,7 @@ def isDarkBackground(background,rect=nil)
   yStart = (ySeg==0) ? rect.y+(rect.height/2) : rect.y+ySeg/2
   count = 0
   y = yStart
-  r = g = b = 0
+  r = 0; g = 0; b = 0
   yLoop.times do
     x = xStart
     xLoop.times do
@@ -566,9 +570,7 @@ def pbFadeOutIn(z=99999,nofadeout=false)
   end
   pbPushFade
   begin
-    val = 0
-    val = yield if block_given?
-    nofadeout = true if val == 99999   # Ugly hack used by Town Map in the Bag/Pokégear
+    yield if block_given?
   ensure
     pbPopFade
     if !nofadeout

@@ -190,17 +190,15 @@ def pbHatchAnimation(pokemon)
 end
 
 def pbHatch(pokemon)
-  $stats.eggs_hatched += 1
   speciesname = pokemon.speciesName
   pokemon.name           = nil
-  pokemon.owner          = Pokemon::Owner.new_from_trainer($player)
+  pokemon.owner          = Pokemon::Owner.new_from_trainer($Trainer)
   pokemon.happiness      = 120
   pokemon.timeEggHatched = pbGetTimeNow
   pokemon.obtain_method  = 1   # hatched from egg
   pokemon.hatched_map    = $game_map.map_id
-  $player.pokedex.register(pokemon)
-  $player.pokedex.set_owned(pokemon.species)
-  $player.pokedex.set_seen_egg(pokemon.species)
+  $Trainer.pokedex.register(pokemon)
+  $Trainer.pokedex.set_owned(pokemon.species)
   pokemon.record_first_moves
   if !pbHatchAnimation(pokemon)
     pbMessage(_INTL("Huh?\1"))
@@ -216,17 +214,13 @@ def pbHatch(pokemon)
 end
 
 Events.onStepTaken += proc { |_sender,_e|
-<<<<<<< HEAD
   next if !$Trainer
   $Trainer.stats.steps_taken += 1
   for egg in $Trainer.party
-=======
-  for egg in $player.party
->>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     next if egg.steps_to_hatch <= 0
     egg.steps_to_hatch -= 1
-    for i in $player.pokemon_party
-      next if ![:FLAMEBODY, :MAGMAARMOR, :STEAMENGINE].include?(i.ability_id)
+    for i in $Trainer.pokemon_party
+      next if !i.hasAbility?(:FLAMEBODY) && !i.hasAbility?(:MAGMAARMOR)
       egg.steps_to_hatch -= 1
       break
     end

@@ -152,7 +152,7 @@ module SaveData
   #       save_data[:new_value] = Foo.new
   #     end
   #   end
-  # @yield the block of code to be saved as a Conversion
+  # @yield self [Conversion]
   def self.register_conversion(id, &block)
     validate id => Symbol
     unless block_given?
@@ -195,14 +195,13 @@ module SaveData
     conversions_to_run = self.get_conversions(save_data)
     return false if conversions_to_run.none?
     File.open(SaveData::FILE_PATH + '.bak', 'wb') { |f| Marshal.dump(save_data, f) }
-    Console.echo_h1 "Running #{conversions_to_run.length} save file conversions"
+    echoln "Running #{conversions_to_run.length} conversions..."
     conversions_to_run.each do |conversion|
-      Console.echo_li "#{conversion.title}..."
+      echo "#{conversion.title}..."
       conversion.run(save_data)
-      Console.echo_done(true)
+      echoln ' done.'
     end
-    echoln "" if conversions_to_run.length > 0
-    Console.echo_h2("All save file conversions applied successfully", text: :green)
+    echoln '' if conversions_to_run.length > 0
     save_data[:essentials_version] = Essentials::VERSION
     save_data[:game_version] = Settings::GAME_VERSION
     return true

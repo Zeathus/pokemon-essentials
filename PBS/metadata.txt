@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ﻿# See the documentation on the wiki to learn how to edit this file.
 #-------------------------------
 [000]
@@ -472,34 +471,3 @@ Outdoor = true
 # Distortion Abode
 BattleBack = distortion
 WildBattleBGM = Battle! Distortion World (Stardust).ogg
-=======
-﻿# See the documentation on the wiki to learn how to edit this file.
-#-------------------------------
-[0]
-StartMoney = 3000
-StartItemStorage = POTION
-Home = 3,7,5,8
-StorageCreator = Bill
-WildBattleBGM = Battle wild.mid
-TrainerBattleBGM = Battle trainer.mid
-WildVictoryME = Battle victory wild.ogg
-TrainerVictoryME = Battle victory trainer.ogg
-SurfBGM = Surfing.mid
-BicycleBGM = Bicycle.mid
-#-------------------------------
-[1]
-TrainerType = POKEMONTRAINER_Red
-WalkCharset = trainer_POKEMONTRAINER_Red
-RunCharset = boy_run
-CycleCharset = boy_bike
-SurfCharset = boy_surf
-FishCharset = boy_fish_offset
-#-------------------------------
-[2]
-TrainerType = POKEMONTRAINER_Leaf
-WalkCharset = trainer_POKEMONTRAINER_Leaf
-RunCharset = girl_run
-CycleCharset = girl_bike
-SurfCharset = girl_surf
-FishCharset = girl_fish_offset
->>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388

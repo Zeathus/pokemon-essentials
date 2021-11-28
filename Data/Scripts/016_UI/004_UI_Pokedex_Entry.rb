@@ -11,7 +11,6 @@ class PokemonPokedexInfo_Scene
     @index   = index
     @region  = region
     @page = 1
-    @show_battled_count = false
     @typebitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/Pokedex/icon_types"))
     @sprites = {}
     @sprites["background"] = IconSprite.new(0,0,@viewport)
@@ -20,7 +19,8 @@ class PokemonPokedexInfo_Scene
     @sprites["infosprite"].x = 104
     @sprites["infosprite"].y = 136
     @mapdata = pbLoadTownMapData
-    mappos = $game_map.metadata&.town_map_position
+    map_metadata = GameData::MapMetadata.try_get($game_map.map_id)
+    mappos = (map_metadata) ? map_metadata.town_map_position : nil
     if @region < 0                                 # Use player's current region
       @region = (mappos) ? mappos[0] : 0                      # Region 0 default
     end
@@ -32,8 +32,8 @@ class PokemonPokedexInfo_Scene
       if hidden[0]==@region && hidden[1]>0 && $game_switches[hidden[1]]
         pbDrawImagePositions(@sprites["areamap"].bitmap,[
            ["Graphics/Pictures/#{hidden[4]}",
-              hidden[2]*PokemonRegionMap_Scene::SQUARE_WIDTH,
-              hidden[3]*PokemonRegionMap_Scene::SQUARE_HEIGHT]
+              hidden[2]*PokemonRegionMap_Scene::SQUAREWIDTH,
+              hidden[3]*PokemonRegionMap_Scene::SQUAREHEIGHT]
         ])
       end
     end
@@ -76,17 +76,14 @@ class PokemonPokedexInfo_Scene
     @viewport.z = 99999
     dexnum = 0
     dexnumshift = false
-    if $player.pokedex.unlocked?(-1)   # National Dex is unlocked
+    if $Trainer.pokedex.unlocked?(-1)   # National Dex is unlocked
       species_data = GameData::Species.try_get(species)
-      if species_data
-        nationalDexList = [:NONE]
-        GameData::Species.each_species { |s| nationalDexList.push(s.species) }
-        dexnum = nationalDexList.index(species_data.species) || 0
-        dexnumshift = true if dexnum > 0 && Settings::DEXES_WITH_OFFSETS.include?(-1)
-      end
+      dexnum = species_data.id_number if species_data
+      dexnumshift = true if Settings::DEXES_WITH_OFFSETS.include?(-1)
     else
-      for i in 0...$player.pokedex.dexes_count - 1   # Regional Dexes
-        next if !$player.pokedex.unlocked?(i)
+      dexnum = 0
+      for i in 0...$Trainer.pokedex.dexes_count - 1   # Regional Dexes
+        next if !$Trainer.pokedex.unlocked?(i)
         num = pbGetRegionalNumber(i,species)
         next if num <= 0
         dexnum = num
@@ -130,8 +127,8 @@ class PokemonPokedexInfo_Scene
 
   def pbUpdateDummyPokemon
     @species = @dexlist[@index][0]
-    @gender, @form = $player.pokedex.last_form_seen(@species)
-    metrics_data = GameData::SpeciesMetrics.get_species_form(@species, @form)
+    @gender, @form = $Trainer.pokedex.last_form_seen(@species)
+    species_data = GameData::Species.get_species_form(@species, @form)
     @sprites["infosprite"].setSpeciesBitmap(@species,@gender,@form)
     if @sprites["formfront"]
       @sprites["formfront"].setSpeciesBitmap(@species,@gender,@form)
@@ -139,7 +136,7 @@ class PokemonPokedexInfo_Scene
     if @sprites["formback"]
       @sprites["formback"].setSpeciesBitmap(@species,@gender,@form,false,false,true)
       @sprites["formback"].y = 256
-      @sprites["formback"].y += metrics_data.back_sprite[1] * 2
+      @sprites["formback"].y += species_data.back_sprite_y * 2
     end
     if @sprites["formicon"]
       @sprites["formicon"].pbSetParams(@species,@gender,@form)
@@ -155,14 +152,15 @@ class PokemonPokedexInfo_Scene
       next if sp.form != 0 && (!sp.real_form_name || sp.real_form_name.empty?)
       next if sp.pokedex_form != sp.form
       multiple_forms = true if sp.form > 0
-      if sp.single_gendered?
+      case sp.gender_ratio
+      when :AlwaysMale, :AlwaysFemale, :Genderless
         real_gender = (sp.gender_ratio == :AlwaysFemale) ? 1 : 0
-        next if !$player.pokedex.seen_form?(@species, real_gender, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
+        next if !$Trainer.pokedex.seen_form?(@species, real_gender, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
         real_gender = 2 if sp.gender_ratio == :Genderless
         ret.push([sp.form_name, real_gender, sp.form])
       else   # Both male and female
         for real_gender in 0...2
-          next if !$player.pokedex.seen_form?(@species, real_gender, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
+          next if !$Trainer.pokedex.seen_form?(@species, real_gender, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
           ret.push([sp.form_name, real_gender, sp.form])
           break if sp.form_name && !sp.form_name.empty?   # Only show 1 entry for each non-0 form
         end
@@ -223,31 +221,24 @@ class PokemonPokedexInfo_Scene
     end
     textpos = [
        [_INTL("{1}{2} {3}", indexText, " ", species_data.name),
-          246, 36, 0, Color.new(248, 248, 248), Color.new(0, 0, 0)]
+          246, 36, 0, Color.new(248, 248, 248), Color.new(0, 0, 0)],
+       [_INTL("Height"), 314, 152, 0, base, shadow],
+       [_INTL("Weight"), 314, 184, 0, base, shadow]
     ]
-    if @show_battled_count
-      textpos.push([_INTL("Number Battled"), 314, 152, 0, base, shadow])
-      textpos.push([$player.pokedex.battled_count(@species).to_s, 452, 184, 1, base, shadow])
-    else
-      textpos.push([_INTL("Height"), 314, 152, 0, base, shadow])
-      textpos.push([_INTL("Weight"), 314, 184, 0, base, shadow])
-    end
-    if $player.owned?(@species)
+    if $Trainer.owned?(@species)
       # Write the category
       textpos.push([_INTL("{1} Pokémon", species_data.category), 246, 68, 0, base, shadow])
       # Write the height and weight
-      if !@show_battled_count
-        height = species_data.height
-        weight = species_data.weight
-        if System.user_language[3..4] == "US"   # If the user is in the United States
-          inches = (height / 0.254).round
-          pounds = (weight / 0.45359).round
-          textpos.push([_ISPRINTF("{1:d}'{2:02d}\"", inches / 12, inches % 12), 460, 152, 1, base, shadow])
-          textpos.push([_ISPRINTF("{1:4.1f} lbs.", pounds / 10.0), 494, 184, 1, base, shadow])
-        else
-          textpos.push([_ISPRINTF("{1:.1f} m", height / 10.0), 470, 152, 1, base, shadow])
-          textpos.push([_ISPRINTF("{1:.1f} kg", weight / 10.0), 482, 184, 1, base, shadow])
-        end
+      height = species_data.height
+      weight = species_data.weight
+      if System.user_language[3..4] == "US"   # If the user is in the United States
+        inches = (height / 0.254).round
+        pounds = (weight / 0.45359).round
+        textpos.push([_ISPRINTF("{1:d}'{2:02d}\"", inches / 12, inches % 12), 460, 152, 1, base, shadow])
+        textpos.push([_ISPRINTF("{1:4.1f} lbs.", pounds / 10.0), 494, 184, 1, base, shadow])
+      else
+        textpos.push([_ISPRINTF("{1:.1f} m", height / 10.0), 470, 152, 1, base, shadow])
+        textpos.push([_ISPRINTF("{1:.1f} kg", weight / 10.0), 482, 184, 1, base, shadow])
       end
       # Draw the Pokédex entry text
       drawTextEx(overlay, 40, 244, 512 - (40 * 2), 4,   # overlay, x, y, width, num lines
@@ -262,23 +253,24 @@ class PokemonPokedexInfo_Scene
       # Show the owned icon
       imagepos.push(["Graphics/Pictures/Pokedex/icon_own", 212, 44])
       # Draw the type icon(s)
-      species_data.types.each_with_index do |type, i|
-        type_number = GameData::Type.get(type).icon_position
-        type_rect = Rect.new(0, type_number * 32, 96, 32)
-        overlay.blt(296 + 100 * i, 120, @typebitmap.bitmap, type_rect)
-      end
+      type1 = species_data.type1
+      type2 = species_data.type2
+      type1_number = GameData::Type.get(type1).id_number
+      type2_number = GameData::Type.get(type2).id_number
+      type1rect = Rect.new(0, type1_number * 32, 96, 32)
+      type2rect = Rect.new(0, type2_number * 32, 96, 32)
+      overlay.blt(296, 120, @typebitmap.bitmap, type1rect)
+      overlay.blt(396, 120, @typebitmap.bitmap, type2rect) if type1 != type2
     else
       # Write the category
       textpos.push([_INTL("????? Pokémon"), 246, 68, 0, base, shadow])
       # Write the height and weight
-      if !@show_battled_count
-        if System.user_language[3..4] == "US"   # If the user is in the United States
-          textpos.push([_INTL("???'??\""), 460, 152, 1, base, shadow])
-          textpos.push([_INTL("????.? lbs."), 494, 184, 1, base, shadow])
-        else
-          textpos.push([_INTL("????.? m"), 470, 152, 1, base, shadow])
-          textpos.push([_INTL("????.? kg"), 482, 184, 1, base, shadow])
-        end
+      if System.user_language[3..4] == "US"   # If the user is in the United States
+        textpos.push([_INTL("???'??\""), 460, 152, 1, base, shadow])
+        textpos.push([_INTL("????.? lbs."), 494, 184, 1, base, shadow])
+      else
+        textpos.push([_INTL("????.? m"), 470, 152, 1, base, shadow])
+        textpos.push([_INTL("????.? kg"), 482, 184, 1, base, shadow])
       end
     end
     # Draw all text
@@ -335,8 +327,8 @@ class PokemonPokedexInfo_Scene
     # Draw coloured squares on each square of the region map with a nest
     pointcolor   = Color.new(0,248,248)
     pointcolorhl = Color.new(192,248,248)
-    sqwidth = PokemonRegionMap_Scene::SQUARE_WIDTH
-    sqheight = PokemonRegionMap_Scene::SQUARE_HEIGHT
+    sqwidth = PokemonRegionMap_Scene::SQUAREWIDTH
+    sqheight = PokemonRegionMap_Scene::SQUAREHEIGHT
     for j in 0...points.length
       if points[j]
         x = (j%mapwidth)*sqwidth
@@ -381,8 +373,7 @@ class PokemonPokedexInfo_Scene
     formname = ""
     for i in @available
       if i[1]==@gender && i[2]==@form
-        formname = i[0]
-        break
+        formname = i[0]; break
       end
     end
     textpos = [
@@ -397,7 +388,7 @@ class PokemonPokedexInfo_Scene
     newindex = @index
     while newindex>0
       newindex -= 1
-      if $player.seen?(@dexlist[newindex][0])
+      if $Trainer.seen?(@dexlist[newindex][0])
         @index = newindex
         break
       end
@@ -408,7 +399,7 @@ class PokemonPokedexInfo_Scene
     newindex = @index
     while newindex<@dexlist.length-1
       newindex += 1
-      if $player.seen?(@dexlist[newindex][0])
+      if $Trainer.seen?(@dexlist[newindex][0])
         @index = newindex
         break
       end
@@ -426,7 +417,7 @@ class PokemonPokedexInfo_Scene
     oldindex = -1
     loop do
       if oldindex!=index
-        $player.pokedex.set_last_form_seen(@species, @available[index][1], @available[index][2])
+        $Trainer.pokedex.set_last_form_seen(@species, @available[index][1], @available[index][2])
         pbUpdateDummyPokemon
         drawPage(@page)
         @sprites["uparrow"].visible   = (index>0)
@@ -468,12 +459,9 @@ class PokemonPokedexInfo_Scene
         pbPlayCloseMenuSE
         break
       elsif Input.trigger?(Input::USE)
-        if @page == 1   # Info
-          @show_battled_count = !@show_battled_count
-          dorefresh = true
-        elsif @page == 2   # Area
+        if @page==2   # Area
 #          dorefresh = true
-        elsif @page == 3   # Forms
+        elsif @page==3   # Forms
           if @available.length>1
             pbPlayDecisionSE
             pbChooseForm
@@ -565,7 +553,7 @@ class PokemonPokedexInfoScreen
     region = -1
     if Settings::USE_CURRENT_REGION_DEX
       region = pbGetCurrentRegion
-      region = -1 if region >= $player.pokedex.dexes_count - 1
+      region = -1 if region >= $Trainer.pokedex.dexes_count - 1
     else
       region = $PokemonGlobal.pokedexDex   # National Dex -1, regional Dexes 0, 1, etc.
     end

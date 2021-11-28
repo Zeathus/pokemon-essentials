@@ -31,7 +31,7 @@ class PokemonMapFactory
     return @maps[@mapIndex] if @maps[@mapIndex]
     raise "No maps in save file... (mapIndex=#{@mapIndex})" if @maps.length==0
     if @maps[0]
-      echoln "Using next map, may be incorrect (mapIndex=#{@mapIndex}, length=#{@maps.length})"
+      echoln("Using next map, may be incorrect (mapIndex=#{@mapIndex}, length=#{@maps.length})")
       return @maps[0]
     end
     raise "No maps in save file... (all maps empty; mapIndex=#{@mapIndex})"
@@ -243,7 +243,6 @@ class PokemonMapFactory
     return false
   end
 
-  # Returns the coordinate change to go from this position to other position
   def getRelativePos(thisMapID, thisX, thisY, otherMapID, otherX, otherY)
     if thisMapID == otherMapID   # Both events share the same map
       return [otherX - thisX, otherY - thisY]
@@ -252,12 +251,12 @@ class PokemonMapFactory
     if conns[thisMapID]
       for conn in conns[thisMapID]
         if conn[0] == otherMapID
-          posX = conn[4] - conn[1] + otherX - thisX
-          posY = conn[5] - conn[2] + otherY - thisY
+          posX = thisX + conn[1] - conn[4] + otherX
+          posY = thisY + conn[2] - conn[5] + otherY
           return [posX, posY]
-        elsif conn[3] == otherMapID
-          posX =  conn[1] - conn[4] + otherX - thisX
-          posY =  conn[2] - conn[5] + otherY - thisY
+        elsif conn[1] == otherMapID
+          posX = thisX + conn[4] - conn[1] + otherX
+          posY = thisY + conn[5] - conn[2] + otherY
           return [posX, posY]
         end
       end
@@ -382,21 +381,31 @@ class PokemonMapFactory
 
   def updateMaps(scene)
     updateMapsInternal
-    $map_factory.setSceneStarted(scene) if @mapChanged
+    $MapFactory.setSceneStarted(scene) if @mapChanged
   end
 
   def updateMapsInternal
     return if $game_player.moving?
     if !MapFactoryHelper.hasConnections?($game_map.map_id)
-      return if @maps.length == 1
-      @maps.delete_if { |map| $game_map.map_id != map.map_id }
+      return if @maps.length==1
+      for i in 0...@maps.length
+        @maps[i] = nil if $game_map.map_id!=@maps[i].map_id
+      end
+      @maps.compact!
       @mapIndex = getMapIndex($game_map.map_id)
       return
     end
     setMapsInRange
     deleted = false
-    deleted = @maps.delete_if { |map| !MapFactoryHelper.mapInRange?(map) }
-    @mapIndex = getMapIndex($game_map.map_id) if deleted
+    for i in 0...@maps.length
+      next if MapFactoryHelper.mapInRange?(@maps[i])
+      @maps[i] = nil
+      deleted = true
+    end
+    if deleted
+      @maps.compact!
+      @mapIndex = getMapIndex($game_map.map_id)
+    end
   end
 end
 
@@ -510,7 +519,7 @@ end
 #===============================================================================
 # Unused
 def updateTilesets
-  maps = $map_factory.maps
+  maps = $MapFactory.maps
   for map in maps
     map.updateTileset if map
   end

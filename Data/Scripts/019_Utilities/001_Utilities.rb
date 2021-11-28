@@ -208,11 +208,11 @@ end
 #===============================================================================
 # Unused
 def pbGetPlayerGraphic
-  id = $player.character_ID
-  return "" if id < 1
-  meta = GameData::PlayerMetadata.get(id)
+  id = $Trainer.character_ID
+  return "" if id < 0 || id >= 8
+  meta = GameData::Metadata.get_player(id)
   return "" if !meta
-  return GameData::TrainerType.player_front_sprite_filename(meta.trainer_type)
+  return GameData::TrainerType.player_front_sprite_filename(meta[0])
 end
 
 def pbGetTrainerTypeGender(trainer_type)
@@ -220,25 +220,28 @@ def pbGetTrainerTypeGender(trainer_type)
 end
 
 def pbChangePlayer(id)
-  return false if id < 1
-  meta = GameData::PlayerMetadata.get(id)
+  return false if id < 0 || id >= 8
+  meta = GameData::Metadata.get_player(id)
   return false if !meta
-  $player.character_ID = id
+  $Trainer.character_ID = id
+  $Trainer.trainer_type = meta[0]
+  $game_player.character_name = meta[1]
 end
 
 def pbTrainerName(name = nil, outfit = 0)
-  pbChangePlayer(1) if $player.character_ID < 1
+  pbChangePlayer(0) if $Trainer.character_ID < 0
   if name.nil?
     name = pbEnterPlayerName(_INTL("Your name?"), 0, Settings::MAX_PLAYER_NAME_SIZE)
     if name.nil? || name.empty?
-      player_metadata = GameData::PlayerMetadata.get($player.character_ID)
-      trainer_type = (player_metadata) ? player_metadata.trainer_type : nil
+      player_metadata = GameData::Metadata.get_player($Trainer.character_ID)
+      trainer_type = (player_metadata) ? player_metadata[0] : nil
       gender = pbGetTrainerTypeGender(trainer_type)
       name = pbSuggestTrainerName(gender)
     end
   end
-  $player.name   = name
-  $player.outfit = outfit
+  $Trainer.name   = name
+  $Trainer.outfit = outfit
+  $PokemonTemp.begunNewGame = true
 end
 
 def pbSuggestTrainerName(gender)
@@ -353,7 +356,8 @@ end
 # as determined by the current map's metadata.
 def pbGetCurrentRegion(default = -1)
   return default if !$game_map
-  map_pos = $game_map.metadata&.town_map_position
+  map_metadata = GameData::MapMetadata.try_get($game_map.map_id)
+  map_pos = (map_metadata) ? map_metadata.town_map_position : nil
   return (map_pos) ? map_pos[0] : default
 end
 
@@ -385,7 +389,7 @@ end
 def pbGetRegionalDexLength(region_dex)
   if region_dex < 0
     ret = 0
-    GameData::Species.each_species { |s| ret += 1 }
+    GameData::Species.each { |s| ret += 1 if s.form == 0 }
     return ret
   end
   dex_list = pbLoadRegionalDexes[region_dex]
@@ -404,7 +408,7 @@ end
 
 def pbMoveTutorAnnotations(move, movelist = nil)
   ret = []
-  $player.party.each_with_index do |pkmn, i|
+  $Trainer.party.each_with_index do |pkmn, i|
     if pkmn.egg?
       ret[i] = _INTL("NOT ABLE")
     elsif pkmn.hasMove?(move)
@@ -437,12 +441,12 @@ def pbMoveTutorChoose(move,movelist=nil,bymachine=false,oneusemachine=false)
     movename = GameData::Move.get(move).name
     annot = pbMoveTutorAnnotations(move,movelist)
     scene = PokemonParty_Scene.new
-    screen = PokemonPartyScreen.new(scene,$player.party)
+    screen = PokemonPartyScreen.new(scene,$Trainer.party)
     screen.pbStartScene(_INTL("Teach which Pokémon?"),false,annot)
     loop do
       chosen = screen.pbChoosePokemon
       break if chosen<0
-      pokemon = $player.party[chosen]
+      pokemon = $Trainer.party[chosen]
       if pokemon.egg?
         pbMessage(_INTL("Eggs can't be taught any moves.")) { screen.pbUpdate }
       elsif pokemon.shadowPokemon?
@@ -453,8 +457,6 @@ def pbMoveTutorChoose(move,movelist=nil,bymachine=false,oneusemachine=false)
         pbMessage(_INTL("{1} can't learn {2}.",pokemon.name,movename)) { screen.pbUpdate }
       else
         if pbLearnMove(pokemon,move,false,bymachine) { screen.pbUpdate }
-          $stats.moves_taught_by_item += 1 if bymachine
-          $stats.moves_taught_by_tutor += 1 if !bymachine
           pokemon.add_first_move(move) if oneusemachine
           ret = true
           break
@@ -566,17 +568,17 @@ def pbLoadRpgxpScene(scene)
   Graphics.freeze
   oldscene.disposeSpritesets
   visibleObjects = pbHideVisibleObjects
-  Graphics.transition
+  Graphics.transition(20)
   Graphics.freeze
   while $scene && !$scene.is_a?(Scene_Map)
     $scene.main
   end
-  Graphics.transition
+  Graphics.transition(20)
   Graphics.freeze
   $scene = oldscene
   $scene.createSpritesets
   pbShowObjects(visibleObjects)
-  Graphics.transition
+  Graphics.transition(20)
 end
 
 def pbChooseLanguage

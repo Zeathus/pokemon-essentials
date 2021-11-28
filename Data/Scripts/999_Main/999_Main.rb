@@ -34,7 +34,7 @@ def mainFunctionDebug
     Graphics.freeze
     $scene = pbCallTitle
     $scene.main until $scene.nil?
-    Graphics.transition
+    Graphics.transition(20)
   rescue Hangup
     pbPrintException($!) if !$DEBUG
     pbEmergencySave

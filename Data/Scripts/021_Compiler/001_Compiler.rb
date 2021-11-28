@@ -102,7 +102,6 @@ module Compiler
         line = line[3,line.length-3]
       end
       if !line[/^\#/] && !line[/^\s*$/]
-        line = prepline(line)
         if line[/^\s*\[\s*(.*)\s*\]\s*$/]   # Of the format: [something]
           yield lastsection,sectionname if havesection
           sectionname = $~[1]
@@ -123,27 +122,21 @@ module Compiler
         end
       end
       lineno += 1
-      Graphics.update if lineno%1000==0
+      Graphics.update if lineno%200==0
+      pbSetWindowText(_INTL("Processing {1} line {2}",FileLineData.file,lineno)) if lineno%50==0
     }
     yield lastsection,sectionname if havesection
   end
 
-  # Used for types.txt, pokemon.txt, battle_facility_lists.txt and Battle Tower trainers PBS files
+  # Used for types.txt, pokemon.txt, metadata.txt
   def pbEachFileSection(f)
-    pbEachFileSectionEx(f) { |section,name|
-      yield section,name if block_given? && name[/^.+$/]
-    }
-  end
-
-  # Used for metadata.txt and map_metadata.txt
-  def pbEachFileSectionNumbered(f)
     pbEachFileSectionEx(f) { |section,name|
       yield section,name.to_i if block_given? && name[/^\d+$/]
     }
   end
 
-  # Used for pokemon_forms.txt
-  def pbEachFileSectionPokemonForms(f)
+  # Used for pokemonforms.txt
+  def pbEachFileSection2(f)
     pbEachFileSectionEx(f) { |section,name|
       yield section,name if block_given? && name[/^\w+[-,\s]{1}\d+$/]
     }
@@ -221,7 +214,7 @@ module Compiler
     }
   end
 
-  # Used for map_connections.txt, abilities.txt, moves.txt, regional_dexes.txt
+  # Used for connections.txt, abilities.txt, moves.txt, regionaldexes.txt
   def pbCompilerEachPreppedLine(filename)
     File.open(filename,"rb") { |f|
       FileLineData.file = filename
@@ -401,221 +394,205 @@ module Compiler
       repeat = true
       start = 1
     end
-    subarrays = repeat && schema[1].length > 2
     begin
-      subrecord = []
       for i in start...schema[1].length
         chr = schema[1][i,1]
         case chr
         when "i"   # Integer
-          subrecord.push(csvInt!(rec,lineno))
+          record.push(csvInt!(rec,lineno))
         when "I"   # Optional integer
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif !field[/^\-?\d+$/]
             raise _INTL("Field {1} is not an integer\r\n{2}",field,FileLineData.linereport)
           else
-            subrecord.push(field.to_i)
+            record.push(field.to_i)
           end
         when "u"   # Positive integer or zero
-          subrecord.push(csvPosInt!(rec,lineno))
+          record.push(csvPosInt!(rec,lineno))
         when "U"   # Optional positive integer or zero
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif !field[/^\d+$/]
             raise _INTL("Field '{1}' must be 0 or greater\r\n{2}",field,FileLineData.linereport)
           else
-            subrecord.push(field.to_i)
+            record.push(field.to_i)
           end
         when "v"   # Positive integer
           field = csvPosInt!(rec,lineno)
           raise _INTL("Field '{1}' must be greater than 0\r\n{2}",field,FileLineData.linereport) if field==0
-          subrecord.push(field)
+          record.push(field)
         when "V"   # Optional positive integer
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif !field[/^\d+$/]
             raise _INTL("Field '{1}' must be greater than 0\r\n{2}",field,FileLineData.linereport)
           elsif field.to_i==0
             raise _INTL("Field '{1}' must be greater than 0\r\n{2}",field,FileLineData.linereport)
           else
-            subrecord.push(field.to_i)
+            record.push(field.to_i)
           end
         when "x"   # Hexadecimal number
           field = csvfield!(rec)
           if !field[/^[A-Fa-f0-9]+$/]
             raise _INTL("Field '{1}' is not a hexadecimal number\r\n{2}",field,FileLineData.linereport)
           end
-          subrecord.push(field.hex)
+          record.push(field.hex)
         when "X"   # Optional hexadecimal number
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif !field[/^[A-Fa-f0-9]+$/]
             raise _INTL("Field '{1}' is not a hexadecimal number\r\n{2}",field,FileLineData.linereport)
           else
-            subrecord.push(field.hex)
+            record.push(field.hex)
           end
         when "f"   # Floating point number
-          subrecord.push(csvFloat!(rec,lineno))
+          record.push(csvFloat!(rec,lineno))
         when "F"   # Optional floating point number
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif !field[/^\-?^\d*\.?\d*$/]
             raise _INTL("Field {1} is not a floating point number\r\n{2}",field,FileLineData.linereport)
           else
-            subrecord.push(field.to_f)
+            record.push(field.to_f)
           end
         when "b"   # Boolean
-          subrecord.push(csvBoolean!(rec,lineno))
+          record.push(csvBoolean!(rec,lineno))
         when "B"   # Optional Boolean
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif field[/^1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Tt]|[Yy]$/]
-            subrecord.push(true)
+            record.push(true)
           else
-            subrecord.push(false)
+            record.push(false)
           end
         when "n"   # Name
           field = csvfield!(rec)
           if !field[/^(?![0-9])\w+$/]
             raise _INTL("Field '{1}' must contain only letters, digits, and\r\nunderscores and can't begin with a number.\r\n{2}",field,FileLineData.linereport)
           end
-          subrecord.push(field)
+          record.push(field)
         when "N"   # Optional name
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif !field[/^(?![0-9])\w+$/]
             raise _INTL("Field '{1}' must contain only letters, digits, and\r\nunderscores and can't begin with a number.\r\n{2}",field,FileLineData.linereport)
           else
-            subrecord.push(field)
+            record.push(field)
           end
         when "s"   # String
-          subrecord.push(csvfield!(rec))
+          record.push(csvfield!(rec))
         when "S"   # Optional string
           field = csvfield!(rec)
-          subrecord.push((nil_or_empty?(field)) ? nil : field)
+          record.push((nil_or_empty?(field)) ? nil : field)
         when "q"   # Unformatted text
-          subrecord.push(rec)
+          record.push(rec)
           rec = ""
         when "Q"   # Optional unformatted text
           if nil_or_empty?(rec)
-            subrecord.push(nil)
+            record.push(nil)
           else
-            subrecord.push(rec)
+            record.push(rec)
             rec = ""
           end
         when "e"   # Enumerable
-          subrecord.push(csvEnumField!(rec,schema[2+i-start],"",FileLineData.linereport))
+          record.push(csvEnumField!(rec,schema[2+i-start],"",FileLineData.linereport))
         when "E"   # Optional enumerable
           field = csvfield!(rec)
-          subrecord.push(checkEnumFieldOrNil(field,schema[2+i-start]))
+          record.push(checkEnumFieldOrNil(field,schema[2+i-start]))
         when "y"   # Enumerable or integer
           field = csvfield!(rec)
-          subrecord.push(csvEnumFieldOrInt!(field,schema[2+i-start],"",FileLineData.linereport))
+          record.push(csvEnumFieldOrInt!(field,schema[2+i-start],"",FileLineData.linereport))
         when "Y"   # Optional enumerable or integer
           field = csvfield!(rec)
           if nil_or_empty?(field)
-            subrecord.push(nil)
+            record.push(nil)
           elsif field[/^\-?\d+$/]
-            subrecord.push(field.to_i)
+            record.push(field.to_i)
           else
-            subrecord.push(checkEnumFieldOrNil(field,schema[2+i-start]))
+            record.push(checkEnumFieldOrNil(field,schema[2+i-start]))
           end
-        end
-      end
-      if !subrecord.empty?
-        if subarrays
-          record.push(subrecord)
-        else
-          record.concat(subrecord)
         end
       end
       break if repeat && nil_or_empty?(rec)
     end while repeat
-    return (schema[1].length == 1) ? record[0] : record
+    return (schema[1].length==1) ? record[0] : record
   end
 
   #=============================================================================
   # Write values to a file using a schema
   #=============================================================================
   def pbWriteCsvRecord(record,file,schema)
-    rec = (record.is_a?(Array)) ? record.flatten : [record]
-    start = (schema[1][0, 1] == "*") ? 1 : 0
-    index = -1
-    begin
-      for i in start...schema[1].length
-        index += 1
-        file.write(",") if index > 0
-        value = rec[index]
-        if value.nil?
-          # do nothing
-        elsif value.is_a?(String)
-          file.write(csvQuote(value))
-        elsif value.is_a?(Symbol)
-          file.write(csvQuote(value.to_s))
-        elsif value==true
-          file.write("true")
-        elsif value==false
-          file.write("false")
-        elsif value.is_a?(Numeric)
-          case schema[1][i, 1]
-          when "e", "E"   # Enumerable
-            enumer = schema[2+i]
-            if enumer.is_a?(Array)
-              file.write(enumer[value])
-            elsif enumer.is_a?(Symbol) || enumer.is_a?(String)
-              mod = Object.const_get(enumer.to_sym)
-              file.write(getConstantName(mod,value))
-            elsif enumer.is_a?(Module)
-              file.write(getConstantName(enumer,value))
-            elsif enumer.is_a?(Hash)
-              for key in enumer.keys
-                if enumer[key]==value
-                  file.write(key)
-                  break
-                end
+    rec = (record.is_a?(Array)) ? record.clone : [record]
+    for i in 0...schema[1].length
+      chr = schema[1][i,1]
+      file.write(",") if i>0
+      if rec[i].nil?
+        # do nothing
+      elsif rec[i].is_a?(String)
+        file.write(csvQuote(rec[i]))
+      elsif rec[i].is_a?(Symbol)
+        file.write(csvQuote(rec[i].to_s))
+      elsif rec[i]==true
+        file.write("true")
+      elsif rec[i]==false
+        file.write("false")
+      elsif rec[i].is_a?(Numeric)
+        case chr
+        when "e", "E"   # Enumerable
+          enumer = schema[2+i]
+          if enumer.is_a?(Array)
+            file.write(enumer[rec[i]])
+          elsif enumer.is_a?(Symbol) || enumer.is_a?(String)
+            mod = Object.const_get(enumer.to_sym)
+            file.write(getConstantName(mod,rec[i]))
+          elsif enumer.is_a?(Module)
+            file.write(getConstantName(enumer,rec[i]))
+          elsif enumer.is_a?(Hash)
+            for key in enumer.keys
+              if enumer[key]==rec[i]
+                file.write(key)
+                break
               end
             end
-          when "y", "Y"   # Enumerable or integer
-            enumer = schema[2+i]
-            if enumer.is_a?(Array)
-              if enumer[value]!=nil
-                file.write(enumer[value])
-              else
-                file.write(value)
-              end
-            elsif enumer.is_a?(Symbol) || enumer.is_a?(String)
-              mod = Object.const_get(enumer.to_sym)
-              file.write(getConstantNameOrValue(mod,value))
-            elsif enumer.is_a?(Module)
-              file.write(getConstantNameOrValue(enumer,value))
-            elsif enumer.is_a?(Hash)
-              hasenum = false
-              for key in enumer.keys
-                if enumer[key]==value
-                  file.write(key)
-                  hasenum = true
-                  break
-                end
-              end
-              file.write(value) unless hasenum
-            end
-          else   # Any other record type
-            file.write(value.inspect)
           end
-        else
-          file.write(value.inspect)
+        when "y", "Y"   # Enumerable or integer
+          enumer = schema[2+i]
+          if enumer.is_a?(Array)
+            if enumer[rec[i]]!=nil
+              file.write(enumer[rec[i]])
+            else
+              file.write(rec[i])
+            end
+          elsif enumer.is_a?(Symbol) || enumer.is_a?(String)
+            mod = Object.const_get(enumer.to_sym)
+            file.write(getConstantNameOrValue(mod,rec[i]))
+          elsif enumer.is_a?(Module)
+            file.write(getConstantNameOrValue(enumer,rec[i]))
+          elsif enumer.is_a?(Hash)
+            hasenum = false
+            for key in enumer.keys
+              if enumer[key]==rec[i]
+                file.write(key)
+                hasenum = true; break
+              end
+            end
+            file.write(rec[i]) unless hasenum
+          end
+        else   # Any other record type
+          file.write(rec[i].inspect)
         end
+      else
+        file.write(rec[i].inspect)
       end
-      break if start > 0 && index >= rec.length - 1
-    end while start > 0
+    end
     return record
   end
 
@@ -623,7 +600,6 @@ module Compiler
   # Parse string into a likely constant name and return its ID number (if any).
   # Last ditch attempt to figure out whether a constant is defined.
   #=============================================================================
-  # Unused
   def pbGetConst(mod,item,err)
     isDef = false
     begin
@@ -691,7 +667,7 @@ module Compiler
     clontype.sub!(/\s*$/, "")
     typ = GameData::TrainerType.try_get(clontype)
     if !typ
-      raise _INTL("Undefined Trainer type constant name: {1}\r\nMake sure the trainer type is defined in PBS/trainer_types.txt.\r\n{2}", type, FileLineData.linereport)
+      raise _INTL("Undefined Trainer type constant name: {1}\r\nMake sure the trainer type is defined in PBS/trainertypes.txt.\r\n{2}", type, FileLineData.linereport)
     end
     return typ.id
   end
@@ -699,87 +675,87 @@ module Compiler
   #=============================================================================
   # Compile all data
   #=============================================================================
-  def compile_pbs_file_message_start(filename)
-    # The `` around the file's name turns it cyan
-    Console.echo_li _INTL("Compiling PBS file `{1}`...", filename.split("/").last)
-  end
-
-  def write_pbs_file_message_start(filename)
-    # The `` around the file's name turns it cyan
-    Console.echo_li _INTL("Writing PBS file `{1}`...", filename.split("/").last)
-  end
-
-  def process_pbs_file_message_end
-    Console.echo_done(true)
-    Graphics.update
-  end
-
   def compile_all(mustCompile)
     return if !mustCompile
     FileLineData.clear
-    Console.echo_h1 _INTL("Starting full compile")
+    echoln _INTL("*** Starting full compile ***")
+    echoln ""
+    yield(_INTL("Compiling town map data"))
     compile_town_map               # No dependencies
+    yield(_INTL("Compiling map connection data"))
     compile_connections            # No dependencies
+    yield(_INTL("Compiling phone data"))
     compile_phone                  # No dependencies
+    yield(_INTL("Compiling type data"))
     compile_types                  # No dependencies
+    yield(_INTL("Compiling ability data"))
     compile_abilities              # No dependencies
+    yield(_INTL("Compiling move data"))
     compile_moves                  # Depends on Type
+    yield(_INTL("Compiling item data"))
     compile_items                  # Depends on Move
+    yield(_INTL("Compiling berry plant data"))
     compile_berry_plants           # Depends on Item
+    yield(_INTL("Compiling Pokémon data"))
     compile_pokemon                # Depends on Move, Item, Type, Ability
+    yield(_INTL("Compiling Pokémon forms data"))
     compile_pokemon_forms          # Depends on Species, Move, Item, Type, Ability
-    compile_pokemon_metrics        # Depends on Species
-    compile_shadow_pokemon         # Depends on Species
+    yield(_INTL("Compiling machine data"))
+    compile_move_compatibilities   # Depends on Species, Move
+    yield(_INTL("Compiling shadow moveset data"))
+    compile_shadow_movesets        # Depends on Species, Move
+    yield(_INTL("Compiling Regional Dexes"))
     compile_regional_dexes         # Depends on Species
+    yield(_INTL("Compiling ribbon data"))
     compile_ribbons                # No dependencies
+    yield(_INTL("Compiling encounter data"))
     compile_encounters             # Depends on Species
+    yield(_INTL("Compiling Trainer type data"))
     compile_trainer_types          # No dependencies
+    yield(_INTL("Compiling Trainer data"))
     compile_trainers               # Depends on Species, Item, Move
+    yield(_INTL("Compiling battle Trainer data"))
     compile_trainer_lists          # Depends on TrainerType
+    yield(_INTL("Compiling metadata"))
     compile_metadata               # Depends on TrainerType
-    compile_map_metadata           # No dependencies
+    yield(_INTL("Compiling animations"))
     compile_animations
+    yield(_INTL("Converting events"))
     compile_trainer_events(mustCompile)
-<<<<<<< HEAD
     if !IMPORT_EXPORT_MODE || IMPORT_EXPORT_MODE != 3
       yield(_INTL("Saving messages"))
       pbSetTextMessages
       MessageTypes.saveMessages
       MessageTypes.loadMessageFile("Data/messages.dat") if safeExists?("Data/messages.dat")
     end
-=======
-    Console.echo_li _INTL("Saving messages...")
-    pbSetTextMessages
-    MessageTypes.saveMessages
-    MessageTypes.loadMessageFile("Data/messages.dat") if safeExists?("Data/messages.dat")
-    Console.echo_done(true)
-    Console.echo_li _INTL("Reloading cache...")
->>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     System.reload_cache
-    Console.echo_done(true)
     echoln ""
-    Console.echo_h2("Successfully fully compiled", text: :green)
+    echoln _INTL("*** Finished full compile ***")
+    echoln ""
+    pbSetWindowText(nil)
   end
 
   def main
     return if !$DEBUG
     begin
       dataFiles = [
-         "abilities.dat",
          "berry_plants.dat",
          "encounters.dat",
+         "form2species.dat",
          "items.dat",
          "map_connections.dat",
-         "map_metadata.dat",
          "metadata.dat",
          "moves.dat",
          "phone.dat",
-         "player_metadata.dat",
          "regional_dexes.dat",
          "ribbons.dat",
-         "shadow_pokemon.dat",
+         "shadow_movesets.dat",
          "species.dat",
+         "species_eggmoves.dat",
+         "species_evolutions.dat",
          "species_metrics.dat",
+         "species_movesets.dat",
+         "tm.dat",
          "town_map.dat",
          "trainer_lists.dat",
          "trainer_types.dat",
@@ -789,24 +765,22 @@ module Compiler
       ]
       textFiles = [
          "abilities.txt",
-         "battle_facility_lists.txt",
-         "berry_plants.txt",
+         "berryplants.txt",
+         "connections.txt",
          "encounters.txt",
          "items.txt",
-         "map_connections.txt",
-         "map_metadata.txt",
          "metadata.txt",
          "moves.txt",
          "phone.txt",
          "pokemon.txt",
-         "pokemon_forms.txt",
-         "pokemon_metrics.txt",
-         "regional_dexes.txt",
+         "pokemonforms.txt",
+         "regionaldexes.txt",
          "ribbons.txt",
-         "shadow_pokemon.txt",
-         "town_map.txt",
-         "trainer_types.txt",
+         "shadowmoves.txt",
+         "townmap.txt",
+         "trainerlists.txt",
          "trainers.txt",
+         "trainertypes.txt",
          "types.txt"
       ]
       latestDataTime = 0
@@ -855,7 +829,6 @@ module Compiler
         end
       end
       # Recompile all data
-<<<<<<< HEAD
       compile_all(mustCompile) { |msg| pbSetWindowText(msg); echoln(msg) }
       # Recompile dialog data
       if !mustCompile
@@ -876,9 +849,6 @@ module Compiler
       end
       mustCompile |= (latestTextTime >= latestDataTime)
       compile_dialog if mustCompile
-=======
-      compile_all(mustCompile)
->>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     rescue Exception
       e = $!
       raise e if "#{e.class}"=="Reset" || e.is_a?(Reset) || e.is_a?(SystemExit)

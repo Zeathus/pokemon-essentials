@@ -42,16 +42,11 @@ class MiningGameTile < BitmapSprite
     @viewport.z=99999
     super(32,32,@viewport)
     r = rand(100)
-    if r < 10
-      @layer = 2   # 10%
-    elsif r < 25
-      @layer = 3   # 15%
-    elsif r < 60
-      @layer = 4   # 35%
-    elsif r < 85
-      @layer = 5   # 25%
-    else
-      @layer = 6   # 15%
+    if r<10;    @layer = 2   # 10%
+    elsif r<25; @layer = 3   # 15%
+    elsif r<60; @layer = 4   # 35%
+    elsif r<85; @layer = 5   # 25%
+    else;       @layer = 6   # 15%
     end
     @image=AnimatedBitmap.new(_INTL("Graphics/Pictures/Mining/tiles"))
     update
@@ -109,12 +104,10 @@ class MiningGameCursor < BitmapSprite
     y = 32*(@position/MiningGameScene::BOARDWIDTH)
     if @counter>0
       @counter -= 1
-      toolx = x
-      tooly = y
+      toolx = x; tooly = y
       i = 10-(@counter/2).floor
       if ToolPositions[i][1]==1
-        toolx -= 8
-        tooly += 8
+        toolx -= 8; tooly += 8
       elsif ToolPositions[i][1]==2
         toolx += 6
       end
@@ -586,7 +579,7 @@ class MiningGameScene
   def pbGiveItems
     if @itemswon.length>0
       for i in @itemswon
-        if $bag.add(i)
+        if $PokemonBag.pbStoreItem(i)
           pbMessage(_INTL("One {1} was obtained.\\se[Mining item get]\\wtnp[30]",
              GameData::Item.get(i).name))
         else

@@ -26,6 +26,9 @@ module GameData
       validate other => [Symbol, self, String, Integer]
       return other if other.is_a?(self)
       other = other.to_sym if other.is_a?(String)
+#      if other.is_a?(Integer)
+#        p "Please switch to symbols, thanks."
+#      end
       raise "Unknown ID #{other}." unless self::DATA.has_key?(other)
       return self::DATA[other]
     end
@@ -37,6 +40,9 @@ module GameData
       validate other => [Symbol, self, String, Integer]
       return other if other.is_a?(self)
       other = other.to_sym if other.is_a?(String)
+#      if other.is_a?(Integer)
+#        p "Please switch to symbols, thanks."
+#      end
       return (self::DATA.has_key?(other)) ? self::DATA[other] : nil
     end
 
@@ -48,12 +54,8 @@ module GameData
 
     # Yields all data in order of their id_number.
     def each
-      sorted_keys = self::DATA.keys.sort { |a, b| self::DATA[a].id_number <=> self::DATA[b].id_number }
-      sorted_keys.each { |key| yield self::DATA[key] if !key.is_a?(Integer) }
-    end
-
-    def count
-      return self::DATA.length / 2
+      keys = self::DATA.keys.sort { |a, b| self::DATA[a].id_number <=> self::DATA[b].id_number }
+      keys.each { |key| yield self::DATA[key] if !key.is_a?(Integer) }
     end
 
     def load
@@ -112,19 +114,10 @@ module GameData
       return self::DATA.keys
     end
 
-    # Yields all data in the order they were defined.
-    def each
-      self::DATA.each_value { |value| yield value }
-    end
-
     # Yields all data in alphabetical order.
-    def each_alphabetically
+    def each
       keys = self::DATA.keys.sort { |a, b| self::DATA[a].real_name <=> self::DATA[b].real_name }
       keys.each { |key| yield self::DATA[key] }
-    end
-
-    def count
-      return self::DATA.length
     end
 
     def load
@@ -184,10 +177,6 @@ module GameData
       keys.each { |key| yield self::DATA[key] }
     end
 
-    def count
-      return self::DATA.length
-    end
-
     def load
       const_set(:DATA, load_data("Data/#{self::DATA_FILENAME}"))
     end
@@ -212,7 +201,7 @@ module GameData
       elsif other.is_a?(self.class)
         return @id == other.id
       elsif other.is_a?(String)
-        return @id == other.to_sym
+        return @id_number == other.to_sym
       elsif other.is_a?(Integer)
         return @id_number == other
       end
@@ -230,14 +219,11 @@ module GameData
     Item.load
     BerryPlant.load
     Species.load
-    SpeciesMetrics.load
-    ShadowPokemon.load
     Ribbon.load
     Encounter.load
     TrainerType.load
     Trainer.load
     Metadata.load
-    PlayerMetadata.load
     MapMetadata.load
   end
 end

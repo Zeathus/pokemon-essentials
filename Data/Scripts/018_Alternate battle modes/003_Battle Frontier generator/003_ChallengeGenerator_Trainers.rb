@@ -3,7 +3,9 @@
 #===============================================================================
 def getTypes(species)
   species_data = GameData::Species.get(species)
-  return species_data.types.clone
+  type1 = species_data.type1
+  type2 = species_data.type2
+  return (type1 == type2) ? [type1] : [type1, type2]
 end
 
 #===============================================================================
@@ -23,9 +25,9 @@ def pbTrainerInfo(pokemonlist, trfile, rules)
       if GameData::TrainerType.exists?(:YOUNGSTER) && rand(30) == 0
         trainerid = :YOUNGSTER
       else
-        tr_typekeys = GameData::TrainerType.keys
+        tr_typekeys = GameData::TrainerType::DATA.keys
         loop do
-          tr_type = tr_typekeys[tr_typekeys.sample]
+          tr_type = tr_typekeys[rand(tr_typekeys.length)]
           tr_type_data = GameData::TrainerType.get(tr_type)
           next if tr_type_data.base_money >= 100
           trainerid = tr_type_data.id

@@ -205,7 +205,8 @@ def pbGenerateChallenge(rule, tag)
       elsif teams[i].length < 2
         teams[i] = RuledTeam.new(party, rule)
       elsif i >= maxteams
-        teams.delete_at(i)
+        teams[i] = nil
+        teams.compact!
       elsif teams[i].totalGames >= 250
         # retire
         for j in 0...teams[i].length

@@ -108,11 +108,11 @@ class VoltorbFlip
     @sprites["curtainL"].visible=false
     @sprites["curtainR"].visible=false
     @sprites["curtain"].opacity=100
-    if $player.coins >= Settings::MAX_COINS
+    if $Trainer.coins >= Settings::MAX_COINS
       pbMessage(_INTL("You've gathered {1} Coins. You cannot gather any more.", Settings::MAX_COINS.to_s_formatted))
-      $player.coins = Settings::MAX_COINS   # As a precaution
+      $Trainer.coins = Settings::MAX_COINS   # As a precaution
       @quit=true
-#    elsif !pbConfirmMessage(_INTL("Play Voltorb Flip Lv. {1}?",@level)) && $player.coins<Settings::MAX_COINS
+#    elsif !pbConfirmMessage(_INTL("Play Voltorb Flip Lv. {1}?",@level)) && $Trainer.coins<Settings::MAX_COINS
 #      @quit=true
     else
       @sprites["curtain"].opacity=0
@@ -366,13 +366,11 @@ class VoltorbFlip
         pbMessage(_INTL("\\me[Voltorb Flip win]Game clear!\\wtnp[40]"))
 #        pbMessage(_INTL("You've found all of the hidden x2 and x3 cards."))
 #        pbMessage(_INTL("This means you've found all the Coins in this game, so the game is now over."))
-        pbMessage(_INTL("\\se[Voltorb Flip gain coins]{1} received {2} Coins!",$player.name,@points.to_s_formatted))
+        pbMessage(_INTL("\\se[Voltorb Flip gain coins]{1} received {2} Coins!",$Trainer.name,@points.to_s_formatted))
         # Update level text
         @sprites["level"].bitmap.clear
         pbDrawShadowText(@sprites["level"].bitmap,8,150,118,28,_INTL("Level {1}",@level.to_s),Color.new(60,60,60),Color.new(150,190,170),1)
-        old_coins = $player.coins
-        $player.coins+=@points
-        $stats.coins_won += $player.coins - old_coins if $player.coins > old_coins
+        $Trainer.coins+=@points
         @points=0
         pbUpdateCoins
         @sprites["curtain"].opacity=0
@@ -415,10 +413,8 @@ class VoltorbFlip
           @quit=true
         end
       elsif pbConfirmMessage(_INTL("If you quit now, you will recieve {1} Coin(s). Will you quit?",@points.to_s_formatted))
-        pbMessage(_INTL("{1} received {2} Coin(s)!",$player.name,@points.to_s_formatted))
-        old_coins = $player.coins
-        $player.coins+=@points
-        $stats.coins_won += $player.coins - old_coins if $player.coins > old_coins
+        pbMessage(_INTL("{1} received {2} Coin(s)!",$Trainer.name,@points.to_s_formatted))
+        $Trainer.coins+=@points
         @points=0
         pbUpdateCoins
         @sprites["curtain"].opacity=0
@@ -483,7 +479,7 @@ class VoltorbFlip
   def pbUpdateCoins
     # Update coins display
     @sprites["totalCoins"].bitmap.clear
-    pbCreateCoins($player.coins,44)
+    pbCreateCoins($Trainer.coins,44)
     pbDrawImagePositions(@sprites["totalCoins"].bitmap,@coins)
     # Update points display
     @sprites["currentCoins"].bitmap.clear
@@ -618,9 +614,9 @@ end
 
 
 def pbVoltorbFlip
-  if !$bag.has?(:COINCASE)
+  if GameData::Item.exists?(:COINCASE) && !$PokemonBag.pbHasItem?(:COINCASE)
     pbMessage(_INTL("You can't play unless you have a Coin Case."))
-  elsif $player.coins == Settings::MAX_COINS
+  elsif $Trainer.coins == Settings::MAX_COINS
     pbMessage(_INTL("Your Coin Case is full!"))
   else
     scene=VoltorbFlip.new

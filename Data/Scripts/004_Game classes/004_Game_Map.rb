@@ -95,14 +95,11 @@ class Game_Map
   def encounter_list; return @map.encounter_list; end
   def encounter_step; return @map.encounter_step; end
   def data;           return @map.data;           end
-  def tileset_id;     return @map.tileset_id;     end
 
   def name
-    return pbGetMapNameFromId(@map_id)
-  end
-
-  def metadata
-    return GameData::MapMetadata.try_get(@map_id)
+    ret = pbGetMessage(MessageTypes::MapNames,@map_id)
+    ret.gsub!(/\\PN/,$Trainer.name) if $Trainer
+    return ret
   end
   #-----------------------------------------------------------------------------
   # * Autoplays background music
@@ -387,21 +384,21 @@ class Game_Map
   def display_x=(value)
     return if @display_x == value
     @display_x = value
-    if metadata&.snap_edges
+    if GameData::MapMetadata.exists?(self.map_id) && GameData::MapMetadata.get(self.map_id).snap_edges
       max_x = (self.width - Graphics.width*1.0/TILE_WIDTH) * REAL_RES_X
       @display_x = [0, [@display_x, max_x].min].max
     end
-    $map_factory.setMapsInRange if $map_factory
+    $MapFactory.setMapsInRange if $MapFactory
   end
 
   def display_y=(value)
     return if @display_y == value
     @display_y = value
-    if metadata&.snap_edges
+    if GameData::MapMetadata.exists?(self.map_id) && GameData::MapMetadata.get(self.map_id).snap_edges
       max_y = (self.height - Graphics.height*1.0/TILE_HEIGHT) * REAL_RES_Y
       @display_y = [0, [@display_y, max_y].min].max
     end
-    $map_factory.setMapsInRange if $map_factory
+    $MapFactory.setMapsInRange if $MapFactory
   end
 
   def scroll_up(distance)
@@ -450,14 +447,6 @@ class Game_Map
     end
   end
 
-  def set_tile(x, y, layer, id = 0)
-    self.data[x, y, layer] = id
-  end
-
-  def erase_tile(x, y, layer)
-    set_tile(x, y, layer, 0)
-  end
-
   def refresh
     for event in @events.values
       event.refresh
@@ -470,11 +459,11 @@ class Game_Map
 
   def update
     # refresh maps if necessary
-    if $map_factory
-      for i in $map_factory.maps
+    if $MapFactory
+      for i in $MapFactory.maps
         i.refresh if i.need_refresh
       end
-      $map_factory.setCurrentMap
+      $MapFactory.setCurrentMap
     end
     # If scrolling
     if @scroll_rest>0

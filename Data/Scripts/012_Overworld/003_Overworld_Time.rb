@@ -264,7 +264,8 @@ end
 
 def pbDayNightTint(object)
   return if !$scene.is_a?(Scene_Map)
-  if Settings::TIME_SHADING && $game_map.metadata&.outdoor_map
+  if Settings::TIME_SHADING && GameData::MapMetadata.exists?($game_map.map_id) &&
+     GameData::MapMetadata.get($game_map.map_id).outdoor_map
     tone = PBDayNight.getTone
     if (pbGetTimeNow.hour >= 18 || pbGetTimeNow.hour <= 5) && PBMaps.hasLights
       li=0.5
