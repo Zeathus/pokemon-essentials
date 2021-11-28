@@ -28,9 +28,14 @@ class Window_PokemonBag < Window_DrawableCommand
 
   def pocket=(value)
     @pocket = value
+<<<<<<< HEAD
     thispocket = getPocket
     @item_max = thispocket.length+1
     self.index = @bag.getChoice(@pocket)
+=======
+    @item_max = (@filterlist) ? @filterlist[@pocket].length+1 : @bag.pockets[@pocket].length+1
+    self.index = @bag.last_viewed_index(@pocket)
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
   end
 
   def inMenu=(value)
@@ -139,6 +144,7 @@ class Window_PokemonBag < Window_DrawableCommand
         imagepos=[[GameData::Item.icon_filename(item),rect.x,rect.y,0,0,-1,-1]]
         pbDrawImagePositions(self.contents,imagepos)
       end
+<<<<<<< HEAD
       pbSetSmallFont(self.contents)
       pbDrawTextPositions(self.contents,textpos)
       imagepos=[["Graphics/Pictures/Bag/overlay.png",6,224,0,0,-1,-1]]
@@ -146,6 +152,13 @@ class Window_PokemonBag < Window_DrawableCommand
       pbSetSystemFont(self.contents)
       if index!=pocketLen
         if @bag.pbIsRegistered?(indexItem(index))
+=======
+      textpos.push(
+         [@adapter.getDisplayName(item),rect.x,rect.y-2,false,baseColor,shadowColor]
+      )
+      if GameData::Item.get(item).is_important?
+        if @bag.registered?(item)
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
           pbDrawImagePositions(self.contents,[
              ["Graphics/Pictures/Bag/icon_register",rect.x+rect.width-54,ypos-10,0,0,-1,-1]
           ])
@@ -238,7 +251,7 @@ class PokemonBag_Scene
     @choosing   = choosing
     #@filterproc = filterproc
     pbRefreshFilter
-    lastpocket = @bag.lastpocket
+    lastpocket = @bag.last_viewed_pocket
     numfilledpockets = @bag.pockets.length-1
     if @choosing
       numfilledpockets = 0
@@ -251,19 +264,21 @@ class PokemonBag_Scene
           numfilledpockets += 1 if @bag.pockets[i].length>0
         end
       end
-      lastpocket = (resetpocket) ? 1 : @bag.lastpocket
+      lastpocket = (resetpocket) ? 1 : @bag.last_viewed_pocket
       if (@filterlist && @filterlist[lastpocket].length==0) ||
          (!@filterlist && @bag.pockets[lastpocket].length==0)
         for i in 1...@bag.pockets.length
           if @filterlist && @filterlist[i].length>0
-            lastpocket = i; break
+            lastpocket = i
+            break
           elsif !@filterlist && @bag.pockets[i].length>0
-            lastpocket = i; break
+            lastpocket = i
+            break
           end
         end
       end
     end
-    @bag.lastpocket = lastpocket
+    @bag.last_viewed_pocket = lastpocket
     @sliderbitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/Bag/icon_slider"))
     @pocketbitmap = AnimatedBitmap.new(_INTL("Graphics/Pictures/Bag/icon_pocket"))
     @sprites = {}
@@ -278,7 +293,7 @@ class PokemonBag_Scene
     @sprites["itemlist"] = Window_PokemonBag.new(@bag,@filterlist,lastpocket,168,-8,314,40+32+ITEMSVISIBLE*32,@mode)
     @sprites["itemlist"].viewport    = @viewport
     @sprites["itemlist"].pocket      = lastpocket
-    @sprites["itemlist"].index       = @bag.getChoice(lastpocket)
+    @sprites["itemlist"].index       = @bag.last_viewed_index(lastpocket)
     @sprites["itemlist"].baseColor   = ITEMLISTBASECOLOR
     @sprites["itemlist"].shadowColor = ITEMLISTSHADOWCOLOR
     #@sprites["itemicon"] = ItemIconSprite.new(48,Graphics.height-48,nil,@viewport)
@@ -342,6 +357,10 @@ class PokemonBag_Scene
   def pbEndScene
     pbFadeOutAndHide(@sprites) if !@oldsprites
     @oldsprites = nil
+    dispose
+  end
+
+  def dispose
     pbDisposeSpriteHash(@sprites)
     @sliderbitmap.dispose
     @pocketbitmap.dispose
@@ -366,9 +385,18 @@ class PokemonBag_Scene
 
   def pbRefresh
     # Set the background image
-    @sprites["background"].setBitmap(sprintf("Graphics/Pictures/Bag/bg_#{@bag.lastpocket}"))
+    @sprites["background"].setBitmap(sprintf("Graphics/Pictures/Bag/bg_#{@bag.last_viewed_pocket}"))
     # Set the bag sprite
+<<<<<<< HEAD
     fbagexists = pbResolveBitmap(sprintf("Graphics/Pictures/Bag/bag_#{@bag.lastpocket}_f"))
+=======
+    fbagexists = pbResolveBitmap(sprintf("Graphics/Pictures/Bag/bag_#{@bag.last_viewed_pocket}_f"))
+    if $player.female? && fbagexists
+      @sprites["bagsprite"].setBitmap("Graphics/Pictures/Bag/bag_#{@bag.last_viewed_pocket}_f")
+    else
+      @sprites["bagsprite"].setBitmap("Graphics/Pictures/Bag/bag_#{@bag.last_viewed_pocket}")
+    end
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     # Draw the pocket icons
     @sprites["pocketicon"].bitmap.clear
     if @choosing && @filterlist
@@ -393,7 +421,11 @@ class PokemonBag_Scene
     overlay.clear
     # Draw the pocket name
     pbDrawTextPositions(overlay,[
+<<<<<<< HEAD
        [PokemonBag.pocketNames[@bag.lastpocket],94,218,2,POCKETNAMEBASECOLOR,POCKETNAMESHADOWCOLOR]
+=======
+       [PokemonBag.pocket_names[@bag.last_viewed_pocket - 1], 94, 176, 2, POCKETNAMEBASECOLOR, POCKETNAMESHADOWCOLOR]
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     ])
     # Draw slider arrows
     showslider = false
@@ -465,7 +497,7 @@ class PokemonBag_Scene
             thispocket.insert(itemwindow.index,thispocket.delete_at(oldindex))
           end
           # Update selected item for current pocket
-          @bag.setChoice(itemwindow.pocket,itemwindow.index)
+          @bag.set_last_viewed_index(itemwindow.pocket,itemwindow.index)
           pbRefresh
         end
         if itemwindow.inMenu
@@ -518,10 +550,61 @@ class PokemonBag_Scene
             pbRefresh
           end
         else
+<<<<<<< HEAD
           if Input.trigger?(Input::ACTION)   # Start switching the selected item
+=======
+          # Change pockets
+          if Input.trigger?(Input::LEFT)
+            newpocket = itemwindow.pocket
+            loop do
+              newpocket = (newpocket==1) ? PokemonBag.pocket_count : newpocket-1
+              break if !@choosing || newpocket==itemwindow.pocket
+              if @filterlist
+                break if @filterlist[newpocket].length>0
+              else
+                break if @bag.pockets[newpocket].length>0
+              end
+            end
+            if itemwindow.pocket!=newpocket
+              itemwindow.pocket = newpocket
+              @bag.last_viewed_pocket = itemwindow.pocket
+              thispocket = @bag.pockets[itemwindow.pocket]
+              pbPlayCursorSE
+              pbRefresh
+            end
+          elsif Input.trigger?(Input::RIGHT)
+            newpocket = itemwindow.pocket
+            loop do
+              newpocket = (newpocket==PokemonBag.pocket_count) ? 1 : newpocket+1
+              break if !@choosing || newpocket==itemwindow.pocket
+              if @filterlist
+                break if @filterlist[newpocket].length>0
+              else
+                break if @bag.pockets[newpocket].length>0
+              end
+            end
+            if itemwindow.pocket!=newpocket
+              itemwindow.pocket = newpocket
+              @bag.last_viewed_pocket = itemwindow.pocket
+              thispocket = @bag.pockets[itemwindow.pocket]
+              pbPlayCursorSE
+              pbRefresh
+            end
+#          elsif Input.trigger?(Input::SPECIAL)   # Register/unregister selected item
+#            if !@choosing && itemwindow.index<thispocket.length
+#              if @bag.registered?(itemwindow.item)
+#                @bag.unregister(itemwindow.item)
+#              elsif pbCanRegisterItem?(itemwindow.item)
+#                @bag.register(itemwindow.item)
+#              end
+#              pbPlayDecisionSE
+#              pbRefresh
+#            end
+          elsif Input.trigger?(Input::ACTION)   # Start switching the selected item
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
             if !@choosing
               if thispocket.length>1 && itemwindow.index<thispocket.length &&
-                 !Settings::BAG_POCKET_AUTO_SORT[itemwindow.pocket]
+                 !Settings::BAG_POCKET_AUTO_SORT[itemwindow.pocket - 1]
                 itemwindow.sorting = true
                 swapinitialpos = itemwindow.index
                 pbPlayDecisionSE
@@ -567,16 +650,16 @@ class PokemonBagScreen
       commands = []
       # Generate command list
       commands[cmdRead = commands.length]       = _INTL("Read") if itm.is_mail?
-      if ItemHandlers.hasOutHandler(item) || (itm.is_machine? && $Trainer.party.length>0)
+      if ItemHandlers.hasOutHandler(item) || (itm.is_machine? && $player.party.length>0)
         if ItemHandlers.hasUseText(item)
           commands[cmdUse = commands.length]    = ItemHandlers.getUseText(item)
         else
           commands[cmdUse = commands.length]    = _INTL("Use")
         end
       end
-      commands[cmdGive = commands.length]       = _INTL("Give") if $Trainer.pokemon_party.length > 0 && itm.can_hold?
+      commands[cmdGive = commands.length]       = _INTL("Give") if $player.pokemon_party.length > 0 && itm.can_hold?
       commands[cmdToss = commands.length]       = _INTL("Toss") if !itm.is_important? || $DEBUG
-      if @bag.pbIsRegistered?(item)
+      if @bag.registered?(item)
         commands[cmdRegister = commands.length] = _INTL("Deselect")
       elsif pbCanRegisterItem?(item)
         commands[cmdRegister = commands.length] = _INTL("Register")
@@ -602,20 +685,20 @@ class PokemonBagScreen
         @scene.pbRefresh
         next
       elsif cmdGive>=0 && command==cmdGive   # Give item to Pokémon
-        if $Trainer.pokemon_count == 0
+        if $player.pokemon_count == 0
           @scene.pbDisplay(_INTL("There is no Pokémon."))
         elsif itm.is_important?
           @scene.pbDisplay(_INTL("The {1} can't be held.",itemname))
         else
           pbFadeOutIn {
             sscene = PokemonParty_Scene.new
-            sscreen = PokemonPartyScreen.new(sscene,$Trainer.party)
+            sscreen = PokemonPartyScreen.new(sscene, $player.party)
             sscreen.pbPokemonGiveScreen(item)
             @scene.pbRefresh
           }
         end
       elsif cmdToss>=0 && command==cmdToss   # Toss item
-        qty = @bag.pbQuantity(item)
+        qty = @bag.quantity(item)
         if qty>1
           helptext = _INTL("Toss out how many {1}?",itm.name_plural)
           qty = @scene.pbChooseNumber(helptext,qty)
@@ -624,15 +707,15 @@ class PokemonBagScreen
           itemname = itm.name_plural if qty>1
           if pbConfirm(_INTL("Is it OK to throw away {1} {2}?",qty,itemname))
             pbDisplay(_INTL("Threw away {1} {2}.",qty,itemname))
-            qty.times { @bag.pbDeleteItem(item) }
+            qty.times { @bag.remove(item) }
             @scene.pbRefresh
           end
         end
       elsif cmdRegister>=0 && command==cmdRegister   # Register item
-        if @bag.pbIsRegistered?(item)
-          @bag.pbUnregisterItem(item)
+        if @bag.registered?(item)
+          @bag.unregister(item)
         else
-          @bag.pbRegisterItem(item)
+          @bag.register(item)
         end
         @scene.pbRefresh
       elsif cmdFavorite>=0 && command==cmdFavorite
@@ -655,7 +738,7 @@ class PokemonBagScreen
             break
           ### Change quantity ###
           when 0
-            qty = @bag.pbQuantity(item)
+            qty = @bag.quantity(item)
             itemplural = itm.name_plural
             params = ChooseNumberParams.new
             params.setRange(0, Settings::BAG_MAX_PER_SLOT)
@@ -663,9 +746,9 @@ class PokemonBagScreen
             newqty = pbMessageChooseNumber(
                _INTL("Choose new quantity of {1} (max. #{Settings::BAG_MAX_PER_SLOT}).",itemplural),params) { @scene.pbUpdate }
             if newqty>qty
-              @bag.pbStoreItem(item,newqty-qty)
+              @bag.add(item, newqty - qty)
             elsif newqty<qty
-              @bag.pbDeleteItem(item,qty-newqty)
+              @bag.remove(item, qty - newqty)
             end
             @scene.pbRefresh
             break if newqty==0
@@ -676,7 +759,7 @@ class PokemonBagScreen
         end
       end
     end
-    @scene.pbEndScene
+    ($game_temp.fly_destination) ? @scene.dispose : @scene.pbEndScene
     return item
   end
 
@@ -690,13 +773,13 @@ class PokemonBagScreen
 
   # UI logic for the item screen for choosing an item.
   def pbChooseItemScreen(proc=nil)
-    oldlastpocket = @bag.lastpocket
-    oldchoices = @bag.getAllChoices
+    oldlastpocket = @bag.last_viewed_pocket
+    oldchoices = @bag.last_pocket_selections.clone
     @scene.pbStartScene(@bag,true,proc)
     item = @scene.pbChooseItem
     @scene.pbEndScene
-    @bag.lastpocket = oldlastpocket
-    @bag.setAllChoices(oldchoices)
+    @bag.last_viewed_pocket = oldlastpocket
+    @bag.last_pocket_selections = oldchoices
     return item
   end
 
@@ -711,16 +794,16 @@ class PokemonBagScreen
       item = @scene.pbChooseItem
       break if !item
       itm = GameData::Item.get(item)
-      qty = storage.pbQuantity(item)
+      qty = storage.quantity(item)
       if qty>1 && !itm.is_important?
         qty = @scene.pbChooseNumber(_INTL("How many do you want to withdraw?"),qty)
       end
       next if qty<=0
-      if @bag.pbCanStore?(item,qty)
-        if !storage.pbDeleteItem(item,qty)
+      if @bag.can_add?(item,qty)
+        if !storage.remove(item,qty)
           raise "Can't delete items from storage"
         end
-        if !@bag.pbStoreItem(item,qty)
+        if !@bag.add(item,qty)
           raise "Can't withdraw items from storage"
         end
         @scene.pbRefresh
@@ -745,18 +828,18 @@ class PokemonBagScreen
       item = @scene.pbChooseItem
       break if !item
       itm = GameData::Item.get(item)
-      qty = @bag.pbQuantity(item)
+      qty = @bag.quantity(item)
       if qty>1 && !itm.is_important?
         qty = @scene.pbChooseNumber(_INTL("How many do you want to deposit?"),qty)
       end
       if qty>0
-        if !storage.pbCanStore?(item,qty)
+        if !storage.can_add?(item,qty)
           pbDisplay(_INTL("There's no room to store items."))
         else
-          if !@bag.pbDeleteItem(item,qty)
+          if !@bag.remove(item,qty)
             raise "Can't delete items from Bag"
           end
-          if !storage.pbStoreItem(item,qty)
+          if !storage.add(item,qty)
             raise "Can't deposit items to storage"
           end
           @scene.pbRefresh
@@ -784,7 +867,7 @@ class PokemonBagScreen
         @scene.pbDisplay(_INTL("That's too important to toss out!"))
         next
       end
-      qty = storage.pbQuantity(item)
+      qty = storage.quantity(item)
       itemname       = itm.name
       itemnameplural = itm.name_plural
       if qty>1
@@ -793,7 +876,7 @@ class PokemonBagScreen
       if qty>0
         itemname = itemnameplural if qty>1
         if pbConfirm(_INTL("Is it OK to throw away {1} {2}?",qty,itemname))
-          if !storage.pbDeleteItem(item,qty)
+          if !storage.remove(item,qty)
             raise "Can't delete items from storage"
           end
           @scene.pbRefresh

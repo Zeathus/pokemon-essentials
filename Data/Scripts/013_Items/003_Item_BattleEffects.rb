@@ -122,7 +122,11 @@ ItemHandlers::CanUseInBattle.add(:FULLHEAL,proc { |item,pokemon,battler,move,fir
 
 ItemHandlers::CanUseInBattle.copy(:FULLHEAL,
    :LAVACOOKIE,:OLDGATEAU,:CASTELIACONE,:LUMIOSEGALETTE,:SHALOURSABLE,
+<<<<<<< HEAD
    :BIGMALASADA,:LUMBERRY,:HEALPOWDER,:LUMBERRYSOUP)
+=======
+   :BIGMALASADA,:PEWTERCRUNCHIES,:LUMBERRY,:HEALPOWDER)
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
 ItemHandlers::CanUseInBattle.copy(:FULLHEAL,:RAGECANDYBAR) if Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::CanUseInBattle.add(:FULLRESTORE,proc { |item,pokemon,battler,move,firstAction,battle,scene,showMessages|
@@ -143,7 +147,7 @@ ItemHandlers::CanUseInBattle.add(:REVIVE,proc { |item,pokemon,battler,move,first
   next true
 })
 
-ItemHandlers::CanUseInBattle.copy(:REVIVE,:MAXREVIVE,:REVIVALHERB)
+ItemHandlers::CanUseInBattle.copy(:REVIVE, :MAXREVIVE, :REVIVALHERB, :MAXHONEY)
 
 ItemHandlers::CanUseInBattle.add(:ETHER,proc { |item,pokemon,battler,move,firstAction,battle,scene,showMessages|
   if !pokemon.able? || move<0 ||
@@ -242,6 +246,18 @@ ItemHandlers::CanUseInBattle.add(:XACCURACY,proc { |item,pokemon,battler,move,fi
 
 ItemHandlers::CanUseInBattle.copy(:XACCURACY,:XACCURACY2,:XACCURACY3,:XACCURACY6)
 
+ItemHandlers::CanUseInBattle.add(:MAXMUSHROOMS, proc { |item, pokemon, battler, move, firstAction, battle, scene, showMessages|
+  if !pbBattleItemCanRaiseStat?(:ATTACK, battler, scene, false) &&
+     !pbBattleItemCanRaiseStat?(:DEFENSE, battler, scene, false) &&
+     !pbBattleItemCanRaiseStat?(:SPECIAL_ATTACK, battler, scene, false) &&
+     !pbBattleItemCanRaiseStat?(:SPECIAL_DEFENSE, battler, scene, false) &&
+     !pbBattleItemCanRaiseStat?(:SPEED, battler, scene, false)
+    scene.pbDisplay(_INTL("It won't have any effect.")) if showMessages
+    next false
+  end
+  next true
+})
+
 ItemHandlers::CanUseInBattle.add(:DIREHIT,proc { |item,pokemon,battler,move,firstAction,battle,scene,showMessages|
   if !battler || battler.effects[PBEffects::FocusEnergy]>=1
     scene.pbDisplay(_INTL("It won't have any effect.")) if showMessages
@@ -267,13 +283,7 @@ ItemHandlers::CanUseInBattle.add(:DIREHIT3,proc { |item,pokemon,battler,move,fir
 })
 
 ItemHandlers::CanUseInBattle.add(:POKEFLUTE,proc { |item,pokemon,battler,move,firstAction,battle,scene,showMessages|
-  anyAsleep = false
-  battle.eachBattler do |b|
-    next if b.status != :SLEEP || b.hasActiveAbility?(:SOUNDPROOF)
-    anyAsleep = true
-    break
-  end
-  if !anyAsleep
+  if battle.allBattlers.none? { |b| b.status == :SLEEP && !b.hasActiveAbility?(:SOUNDPROOF) }
     scene.pbDisplay(_INTL("It won't have any effect.")) if showMessages
     next false
   end
@@ -298,9 +308,8 @@ ItemHandlers::UseInBattle.add(:POKEDOLL,proc { |item,battler,battle|
 ItemHandlers::UseInBattle.copy(:POKEDOLL,:FLUFFYTAIL,:POKETOY)
 
 ItemHandlers::UseInBattle.add(:POKEFLUTE,proc { |item,battler,battle|
-  battle.eachBattler do |b|
-    next if b.status != :SLEEP || b.hasActiveAbility?(:SOUNDPROOF)
-    b.pbCureStatus(false)
+  battle.allBattlers.each do |b|
+    b.pbCureStatus(false) if b.status == :SLEEP && !b.hasActiveAbility?(:SOUNDPROOF)
   end
   battle.pbDisplay(_INTL("All Pokémon were roused by the tune!"))
 })
@@ -323,11 +332,19 @@ ItemHandlers::BattleUseOnPokemon.copy(:POTION,:BERRYJUICE,:SWEETHEART)
 ItemHandlers::BattleUseOnPokemon.copy(:POTION,:RAGECANDYBAR) if !Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::BattleUseOnPokemon.add(:SUPERPOTION,proc { |item,pokemon,battler,choices,scene|
+<<<<<<< HEAD
   pbBattleHPItem(pokemon,battler,60,scene)
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:HYPERPOTION,proc { |item,pokemon,battler,choices,scene|
   pbBattleHPItem(pokemon,battler,120,scene)
+=======
+  pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 60 : 50, scene)
+})
+
+ItemHandlers::BattleUseOnPokemon.add(:HYPERPOTION,proc { |item,pokemon,battler,choices,scene|
+  pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 120 : 200, scene)
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:MAXPOTION,proc { |item,pokemon,battler,choices,scene|
@@ -335,6 +352,7 @@ ItemHandlers::BattleUseOnPokemon.add(:MAXPOTION,proc { |item,pokemon,battler,cho
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:FRESHWATER,proc { |item,pokemon,battler,choices,scene|
+<<<<<<< HEAD
   pbBattleHPItem(pokemon,battler,30,scene)
 })
 
@@ -344,6 +362,17 @@ ItemHandlers::BattleUseOnPokemon.add(:SODAPOP,proc { |item,pokemon,battler,choic
 
 ItemHandlers::BattleUseOnPokemon.add(:LEMONADE,proc { |item,pokemon,battler,choices,scene|
   pbBattleHPItem(pokemon,battler,70,scene)
+=======
+  pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 30 : 50, scene)
+})
+
+ItemHandlers::BattleUseOnPokemon.add(:SODAPOP,proc { |item,pokemon,battler,choices,scene|
+  pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 50 : 60, scene)
+})
+
+ItemHandlers::BattleUseOnPokemon.add(:LEMONADE,proc { |item,pokemon,battler,choices,scene|
+  pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 70 : 80, scene)
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:MOOMOOMILK,proc { |item,pokemon,battler,choices,scene|
@@ -419,7 +448,11 @@ ItemHandlers::BattleUseOnPokemon.add(:FULLHEAL,proc { |item,pokemon,battler,choi
 
 ItemHandlers::BattleUseOnPokemon.copy(:FULLHEAL,
    :LAVACOOKIE,:OLDGATEAU,:CASTELIACONE,:LUMIOSEGALETTE,:SHALOURSABLE,
+<<<<<<< HEAD
    :BIGMALASADA,:LUMBERRY,:LUMBERRYSOUP)
+=======
+   :BIGMALASADA,:PEWTERCRUNCHIES,:LUMBERRY)
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
 ItemHandlers::BattleUseOnPokemon.copy(:FULLHEAL,:RAGECANDYBAR) if Settings::RAGE_CANDY_BAR_CURES_STATUS_PROBLEMS
 
 ItemHandlers::BattleUseOnPokemon.add(:FULLRESTORE,proc { |item,pokemon,battler,choices,scene|
@@ -450,14 +483,16 @@ ItemHandlers::BattleUseOnPokemon.add(:MAXREVIVE,proc { |item,pokemon,battler,cho
   scene.pbDisplay(_INTL("{1} recovered from fainting!",pokemon.name))
 })
 
+ItemHandlers::BattleUseOnPokemon.copy(:MAXREVIVE, :MAXHONEY)
+
 ItemHandlers::BattleUseOnPokemon.add(:ENERGYPOWDER,proc { |item,pokemon,battler,choices,scene|
-  if pbBattleHPItem(pokemon,battler,50,scene)
+  if pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 60 : 50, scene)
     pokemon.changeHappiness("powder")
   end
 })
 
 ItemHandlers::BattleUseOnPokemon.add(:ENERGYROOT,proc { |item,pokemon,battler,choices,scene|
-  if pbBattleHPItem(pokemon,battler,200,scene)
+  if pbBattleHPItem(pokemon, battler, (Settings::REBALANCED_HEALING_ITEM_AMOUNTS) ? 120 : 200, scene)
     pokemon.changeHappiness("energyroot")
   end
 })
@@ -658,6 +693,15 @@ ItemHandlers::BattleUseOnBattler.add(:XACCURACY3,proc { |item,battler,scene|
 
 ItemHandlers::BattleUseOnBattler.add(:XACCURACY6,proc { |item,battler,scene|
   battler.pbRaiseStatStage(:ACCURACY,6,battler)
+  battler.pokemon.changeHappiness("battleitem")
+})
+
+ItemHandlers::BattleUseOnBattler.add(:MAXMUSHROOMS,proc { |item, battler, scene|
+  battler.pbRaiseStatStage(:ATTACK, 1, battler) if battler.pbCanRaiseStatStage?(:ATTACK, battler)
+  battler.pbRaiseStatStage(:DEFENSE, 1, battler) if battler.pbCanRaiseStatStage?(:DEFENSE, battler)
+  battler.pbRaiseStatStage(:SPECIAL_ATTACK, 1, battler) if battler.pbCanRaiseStatStage?(:SPECIAL_ATTACK, battler)
+  battler.pbRaiseStatStage(:SPECIAL_DEFENSE, 1, battler) if battler.pbCanRaiseStatStage?(:SPECIAL_DEFENSE, battler)
+  battler.pbRaiseStatStage(:SPEED, 1, battler) if battler.pbCanRaiseStatStage?(:SPEED, battler)
   battler.pokemon.changeHappiness("battleitem")
 })
 

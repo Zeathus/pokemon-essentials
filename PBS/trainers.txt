@@ -1,8 +1,24 @@
+<<<<<<< HEAD
 #--------------
 [ACETRAINER_F,Ni] #Stadium No More Tutorial Cup #2
 Pokemon = PORYGON2,50
     Item = EVIOLITE
     Moves = THUNDERWAVE,RECOVER,ICEBEAM,FOULPLAY
+=======
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+[CAMPER,Liam]
+LoseText = A very good battle, indeed!
+Pokemon = DIGLETT,10
+Pokemon = BONSLY,11
+#-------------------------------
+[LEADER_Brock,Brock]
+Items = FULLRESTORE,FULLRESTORE
+LoseText = Very good.
+Pokemon = GEODUDE,12
+    Gender = male
+    Moves = DEFENSECURL,HEADSMASH,ROCKPOLISH,ROCKTHROW
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     AbilityIndex = 0
     IV = 31,31,31,31,31,31
 Pokemon = TYPHLOSION,50
@@ -791,6 +807,7 @@ Pokemon = AZELF,40
     Moves = CONFUSION,SWIFT,UPROAR
     AbilityIndex = 0
     IV = 20,20,20,20,20,20
+<<<<<<< HEAD
 Pokemon = LUXIO,17
     Gender = F
     Moves = SPARK,BITE
@@ -1437,6 +1454,98 @@ LoseText = "It seems you have grown quickly."
 Pokemon = EXEGGUTOR,46
     Form = 1
     Gender = M
+=======
+    Ball = HEAVYBALL
+#-------------------------------
+[TEAMROCKET_M,Grunt,1]
+LoseText = You're too good for me!
+Pokemon = WEEPINBELL,21
+    Shadow = yes
+#-------------------------------
+[TEAMROCKET_F,Grunt,1]
+LoseText = You're too good for me!
+Pokemon = BURMY,19
+Pokemon = WINGULL,19
+Pokemon = ELECTABUZZ,20
+    Shadow = yes
+#-------------------------------
+[YOUNGSTER,Ben]
+LoseText = Aww, I lost.
+Pokemon = RATTATA,11
+Pokemon = EKANS,11
+#-------------------------------
+[CAMPER,Jeff]
+LoseText = A very good battle, indeed!
+Pokemon = SPEAROW,16
+Pokemon = SENTRET,16
+#-------------------------------
+[CAMPER,Jeff,1]
+LoseText = You beat me again!
+Pokemon = FEAROW,29
+Pokemon = FURRET,29
+#-------------------------------
+[PICNICKER,Susie]
+LoseText = Defeated! Oh my!
+Pokemon = MEOWTH,18
+#-------------------------------
+[PICNICKER,Susie,1]
+LoseText = Defeated! Oh my!
+Pokemon = PERSIAN,32
+#-------------------------------
+[HIKER,Ford]
+LoseText = You're too good for me!
+Pokemon = MACHOP,19
+#-------------------------------
+[FISHERMAN,Andrew]
+LoseText = Washed out!
+Pokemon = MAGIKARP,14
+Pokemon = MAGIKARP,18
+#-------------------------------
+[BEAUTY,Bridget]
+LoseText = My Skitty!
+Pokemon = SKITTY,18
+#-------------------------------
+[LASS,Crissy]
+LoseText = You didn't have to win so convincingly!
+Pokemon = PLUSLE,17
+Pokemon = MINUN,17
+#-------------------------------
+[COOLCOUPLE,Alice & Bob]
+LoseText = Our teamwork failed!
+Pokemon = TURTWIG,19
+Pokemon = CHIMCHAR,19
+#-------------------------------
+[POKEMONTRAINER_May,May]
+LoseText = ...
+Pokemon = COMBUSKEN,19
+#-------------------------------
+[SWIMMER2_F,Ariel]
+LoseText = Washed out!
+Pokemon = STARYU,15
+Pokemon = GOLDEEN,11
+#-------------------------------
+[RIVAL1,Blue]
+LoseText = Not too shabby.
+Pokemon = PIDGEOTTO,17
+Pokemon = RATTATA,15
+Pokemon = BULBASAUR,18
+#-------------------------------
+[RIVAL1,Blue,1]
+LoseText = Not too shabby.
+Pokemon = PIDGEOTTO,17
+Pokemon = RATTATA,15
+Pokemon = CHARMANDER,18
+#-------------------------------
+[RIVAL1,Blue,2]
+LoseText = Not too shabby.
+Pokemon = PIDGEOTTO,17
+Pokemon = RATTATA,15
+Pokemon = SQUIRTLE,18
+#-------------------------------
+[CHAMPION,Blue]
+LoseText = A good battle indeed!
+Pokemon = VENUSAUR,63
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     Item = SITRUSBERRY
     Moves = DRAGONHAMMER,WOODHAMMER,EARTHQUAKE,FLAMETHROWER
     IV = 31,31,31,31,31,31

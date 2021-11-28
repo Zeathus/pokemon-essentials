@@ -214,6 +214,7 @@ GameData::TerrainTag.register({
 })
 
 GameData::TerrainTag.register({
+<<<<<<< HEAD
   :id                     => :StairsRight,
   :id_number              => 17,
   :stair_right            => true
@@ -285,3 +286,8 @@ GameData::TerrainTag.register({
   :land4_wild_encounters  => true
 })
 
+=======
+  :id                     => :NoEffect,
+  :id_number              => 17
+})
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388

@@ -92,7 +92,7 @@ class Interpreter
       end
       # If this interpreter's map isn't the current map or connected to it,
       # forget this interpreter's event ID
-      if $game_map.map_id != @map_id && !$MapFactory.areConnected?($game_map.map_id, @map_id)
+      if $game_map.map_id != @map_id && !$map_factory.areConnected?($game_map.map_id, @map_id)
         @event_id = 0
       end
       # Update child interpreter if one exists
@@ -140,53 +140,40 @@ class Interpreter
       e = $!
       raise if e.is_a?(SystemExit) || "#{e.class}" == "Reset"
       event = get_self
-      s = "Backtrace:\r\n"
+      # Gather text for error message
       message = pbGetExceptionMessage(e)
+      backtrace_text = ""
       if e.is_a?(SyntaxError)
         script.each_line { |line|
           line.gsub!(/\s+$/, "")
           if line[/^\s*\(/]
-            message += "\r\n***Line '#{line}' shouldn't begin with '('. Try\r\n"
-            message += "putting the '(' at the end of the previous line instead,\r\n"
-            message += "or using 'extendtext.exe'."
-          end
-          if line[/\:\:\s*$/]
-            message += "\r\n***Line '#{line}' can't end with '::'. Try putting\r\n"
-            message += "the next word on the same line, e.g. 'PBSpecies:" + ":MEW'"
+            message += "\r\n***Line '#{line}' shouldn't begin with '('. Try putting the '('\r\n"
+            message += "at the end of the previous line instead, or using 'extendtext.exe'."
           end
         }
       else
-        for bt in e.backtrace[0, 10]
-          s += bt + "\r\n"
-        end
-        s.gsub!(/Section(\d+)/) { $RGSS_SCRIPTS[$1.to_i][1] }
+        backtrace_text += "\r\n"
+        backtrace_text += "Backtrace:"
+        e.backtrace[0, 10].each { |i| backtrace_text += "\r\n#{i}" }
+        backtrace_text.gsub!(/Section(\d+)/) { $RGSS_SCRIPTS[$1.to_i][1] } rescue nil
+        backtrace_text += "\r\n"
       end
-      message = "Exception: #{e.class}\r\nMessage: " + message + "\r\n"
-      message += "\r\n***Full script:\r\n#{script}\r\n"
-      if event && $game_map
+      # Assemble error message
+      err = "Script error in Interpreter\r\n"
+      if $game_map
         map_name = ($game_map.name rescue nil) || "???"
-        err  = "Script error in event #{event.id} (coords #{event.x},#{event.y}), map #{$game_map.map_id} (#{map_name}):\r\n"
-        err += "#{message}\r\n#{s}"
-        if e.is_a?(Hangup)
-          $EVENTHANGUPMSG = err
-          raise
-        end
-      elsif $game_map
-        map_name = ($game_map.name rescue nil) || "???"
-        err = "Script error in map #{$game_map.map_id} (#{map_name}):\r\n"
-        err += "#{message}\r\n#{s}"
-        if e.is_a?(Hangup)
-          $EVENTHANGUPMSG = err
-          raise
-        end
-      else
-        err = "Script error in interpreter:\r\n#{message}\r\n#{s}"
-        if e.is_a?(Hangup)
-          $EVENTHANGUPMSG = err
-          raise
+        if event
+          err = "Script error in event #{event.id} (coords #{event.x},#{event.y}), map #{$game_map.map_id} (#{map_name})\r\n"
+        else
+          err = "Script error in Common Event, map #{$game_map.map_id} (#{map_name})\r\n"
         end
       end
-      raise err
+      err += "Exception: #{e.class}\r\n"
+      err += "Message: #{message}\r\n\r\n"
+      err += "***Full script:\r\n#{script}"   # \r\n"
+      err += backtrace_text
+      # Raise error
+      raise EventScriptError.new(err)
     end
   end
   #-----------------------------------------------------------------------------
@@ -323,6 +310,7 @@ class Interpreter
   # Sets another event's self switch (eg. pbSetSelfSwitch(20, "A", true) ).
   def pbSetSelfSwitch(eventid, switch_name, value, mapid = -1)
     mapid = @map_id if mapid < 0
+<<<<<<< HEAD
     if eventid.is_a?(Numeric)
       old_value = $game_self_switches[[mapid, eventid, switch_name]]
       $game_self_switches[[mapid, eventid, switch_name]] = value
@@ -337,6 +325,12 @@ class Interpreter
           $MapFactory.getMap(mapid, false).need_refresh = true
         end
       end
+=======
+    old_value = $game_self_switches[[mapid, eventid, switch_name]]
+    $game_self_switches[[mapid, eventid, switch_name]] = value
+    if value != old_value && $map_factory.hasMap?(mapid)
+      $map_factory.getMap(mapid, false).need_refresh = true
+>>>>>>> 479aeacc2c9dddad1b701c1a92a2a1f915e34388
     end
   end
 
@@ -378,7 +372,7 @@ class Interpreter
   end
 
   def pbGetPokemon(id)
-    return $Trainer.party[pbGet(id)]
+    return $player.party[pbGet(id)]
   end
 
   def pbSetEventTime(*arg)
@@ -401,6 +395,7 @@ class Interpreter
     # Apply strict version of passable, which treats tiles that are passable
     # only from certain directions as fully impassible
     return if !event.can_move_in_direction?($game_player.direction, true)
+    $stats.strength_push_count += 1
     case $game_player.direction
     when 2 then event.move_down
     when 4 then event.move_left
