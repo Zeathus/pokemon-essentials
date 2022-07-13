@@ -651,7 +651,7 @@ BattleHandlers::DamageCalcUserItem.add(:MIRACLESEED,
   }
 )
 
-BattleHandlers::DamageCalcUserItem.copy(:MIRACLESEED,:MEADOWPLATE,:ROSEINCENSE)
+BattleHandlers::DamageCalcUserItem.copy(:MIRACLESEED,:MEADOWPLATE,:ROSEINCENSE,:TROPICALINCENSE)
 
 BattleHandlers::DamageCalcUserItem.add(:MUSCLEBAND,
   proc { |item,user,target,move,mults,baseDmg,type|

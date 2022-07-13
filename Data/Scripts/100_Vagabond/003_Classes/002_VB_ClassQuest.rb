@@ -1,238 +1,439 @@
-module PBLocks
-  # Arguments needed are listed behind each variable
-  # *Means a value is optional
-  # For unlocks, all requirements are treated as a minimum value
-  # For quest markers, they are treates as an absolute value
-  MapVisited      = 1  # [:MapVisited, map_id]
-  QuestStatus     = 2  # [:QuestStatus, quest_id, status, *questtype]
-  TrainerBattled  = 3  # [:TrainerBattled, trainer_name]
-  GlobalSwitch    = 4  # [:GlobalSwitch, switch_id]
-  EventSelfSwitch = 5  # [:EventSelfSwitch, map_id, event_id, switch]
-  Variable        = 6  # [:Variable, var_id, comparator, value]
-  BadgeCount      = 7  # [:BadgeCount, min_badges]
-  HasBadge        = 8  # [:HasBadge, badge_id]
-  AverageLevel    = 9  # [:AverageLevel, min_level]
-  ReadMail        = 10 # [:ReadMail, sender, subject, *mailbox]
-  HasPokemon      = 11 # [:HasPokemon, PBSpecies]
-  HasItem         = 12 # [:HasItem, PBItems, amount]
-  PokedexSeen     = 13 # [:Pokedex, PBSpecies]
-  QuestStep       = 14 # [:QuestStep, quest_id, step, *questtype]
-  HasMember       = 15 # [:HasMember, member_id]
+class QuestList
+  attr_accessor :enabled
+
+  def initialize
+    @enabled = false
+    @quests = {}
+  end
+
+  def [](quest_id)
+    if !@quests[quest_id]
+      @quests[quest_id] = QuestState.new(quest_id)
+    end
+    return @quests[quest_id]
+  end
+
+  def do_unlocks
+    unlocked = 0
+    self.each { |quest|
+      if quest.unlock? && quest.status == -1
+        quest.status = 0
+        unlocked += 1
+      end
+    }
+    pbDisplayQuestAvailable(unlocked) if unlocked > 0
+  end
+
+  def do_auto_finishes
+    self.each { |quest|
+      if quest.auto_finish?
+        quest.finish
+      end
+    }
+  end
+
+  def enabled?
+    return @enabled
+  end
+
+  def enabled=(value)
+    @enabled = value
+    self.update
+  end
+
+  def update
+    return if !self.enabled?
+    self.do_unlocks
+    self.do_auto_finishes
+  end
+
+  def keys
+    ret = []
+    GameData::Quest.each { |key| ret.push(key.id) }
+    return ret
+  end
+
+  def each
+    GameData::Quest.each { |key| yield self[key.id] }
+  end
 end
 
-class QuestData
-  attr_accessor(:id)          # ID used for the display order
-  attr_accessor(:name)        # The name of the quest
-  attr_accessor(:desc)        # The description of the quest
-  attr_accessor(:step)        # The steps the player is currently on
-  attr_accessor(:steps)       # Array of steps required to complete the quest
-  attr_accessor(:complete)    # Text to display when a quest is complete
-  attr_accessor(:hidden)      # If the quest name and area is shown or not
-  attr_accessor(:status)      # -1 = None, 0 = Available, 1 = Active, 2 = Complete
-  attr_accessor(:location)    # The location of the quest
-  attr_accessor(:money)       # Money rewarded by the quest
-  attr_accessor(:exp)         # Exp reward multiplier, is divided by 100
-  attr_accessor(:item)        # Item rewarded by the quest
-  attr_accessor(:hideitem)    # Show item as unknown
-  attr_accessor(:trainer)     # If the quest is obtained from a generated trainer
-  attr_accessor(:lock)        # Unlock requirments: [[type,vars],[type2,vars2],...]
-  attr_accessor(:unlock)      # The status of the quest when unlocked
-  attr_accessor(:finish)      # Requirements to automatically finish the quest
-  attr_accessor(:mapguide)    # Display where to go on the map
-  attr_accessor(:dummy)       # Dummy variable to be used for a variety of things
-  attr_accessor(:dummy2)      # Secondary dummy to be used if needed
-  
-  def initialize(id,name,money,exp,item,location,desc,steps,complete,trainer=false)
-    self.id       = getID(PBQuests,id)
-    self.name     = name
-    self.money    = money
-    self.exp      = exp
-    self.item     = item
-    self.hideitem = false
-    self.location = location
-    self.desc     = desc
-    self.step     = 0
-    self.steps    = steps
-    self.complete = complete
-    self.hidden   = 0
-    self.status   = -1
-    self.trainer  = trainer
-    self.lock     = 0
-    self.unlock   = 0
-    self.finish   = 0
-    self.mapguide = []
-    self.dummy    = 0
-    self.dummy2   = 0
+Events.onStepTaken += proc {
+  $quests.update
+}
+
+module GameData
+  class Quest
+    attr_reader(:id)            # ID used for the display order
+    attr_reader(:id_number)     # ID used for the display order
+    attr_reader(:name)          # The name of the quest
+    attr_reader(:type)          # Decices what quest marker to show
+    attr_reader(:description)   # The description of the quest
+    attr_reader(:steps)         # Array of steps required to complete the quest
+    attr_reader(:done)          # Text to display when a quest is complete
+    attr_reader(:location)      # The location of the quest
+    attr_reader(:full_location) # The location as used when appended to "can be found..."
+    attr_reader(:money)         # Money rewarded by the quest
+    attr_reader(:exp)           # Exp reward multiplier, is divided by 100
+    attr_reader(:items)         # Item rewarded by the quest
+    attr_reader(:hide_items)    # Show item as unknown
+    attr_reader(:hide_name)     # If the quest name and area is shown or not
+    attr_reader(:require_maps)  # IDs of required maps to be visited for unlock
+    attr_reader(:require_quests)# IDs for finished quests for unlock
+    attr_reader(:require)       # Condition required for unlock
+    attr_reader(:party_members) # Character must be in party to unlock
+    attr_reader(:active_members)# Character must be active during quest
+    attr_reader(:auto_finish)   # Condition to automatically finish the quest
+    attr_reader(:map_guides)    # Display where to go on the map
+    attr_reader(:show_available)# Whether to show the quest in the list as soon as it's available
+
+    DATA = {}
+    DATA_FILENAME = "quests.dat"
+    MAX_STEPS = 50
+
+    extend ClassMethods
+    include InstanceMethods
+
+    def self.schema
+      ret = {
+        "InternalName"  => [0, "n"],
+        "Name"          => [0, "s"],
+        "Type"          => [0, "s"],
+        "Description"   => [0, "s"],
+        "Location"      => [0, "s"],
+        "FullLocation"  => [0, "s"],
+        "Done"          => [0, "s"],
+        "Money"         => [0, "u"],
+        "Exp"           => [0, "u"],
+        "Items"         => [0, "*eU", :Item, nil],
+        "HideItems"     => [0, "b"],
+        "HideName"      => [0, "b"],
+        "RequireMaps"   => [0, "*u"],
+        "RequireQuests" => [0, "*e", :Quest],
+        "Require"       => [0, "s"],
+        "PartyMembers"  => [0, "*s"],
+        "ActiveMembers" => [0, "*s"],
+        "AutoFinish"    => [0, "s"],
+        "ShowAvailable" => [0, "b"]
+      }
+      for i in 1...MAX_STEPS
+        ret[_INTL("Step{1}", i)] = [0, "s"]
+      end
+      for i in 1...MAX_STEPS
+        ret[_INTL("Map{1}", i)] = [0, "*uu"]
+      end
+      return ret
+    end
+
+    def initialize(hash)
+      @id             = hash[:id]
+      @id_number      = hash[:id_number]      || -1
+      @name           = hash[:name]           || "Unnamed"
+      @type           = hash[:type]           || PBQuestType::Basic
+      @description    = hash[:description]    || ""
+      @steps          = hash[:steps]
+      @done           = hash[:done]           || "The quest was completed."
+      @location       = hash[:location]       || ""
+      @full_location  = hash[:full_location]  || hash[:location]
+      @money          = hash[:money]          || 0
+      @exp            = hash[:exp]            || 0
+      @items          = hash[:items]          || []
+      @hide_items     = hash[:hide_items]     || false
+      @hide_name      = hash[:hide_name]      || false
+      @require_maps   = hash[:require_maps]   || []
+      @require_quests = hash[:require_quests] || []
+      @require        = hash[:require]        || "true"
+      @party_members  = hash[:party_members]  || []
+      @active_members = hash[:active_members] || []
+      @auto_finish    = hash[:auto_finish]    || "false"
+      @map_guides     = hash[:map_guides]     || []
+      @show_available = hash[:show_available]
+    end
+
+    def display_name(status=0)
+      if status <= 0 && @hide_name
+        return "?????"
+      elsif status == -1
+        return "Unavailable"
+      else
+        return @name
+      end
+    end
+
+    def display_description(status=0)
+      case status
+      when -1
+        return "This quest is not available yet."
+      when 0
+        return _INTL("This quest can be found {1}", @location)
+      when 1, 2
+        return @description
+      end
+    end
   end
-  
+end
+
+class QuestState
+  attr_reader(:quest_id)
+  attr_accessor(:status)
+  attr_accessor(:step)   # -1 = Unavailable, 0 = Available, 1 = Active, 2 = Complete
+  attr_accessor(:dummy)
+
+  def initialize(quest_id)
+    @quest_id = quest_id
+    @status   = -1
+    @step     = 0
+    @dummy    = nil
+  end
+
+  def complete?
+    return @status == 2
+  end
+
+  def active?
+    return @status == 1
+  end
+
+  def available?
+    return @status == 0
+  end
+
+  def unavailable?
+    return @status == -1
+  end
+
+  def at_step?(step)
+    return false if !self.active?
+    return @step == step
+  end
+
+  def before_step?(step)
+    return false if !self.active?
+    return @step < step
+  end
+
+  def after_step?(step)
+    return false if !self.active?
+    return @step > step
+  end
+
+  def at_or_before_step?(step)
+    return false if !self.active?
+    return @step <= step
+  end
+
+  def at_or_after_step?(step)
+    return false if !self.active?
+    return @step >= step
+  end
+
+  def unlock
+    if @status < 0
+      @status = 0
+      $quests.update
+      pbUpdateMarkers
+      return true
+    end
+    echo "Cannot unlock an unlocked quest.\n"
+    return false
+  end
+
+  def start(silent=false)
+    if @status < 1
+      if !silent
+        if self.type == PBQuestType::Main
+          pbTitleDisplay("Main Quest", self.display_name)
+        else
+          pbDisplayQuestDiscovery(self)
+        end
+      end
+      @status = 1
+      $quests.update
+      pbUpdateMarkers
+      return true
+    end
+    echo "Cannot start a quest again.\n"
+    return false
+  end
+
+  def advance(silent=false)
+    if @status == 1
+      @step = [@step+1, self.steps.length-1].min
+      pbDisplayQuestProgress(self) if !silent
+      $quests.update
+      pbUpdateMarkers
+      return true
+    end
+    echo "Cannot advance an inactive quest.\n"
+    return false
+  end
+
+  def finish(silent=false)
+    if @status < 2
+      pbTitleDisplay(self.display_name, "Quest Completed!") if !silent
+      if self.money > 0
+        pbMessage(_INTL("{1} received ${2}!", $Trainer.name, self.money))
+        $Trainer.money += money
+      end
+      for item in self.items
+        pbReceiveItem(item[0],item[1] || 1)
+      end
+      exp_reward = self.real_exp
+      if exp_reward > 0
+        pbEXPScreen(0,exp_reward,true)
+      end
+      @status = 2
+      $quests.update
+      pbUpdateMarkers
+      return true
+    end
+    echo "Cannot finish a finished quest.\n"
+    return false
+  end
+
+  def status=(value)
+    @status = value
+  end
+
+  def step=(value)
+    @step = value
+  end
+
   def unlock?
-    return false if lock==0
-    ret=true
-    for i in lock
-      i[0]=getID(PBLocks,i[0]) if i[0].is_a?(Symbol)
-      if i[0]==PBLocks::MapVisited
-        ret=false if $PokemonGlobal.visitedMaps[i[1]]!=true
-      elsif i[0]==PBLocks::QuestStatus
-        if i.length<4
-          i[1]=getID(PBQuests,i[1]) if i[1].is_a?(Symbol)
-          ret=false if $game_variables[QUEST_ARRAY][i[1]].status<i[2]
-        else
-          if i[3]==0
-            i[1]=getID(PBMainQuests,i[1]) if i[1].is_a?(Symbol)
-            ret=false if $game_variables[QUEST_MAIN][i[1]].status<i[2]
-          elsif i[3]==1
-            i[1]=getID(PBQuests,i[1]) if i[1].is_a?(Symbol)
-            ret=false if $game_variables[QUEST_ARRAY][i[1]].status<i[2]
-          else
-            i[1]=getID(PBQuests,i[1]) if i[1].is_a?(Symbol)
-            ret=false if $game_variables[QUEST_SPECIAL][i[1]].status<i[2]
-          end
-        end
-      elsif i[0]==PBLocks::TrainerBattled
-        ret=false if pbTrainerFromName(i[1]).battled==false
-      elsif i[0]==PBLocks::GlobalSwitch
-        ret=false if $game_switches[i[1]]==false
-      elsif i[0]==PBLocks::EventSelfSwitch
-        ret=false if !$game_self_switches[[i[1], i[2], i[3]]]
-      elsif i[0]==PBLocks::Variable
-        if i[1]==0 # Equal To
-          ret=false if $game_variables[i[0]]!=i[2]
-        elsif i[1]==1 # Above
-          ret=false if $game_variables[i[0]]<=i[2]
-        elsif i[1]==2 # Below
-          ret=false if $game_variables[i[0]]>=i[2]
-        elsif i[1]==3 # Not Equal To
-          ret=false if $game_variables[i[0]]==i[2]
-        end
-      elsif i[0]==PBLocks::BadgeCount
-        ret=false if $game_variables[BADGE_COUNT]<i[1]
-      elsif i[0]==PBLocks::HasBadge
-        ret=false if $game_switches[4+i[1]]==false
-      elsif i[0]==PBLocks::AverageLevel
-        ret=false if pbTrainerAverageLevel<i[1]
-      elsif i[0]==PBLocks::ReadMail
-        if i.length<4
-          ret=false if !pbHasReadMail(i[1],i[2])
-        else
-          ret=false if !pbHasReadMail(i[1],i[2],i[3])
-        end
-      elsif i[0]==PBLocks::QuestStep
-        i[1]=getID(PBQuests,i[1]) if i[1].is_a?(Symbol)
-        if i.length<4
-          ret=false if $game_variables[QUEST_ARRAY][i[1]].step<i[2]
-        else
-          if i[3]==0
-            ret=false if $game_variables[QUEST_MAIN][i[1]].step<i[2]
-          elsif i[3]==1
-            ret=false if $game_variables[QUEST_ARRAY][i[1]].step<i[2]
-          else
-            ret=false if $game_variables[QUEST_SPECIAL][i[1]].step<i[2]
-          end
-        end
-      elsif i[0]==PBLocks::HasMember
-        ret=false if !hasPartyMember(i[1])
-      end
+    return false if @status != -1
+    return false if !self.show_available
+    for map in self.require_maps
+      return false if !$PokemonGlobal.visitedMaps[map]
     end
-    return ret
-  end
-  
-  def finish?
-    return false if finish==0
-    ret=true
-    for i in finish
-      i[0]=getID(PBLocks,i[0]) if i[0].is_a?(Symbol)
-      if i[0]==PBLocks::MapVisited
-        ret=false if $PokemonGlobal.visitedMaps[i[1]]!=true
-      elsif i[0]==PBLocks::QuestStatus
-        i[1]=getID(PBQuests,i[1]) if i[1].is_a?(Symbol)
-        ret=false if $game_variables[QUEST_ARRAY][i[1]].status<i[2]
-      elsif i[0]==PBLocks::TrainerBattled
-        ret=false if pbTrainerFromName(i[1]).battled==false
-      elsif i[0]==PBLocks::GlobalSwitch
-        ret=false if $game_switches[i[1]]==false
-      elsif i[0]==PBLocks::EventSelfSwitch
-        ret=false if $game_self_switches[[i[1], i[2], i[3]]]
-      elsif i[0]==PBLocks::Variable
-        if i[1]==0 # Equal To
-          ret=false if $game_variables[i[0]]!=i[2]
-        elsif i[1]==1 # Above
-          ret=false if $game_variables[i[0]]<=i[2]
-        elsif i[1]==2 # Below
-          ret=false if $game_variables[i[0]]>=i[2]
-        elsif i[1]==3 # Not Equal To
-          ret=false if $game_variables[i[0]]==i[2]
-        end
-      elsif i[0]==PBLocks::BadgeCount
-        ret=false if $game_variables[BADGE_COUNT]<i[1]
-      elsif i[0]==PBLocks::HasBadge
-        ret=false if $game_switches[4+i[1]]==false
-      elsif i[0]==PBLocks::AverageLevel
-        ret=false if pbTrainerAverageLevel<i[1]
-      elsif i[0]==PBLocks::ReadMail
-        if i.length<4
-          ret=false if !pbHasReadMail(i[1],i[2])
-        else
-          ret=false if !pbHasReadMail(i[1],i[2],i[3])
-        end
-      end
+    for quest in self.require_quests
+      return false if !$quests[quest].complete?
     end
-    return ret
-  end
-  
-  def getName
-    if self.status != -1 && !self.hidden
-      return self.name
-    elsif self.status == 1 || self.status == 2
-      return self.name
-    elsif self.status == -1 && !self.hidden
-      return "Unavailable"
-    else
-      return "?????"
+    for member in self.party_members
+      return false if !hasPartyMember(member)
     end
+    return eval(self.require)
   end
-  
-  def getStatus
-    if self.status == -1
-      return "?: "
-    elsif self.status == 0
-      return "?: "
-    elsif self.status == 1
-      return "O: "
-    elsif self.status == 2
-      return "X: "
-    else
-      return "(#Status Error)"
+
+  def auto_finish?
+    if @status == 1
+      return eval(self.auto_finish)
     end
+    return false
   end
-  
-  def pbGetStepDescription
-    ret=""
-    if hidden && hidden >= 2 && status <= 0
-      ret= _INTL("This is a hidden quest. You have to find it on your own.")
-    elsif status == -1
-      ret= _INTL("This quest is not avaialable yet.")
-    elsif status == 0
-      if trainer
-        trainer = pbTrainerFromName(location)
-        if trainer.last_area >= 1
-          ret= _INTL("This quest is from the trainer {1}, who is currently around {2}", trainer.name, pbGetMapName(trainer.last_area))
-        else
-          ret= _INTL("This quest is from the trainer {1}. They prefer {2}", trainer.name, trainer.pbPreferredAreaString)
-        end
-      else
-        ret= _INTL("This quest is located {1}.", location)
-      end
-    elsif status == 1
-      ret= _INTL(steps[step])
-    elsif status == 2
-      if self.complete
-        ret= self.complete
-      else
-        ret= _INTL("This quest has been completed.")
-      end
-    end
-    char = "\n"
-    ret.gsub!(char,"")
-    return ret
+
+  def quest
+    return GameData::Quest.get(@quest_id)
   end
+
+  def name
+    return GameData::Quest.get(@quest_id).name
+  end
+
+  def display_name
+    return GameData::Quest.get(@quest_id).display_name
+  end
+
+  def type
+    return GameData::Quest.get(@quest_id).type
+  end
+
+  def description
+    return GameData::Quest.get(@quest_id).description
+  end
+
+  def display_description
+    return GameData::Quest.get(@quest_id).display_description
+  end
+
+  def steps
+    return GameData::Quest.get(@quest_id).steps
+  end
+
+  def done
+    return GameData::Quest.get(@quest_id).done
+  end
+
+  def location
+    return GameData::Quest.get(@quest_id).location
+  end
+
+  def full_location
+    return GameData::Quest.get(@quest_id).full_location
+  end
+
+  def exp
+    return GameData::Quest.get(@quest_id).exp
+  end
+
+  def real_exp
+    level = pbPlayerLevel
+    exp_need = (((level+1)**3) - (level**3))
+    return ((self.exp * 1.0) * exp_need / 100).ceil
+  end
+
+  def money
+    return GameData::Quest.get(@quest_id).money
+  end
+
+  def items
+    return GameData::Quest.get(@quest_id).items
+  end
+
+  def hide_items
+    return GameData::Quest.get(@quest_id).hide_items
+  end
+
+  def hide_name
+    return GameData::Quest.get(@quest_id).hide_name
+  end
+
+  def require_maps
+    return GameData::Quest.get(@quest_id).require_maps
+  end
+
+  def require_quests
+    return GameData::Quest.get(@quest_id).require_quests
+  end
+
+  def require
+    return GameData::Quest.get(@quest_id).require
+  end
+
+  def party_members
+    return GameData::Quest.get(@quest_id).party_members
+  end
+
+  def active_members
+    return GameData::Quest.get(@quest_id).active_members
+  end
+
+  def auto_finish
+    return GameData::Quest.get(@quest_id).auto_finish
+  end
+
+  def map_guides
+    return GameData::Quest.get(@quest_id).map_guide
+  end
+
+  def show_available
+    return GameData::Quest.get(@quest_id).show_available
+  end
+end
+
+module PBQuestType
+  Basic        = 0
+  Feature      = 1
+  Story        = 2
+  Challenge    = 3
+  Main         = 4
+  Botanist     = 5
+  Miner        = 6
+  Crafter      = 7
+  Doctor       = 8
+  Fisher       = 9
+  Breeder      = 10
+  Engineer     = 11
+  Professor    = 12
+  Ranger       = 13
+  Archeologist = 14
 end

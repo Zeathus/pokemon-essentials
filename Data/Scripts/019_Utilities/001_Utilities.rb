@@ -437,34 +437,36 @@ def pbMoveTutorChoose(move,movelist=nil,bymachine=false,oneusemachine=false)
       movelist[i] = GameData::Move.get(movelist[i]).id
     end
   end
-  pbFadeOutIn {
-    movename = GameData::Move.get(move).name
-    annot = pbMoveTutorAnnotations(move,movelist)
-    scene = PokemonParty_Scene.new
-    screen = PokemonPartyScreen.new(scene,$Trainer.party)
-    screen.pbStartScene(_INTL("Teach which Pokémon?"),false,annot)
-    loop do
-      chosen = screen.pbChoosePokemon
-      break if chosen<0
-      pokemon = $Trainer.party[chosen]
+
+  choice = pbChoosePokemonScreen(0) { |member, pkmn|
+    if !member && !pkmn
+      true
+    else
+      ret = false
+      pokemon = getPartyPokemon(member)[pkmn]
+      movename = GameData::Move.get(move).name
       if pokemon.egg?
-        pbMessage(_INTL("Eggs can't be taught any moves.")) { screen.pbUpdate }
+        pbMessage(_INTL("Eggs can't be taught any moves."))
       elsif pokemon.shadowPokemon?
-        pbMessage(_INTL("Shadow Pokémon can't be taught any moves.")) { screen.pbUpdate }
+        pbMessage(_INTL("Shadow Pokémon can't be taught any moves."))
       elsif movelist && !movelist.any? { |j| j==pokemon.species }
-        pbMessage(_INTL("{1} can't learn {2}.",pokemon.name,movename)) { screen.pbUpdate }
+        pbMessage(_INTL("{1} can't learn {2}.",pokemon.name,movename))
       elsif !pokemon.compatible_with_move?(move)
-        pbMessage(_INTL("{1} can't learn {2}.",pokemon.name,movename)) { screen.pbUpdate }
+        pbMessage(_INTL("{1} can't learn {2}.",pokemon.name,movename))
       else
-        if pbLearnMove(pokemon,move,false,bymachine) { screen.pbUpdate }
-          pokemon.add_first_move(move) if oneusemachine
-          ret = true
-          break
-        end
+        ret = true
       end
+      ret
     end
-    screen.pbEndScene
   }
+  
+  if choice
+    pokemon = getPartyPokemon(choice[0])[choice[1]]
+    if pbLearnMove(pokemon,move,false,bymachine)
+      pokemon.add_first_move(move) if oneusemachine
+      ret = true
+    end
+  end
   return ret   # Returns whether the move was learned by a Pokemon
 end
 

@@ -150,7 +150,12 @@ def pbMapMention(mapid)
   return ret
 end
 
-
+def pbMapFile(map_id, compressed=false)
+  if compressed
+    return sprintf("Data/CompressedMaps/Map%03d.rxdata", map_id)
+  end
+  return sprintf("Data/Map%03d.rxdata", map_id)
+end
 
 
 

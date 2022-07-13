@@ -71,6 +71,9 @@ class PokeBattle_Battle
       special_opponents = 0
       status_opponents = 0
       opponent_speeds = []
+
+      user_hp_percent = [user.hp * 1.0 / user.totalhp, 1.0].min
+      target_hp_percent = [target.hp * 1.0 / target.totalhp, 1.0].min
       
       unnerve = false
       
@@ -239,14 +242,14 @@ class PokeBattle_Battle
         # Sleep
         if target.pbCanSleep?(user,false,move) &&
            !target.hasActiveAbility?(:EARLYBIRD)
-          effscore += 40
+          effscore += 10.0 + 30.0 * target_hp_percent
           actionable[target.index] = false if chosen
         end
       when "004"
         # Drowsy (Yawn)
         if target.pbCanSleep?(user,false,move) &&
            !target.hasActiveAbility?(:EARLYBIRD)
-          effscore += 30
+          effscore += 30.0 * target_hp_percent
         end
       when "005"
         # Poison
@@ -255,7 +258,7 @@ class PokeBattle_Battle
            !target.hasActiveAbility?(:TOXICBOOST) &&
            !target.hasActiveAbility?(:GUTS) &&
            !target.hasActiveAbility?(:MAGICGUARD)
-          effscore += 20
+          effscore += 5 + 20.0 * target_hp_percent
         end
       when "006"
         # Toxic
@@ -264,9 +267,9 @@ class PokeBattle_Battle
            !target.hasActiveAbility?(:TOXICBOOST) &&
            !target.hasActiveAbility?(:MAGICGUARD)
           if target.hasActiveAbility?(:GUTS)
-            effscore += 20
+            effscore += 5 + 20.0 * target_hp_percent
           else
-            effscore += 40
+            effscore += 5 + 40.0 * target_hp_percent
           end
         end
       when "007"
@@ -276,16 +279,16 @@ class PokeBattle_Battle
           target_speed = target.pbSpeed
           user_speed = user.pbSpeed
           if target_speed > user_speed && target_speed / 2 < user_speed
-            effscore += 15
+            effscore += 5 + 15 * target_hp_percent
           end
           user.eachAlly do |b|
             partner_speed = b.pbSpeed
             if target_speed > partner_speed
-              effscore += 15
+              effscore += 5 + 15 * target_hp_percent
             end
           end
           if !target.hasActiveAbility?(:GUTS)
-            effscore += 10
+            effscore += 5 + 10 * target_hp_percent
           end
         end
       when "00A"
@@ -294,21 +297,21 @@ class PokeBattle_Battle
            !target.hasActiveAbility?(:GUTS) &&
            !target.hasActiveAbility?(:FLAREBOOST)
           if target_has_physical && target_has_special
-            effscore += 20
+            effscore += 5 + 20 * target_hp_percent
           elsif target_has_physical
-            effscore += 40
+            effscore += 10 + 40 * target_hp_percent
           end
         end
       when "013", "014", "015"
         # Confusion
         if target.pbCanConfuse?(user,false,move) &&
            !target.hasActiveAbility?(:TANGLEDFEET)
-          effscore += 30
+          effscore += 10 + 30 * target_hp_percent
         end
       when "016"
         # Attract
         if target.pbCanAttract?(user,false)
-          effscore += 35
+          effscore += 10 + 35 * target_hp_percent
         end
       end
 
@@ -328,6 +331,23 @@ class PokeBattle_Battle
         end
       end
       
+      # Modifiers to value stat changes less on low HP
+      # or when a stat is already increased
+      statscore_mods = {
+        :ATTACK => user_hp_percent * (([8.0 - user.stages[:ATTACK], 8.0].min) / 6.0),
+        :DEFENSE => user_hp_percent * (([8.0 - user.stages[:DEFENSE], 8.0].min) / 6.0),
+        :SPECIAL_ATTACK => user_hp_percent * (([8.0 - user.stages[:SPECIAL_ATTACK], 8.0].min) / 6.0),
+        :SPECIAL_DEFENSE => user_hp_percent * (([8.0 - user.stages[:SPECIAL_DEFENSE], 8.0].min) / 6.0),
+        :SPEED => user_hp_percent * (([8.0 - user.stages[:SPEED], 8.0].min) / 6.0),
+        :EVASION => user_hp_percent * (([7.0 - user.stages[:EVASION], 7.0].min) / 6.0),
+        :ACCURACY => user_hp_percent * (([7.0 - user.stages[:ACCURACY], 7.0].min) / 6.0)
+      }
+      str = sprintf("Buff Mods: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n",
+        statscore_mods[:ATTACK], statscore_mods[:DEFENSE],
+        statscore_mods[:SPECIAL_ATTACK], statscore_mods[:SPECIAL_DEFENSE],
+        statscore_mods[:SPEED],
+        statscore_mods[:EVASION], statscore_mods[:ACCURACY])
+      #echo str
       
       ### Stat changes on user
       statscore = 0
@@ -356,13 +376,13 @@ class PokeBattle_Battle
         if func == "01C" || func == "024" || func == "025" || func == "026" ||
            func == "027" || func == "029" || func == "036" ||
            (func == "028" && self.pbWeather!=:Sun) # Growth
-          statscore += 20 if has_physical
+          statscore += 20 * statscore_mods[:ATTACK] if has_physical
         end
          
         # Attack +2
         if func == "02E" || func == "035" ||
            (func == "028" && self.pbWeather==:Sun) # Growth
-          statscore += 30 if has_physical
+          statscore += 30 * statscore_mods[:ATTACK] if has_physical
         end
       
         # Belly Drum
@@ -397,15 +417,15 @@ class PokeBattle_Battle
         # Defense +1
         if func == "01D" || func == "01E" || func == "024" || func == "025" ||
            func == "02A" || func == "136"
-          statscore += 5
-          statscore += 10 if physical_opponents > 0
+          statscore += 5 * statscore_mods[:DEFENSE]
+          statscore += 10 * statscore_mods[:DEFENSE] if physical_opponents > 0
           
           if func == "01E" && !user.effects[PBEffects::DefenseCurl]
             # Defense Curl
             for m in user.moves
               if m.function == "0D3"
                 # Has Rollout or Ice Ball
-                statscore += 30
+                statscore += 30 * statscore_mods[:DEFENSE]
                 break
               end
             end
@@ -414,36 +434,36 @@ class PokeBattle_Battle
          
         # Defense +2
         if func == "02F"
-           statscore += 5
-           statscore += 10 if physical_opponents > 0
-           statscore += 5 if physical_opponents > 1
+           statscore += 5 * statscore_mods[:DEFENSE]
+           statscore += 10 * statscore_mods[:DEFENSE] if physical_opponents > 0
+           statscore += 10 * statscore_mods[:DEFENSE] if physical_opponents > 1
         end
          
         # Defense +3
         if func == "038"
-           statscore += 5
-           statscore += 15 if physical_opponents > 0
-           statscore += 10 if physical_opponents > 1
+           statscore += 5 * statscore_mods[:DEFENSE]
+           statscore += 15 * statscore_mods[:DEFENSE] if physical_opponents > 0
+           statscore += 15 * statscore_mods[:DEFENSE] if physical_opponents > 1
         end
       end
       
       if user.pbCanRaiseStatStage?(:SPEED,user,move,false,true)
         # Speed +1
         if func == "01F" || func == "026" || func == "02B"
-          statscore += 5
+          statscore += 5 * statscore_mods[:SPEED]
           for s in opponent_speeds
             if s >= speed_stat && s < speed_stat * 1.5
-              statscore += 15
+              statscore += 15 * statscore_mods[:SPEED]
             end
           end
         end
          
         # Speed +2
         if func == "030" || func == "031" || func == "035" || func == "036"
-          statscore += 10
+          statscore += 10 * statscore_mods[:SPEED]
           for s in opponent_speeds
             if s >= speed_stat && s < speed_stat * 2.0
-              statscore += 15
+              statscore += 15 * statscore_mods[:SPEED]
             end
           end
         end
@@ -453,45 +473,45 @@ class PokeBattle_Battle
         # Sp. Atk +1
         if func == "020" || func == "027" || func == "02B" || func == "02C" ||
            (func == "028" && self.pbWeather!=:Sun) # Growth
-          statscore += 20 if has_special
+          statscore += 20 * statscore_mods[:SPECIAL_ATTACK] if has_special
         end
          
         # Sp. Atk +2
         if func == "032" || func == "035" ||
            (func == "028" && self.pbWeather==:Sun) # Growth
-           statscore += 30 if has_special
+           statscore += 30 * statscore_mods[:SPECIAL_ATTACK] if has_special
         end
          
         # Sp. Atk +3
         if func == "039"
-           statscore += 50 if has_special
+           statscore += 50 * statscore_mods[:SPECIAL_ATTACK] if has_special
         end
       end
       
       if user.pbCanRaiseStatStage?(:SPECIAL_DEFENSE,user,move,false,true)
         # Sp. Def +1
         if func == "021" || func == "02A" || func == "02B" || func == "02C"
-          statscore += 5
-          statscore += 10 if special_opponents > 0
+          statscore += 5 * statscore_mods[:SPECIAL_DEFENSE]
+          statscore += 10 * statscore_mods[:SPECIAL_DEFENSE] if special_opponents > 0
         end
         
         # Sp. Def +2
         if func == "033"
-           statscore += 5
-           statscore += 10 if special_opponents > 0
-           statscore += 5 if special_opponents > 1
+           statscore += 5 * statscore_mods[:SPECIAL_DEFENSE]
+           statscore += 10 * statscore_mods[:SPECIAL_DEFENSE] if special_opponents > 0
+           statscore += 10 * statscore_mods[:SPECIAL_DEFENSE] if special_opponents > 1
         end
       end
       
       if user.pbCanRaiseStatStage?(:EVASION,user,move,false,true)
         # Evasiveness +1
         if func == "022"
-          statscore += 20
+          statscore += 20 * statscore_mods[:EVASION]
         end
         
         # Evasiveness +2
         if func == "034"
-          statscore += 30
+          statscore += 30 * statscore_mods[:EVASION]
         end
       end
       
@@ -505,7 +525,7 @@ class PokeBattle_Battle
           for m in user.moves
             acc = m.accuracy * stages[stage]
             if acc < 85
-              statscore += addscore
+              statscore += addscore * statscore_mods[:ACCURACY]
               addscore -= 5
             end
           end
@@ -514,7 +534,7 @@ class PokeBattle_Battle
       
       # Accupressure
       if func == "037"
-        statscore += 25
+        statscore += 25 * user_hp_percent
       end
       
       # Boost score if the user has Stored Power
@@ -537,6 +557,23 @@ class PokeBattle_Battle
         end
       end
       
+      # Modifiers to value stat changes less on low HP
+      # or when a stat is already decreased
+      debuffscore_mods = {
+        :ATTACK => target_hp_percent * (([7.0 + target.stages[:ATTACK], 7.0].min) / 6.0),
+        :DEFENSE => target_hp_percent * (([7.0 + target.stages[:DEFENSE], 7.0].min) / 6.0),
+        :SPECIAL_ATTACK => target_hp_percent * (([7.0 + target.stages[:SPECIAL_ATTACK], 7.0].min) / 6.0),
+        :SPECIAL_DEFENSE => target_hp_percent * (([7.0 + target.stages[:SPECIAL_DEFENSE], 7.0].min) / 6.0),
+        :SPEED => target_hp_percent * (([7.0 + target.stages[:SPEED], 7.0].min) / 6.0),
+        :EVASION => target_hp_percent * (([6.0 + target.stages[:EVASION], 6.0].min) / 6.0),
+        :ACCURACY => target_hp_percent * (([6.0 + target.stages[:ACCURACY], 6.0].min) / 6.0)
+      }
+      str = sprintf("Debuff Mods: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n",
+        debuffscore_mods[:ATTACK], debuffscore_mods[:DEFENSE],
+        debuffscore_mods[:SPECIAL_ATTACK], debuffscore_mods[:SPECIAL_DEFENSE],
+        debuffscore_mods[:SPEED],
+        debuffscore_mods[:EVASION], debuffscore_mods[:ACCURACY])
+      #echo str
       
       ### Stat changes on target
       debuffscore = 0
@@ -559,18 +596,18 @@ class PokeBattle_Battle
           if func == "042" || func == "04A" || func == "119" || func == "13A" ||
              (func == "140" && target.status == :POISON)
             if target_has_physical && target_has_special
-              debuffscore += 10
+              debuffscore += 10 * debuffscore_mods[:ATTACK]
             elsif target_has_physical
-              debuffscore += 20
+              debuffscore += 20 * debuffscore_mods[:ATTACK]
             end
           end
           
           # Attack -2
           if func == "04B"
             if target_has_physical && target_has_special
-              debuffscore += 20
+              debuffscore += 20 * debuffscore_mods[:ATTACK]
             elsif target_has_physical
-              debuffscore += 30
+              debuffscore += 30 * debuffscore_mods[:ATTACK]
             end
           end
         end
@@ -578,12 +615,12 @@ class PokeBattle_Battle
         if target.pbCanLowerStatStage?(:DEFENSE,user,move,false,true)
           # Defense -1
           if func == "043" || func == "04A" || func == "13B"
-            debuffscore += 10
+            debuffscore += 10 * debuffscore_mods[:DEFENSE]
           end
           
           # Defense -2
           if func == "04C"
-            debuffscore += 30
+            debuffscore += 30 * debuffscore_mods[:DEFENSE]
           end
         end
         
@@ -591,20 +628,20 @@ class PokeBattle_Battle
           # Speed -1
           if func == "044" ||
              (func == "140" && target.status == :POISON)
-            debuffscore += 5
+            debuffscore += 5 * debuffscore_mods[:SPEED]
             for s in ally_speeds
               if s <= target_speed && s > target_speed * 2 / 3
-                debuffscore += 15
+                debuffscore += 15 * debuffscore_mods[:SPEED]
               end
             end
           end
           
           # Speed -2
           if func == "04D"
-            debuffscore += 5
+            debuffscore += 5 * debuffscore_mods[:SPEED]
             for s in ally_speeds
               if s <= target_speed && s * 0.5 > target_speed * 0.5
-                debuffscore += 15
+                debuffscore += 15 * debuffscore_mods[:SPEED]
               end
             end
           end
@@ -615,18 +652,18 @@ class PokeBattle_Battle
           if func == "045" || func == "13A" || func == "13C" ||
              (func == "140" && target.status == :POISON)
             if target_has_physical && target_has_special
-              debuffscore += 10
+              debuffscore += 10 * debuffscore_mods[:SPECIAL_ATTACK]
             elsif target_has_special
-              debuffscore += 20
+              debuffscore += 20 * debuffscore_mods[:SPECIAL_ATTACK]
             end
           end
           
           # Sp. Atk -2
           if func == "13D"
             if target_has_physical && target_has_special
-              debuffscore += 20
+              debuffscore += 20 * debuffscore_mods[:SPECIAL_ATTACK]
             elsif target_has_special
-              debuffscore += 30
+              debuffscore += 30 * debuffscore_mods[:SPECIAL_ATTACK]
             end
           end
           # Captivate is not handled, useless move
@@ -635,19 +672,19 @@ class PokeBattle_Battle
         if target.pbCanLowerStatStage?(:SPECIAL_DEFENSE,user,move,false,true)
           # Sp. Def -1
           if func == "046"
-            debuffscore += 10
+            debuffscore += 10 * debuffscore_mods[:SPECIAL_DEFENSE]
           end
           
           # Sp. Def -2
           if func == "04F"
-            debuffscore += 30
+            debuffscore += 30 * debuffscore_mods[:SPECIAL_DEFENSE]
           end
         end
         
         if target.pbCanLowerStatStage?(:ACCURACY,user,move,false,true)
           # Accuracy -1
           if func == "047"
-            score += 25
+            score += 25 * debuffscore_mods[:ACCURACY]
           end
         end
         
@@ -741,15 +778,15 @@ class PokeBattle_Battle
         # Focus Energy
         if user.effects[PBEffects::FocusEnergy]==0 &&
            user.pbOpposingSide.effects[PBEffects::LuckyChant]<=0 # Do not use during Lucky Chant
-          addscore = 30
+          addscore = 10 + 30 * user_hp_percent
           if user.hasActiveItem?(:RAZORCLAW) || user.hasActiveItem?(:SCOPELENS) ||
              user.hasActiveAbility?(:SUPERLUCK)
             # Has a crit rate item or ability, probably uses a critical hit strategy
-            addscore += 20
+            addscore += 5 + 15 * user_hp_percent
           end
           if user.hasActiveAbility?(:SNIPER)
             # Has Sniper, crit rate is ideal
-            addscore += 20
+            addscore += 5 + 15 * user_hp_percent
           end
           # Crit Rate is not optimal against opponents with crit immunity
           user.eachOpposing do |b|
@@ -762,7 +799,7 @@ class PokeBattle_Battle
       when "035"
         # Shell Smash
         if user.hasActiveItem?(:WHITEHERB)
-          score += 30
+          score += 30 * user_hp_percent
         end
       when "049"
         # Defog
@@ -2680,6 +2717,16 @@ class PokeBattle_Battle
           # Extra points if removing other weather
           if pbWeather != :None
             score += 10
+          end
+        end
+      end
+
+      if $game_variables[WILD_AI_LEVEL] > 0
+        if user.species == :TROPIUS
+          if (func == "028" && self.pbWeather==:Sun) # Growth
+            if user.stages[:SPECIAL_ATTACK] < 3
+              statscore += 100
+            end
           end
         end
       end

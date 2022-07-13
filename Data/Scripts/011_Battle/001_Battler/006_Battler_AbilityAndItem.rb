@@ -11,7 +11,7 @@ class PokeBattle_Battler
     pbContinualAbilityChecks(true)
     # Boss Battle
     if @turnCount <= 1
-      pbBossTrigger(@battle, self, :Start)
+      pbBoss.checkTriggers(@battle, :Start, self)
     end
     # SPECIAL: Holding Back
     #if self.species==pbGet(HOLDING_BACK) && self.index % 2 == 1

@@ -61,16 +61,14 @@ class PokeBattle_Scene
       sprites["pkmn1"].z = 104
       sprites["pkmn1"].x = -64 + 32
       sprites["pkmn1"].y = 120 + 32
-      sprites["pkmn1"].ox = 32
-      sprites["pkmn1"].oy = 32
+      sprites["pkmn1"].setOffset(PictureOrigin::Center)
       sprites["pkmn1"].mirror = true
       
       sprites["pkmn2"] = partner ? PokemonIconSprite.new(partner.pokemon,@viewport) : Sprite.new(@viewport)
       sprites["pkmn2"].z = 103
       sprites["pkmn2"].x = 506 + 32
       sprites["pkmn2"].y = 120 + 32
-      sprites["pkmn2"].ox = 32
-      sprites["pkmn2"].oy = 32
+      sprites["pkmn2"].setOffset(PictureOrigin::Center)
     end
     
     if rand < 5

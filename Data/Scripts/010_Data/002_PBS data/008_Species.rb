@@ -11,6 +11,8 @@ module GameData
     attr_reader :pokedex_form
     attr_reader :type1
     attr_reader :type2
+    attr_reader :type3
+    attr_reader :type4
     attr_reader :base_stats
     attr_reader :evs
     attr_reader :base_exp
@@ -196,15 +198,43 @@ module GameData
 
     # @return [String] the translated Pokédex category of this species
     def category
+      return pbCustomPokemon.category if @species == :SILVALLY
       return pbGetMessage(MessageTypes::Kinds, @id_number)
     end
 
+    def type1
+      return pbCustomPokemon.type if @species == :SILVALLY
+      return @type1
+    end
+
+    def type2
+      return pbCustomPokemon.type if @species == :SILVALLY
+      return @type2
+    end
+
     def affinity1
+      return pbCustomPokemon.affinity if @species == :SILVALLY
       return @type3
     end
 
     def affinity2
+      return pbCustomPokemon.affinity if @species == :SILVALLY
       return @type4
+    end
+
+    def base_stats
+      return pbCustomPokemon.base_stats if @species == :SILVALLY
+      return @base_stats
+    end
+
+    def weight
+      return pbCustomPokemon.weight if @species == :SILVALLY
+      return @weight
+    end
+
+    def height
+      return pbCustomPokemon.height if @species == :SILVALLY
+      return @height
     end
 
     # @return [String] the translated Pokédex entry of this species

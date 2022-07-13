@@ -1,11 +1,12 @@
 # [map_id][eventid,marker,[requirements]]
-# Marker: 0=question mark, 1=exclamation mark, 2=speech
+# Marker: 0=question mark, 1=exclamation mark, 2=speech, 3=text
 
 def pbLoadQuestMarkers
   return if !$Markers || !$Markers[$game_map.map_id]
   for marker in $Markers[$game_map.map_id]
     next if !marker || marker.length < 3
     event = $game_map.events[marker[0]]
+    next if !event
     page = marker[1]
     next if event.pageNum != page
     type = marker[2]
@@ -21,16 +22,24 @@ def pbLoadQuestMarkers
       end
     end
     next if !active
-    if marker.length > 4 && marker[4]
-      questid = eval(marker[4])
-      if type==0
-        active = false if pbQuest(questid).status!=0
+    if type != 3 && marker.length > 4 && marker[4]
+      quest_id = marker[4].to_sym
+      if type == 0
+        active = false if $quests[quest_id].status > 0
       else
-        active = false if pbQuest(questid).status!=1
+        active = false if $quests[quest_id].status != 1
       end
+      type += $quests[quest_id].type * 4
     end
     if active
-      pbQuestBubble(event,type)
+      if type == 3
+        if marker[4] == "RuinBoss"
+          marker[4] = _INTL("Lv. {1}", pbRuinBossLevel)
+        end
+        pbQuestBubble(event,type,marker[4])
+      else
+        pbQuestBubble(event,type)
+      end
     end
   end
 end
@@ -52,7 +61,7 @@ end
 
 def pbUpdateMarkers
   pbUnloadQuestMarkers
-  pbLoadQuestMarkers
+  pbLoadQuestMarkers if !($game_switches && $game_switches[HIDE_MARKERS])
   #if (pbPartyAbilityCount(:KEENEYE)+
   #    pbPartyAbilityCount(:COMPOUNDEYES)+
   #    pbPartyAbilityCount(:FRISK))>0
@@ -60,19 +69,17 @@ def pbUpdateMarkers
   #end
 end
 
-def pbQuestBubble(event,id=0,tinting=false)
+def pbHideMarkers
+  $game_switches[HIDE_MARKERS] = true
+  pbUpdateMarkers
+end
+
+def pbShowMarkers
+  $game_switches[HIDE_MARKERS] = false
+  pbUpdateMarkers
+end
+
+def pbQuestBubble(event,id=0,text=nil,tinting=false)
   event.marker_id = id
-  return
-  if event.is_a?(Array)
-    sprite=nil
-    done=[]
-    for i in event
-      if !done.include?(i.id)
-        sprite=$scene.spriteset.addUserAnimation(id,i.x,i.y,tinting,3,event)
-        done.push(i.id)
-      end
-    end
-  else
-    sprite=$scene.spriteset.addUserAnimation(id,event.x,event.y,tinting,3,event)
-  end
+  event.marker_text = text
 end

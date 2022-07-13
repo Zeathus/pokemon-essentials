@@ -16,6 +16,8 @@ module Settings
   # generations 5 and later are reasonably supported.
   MECHANICS_GENERATION = 7
 
+  COMPRESS_MAPS = false
+
   #=============================================================================
 
   # The default screen width (at a scale of 1.0).
@@ -47,7 +49,7 @@ module Settings
   # The amount of money the player starts the game with.
   INITIAL_MONEY        = 5000
   # The maximum amount of money the player can have.
-  MAX_MONEY            = 999_999
+  MAX_MONEY            = 9_999_999
   # The maximum number of Game Corner coins the player can have.
   MAX_COINS            = 99_999
   # The maximum number of Battle Points the player can have.

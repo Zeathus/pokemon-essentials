@@ -129,6 +129,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     @lineHeight       = 32
     @lineHeight       = 30 if font == 1
     @lineHeight       = 24 if font == 2
+    @arrow            = nil
     @linesdrawn       = 0
     @bufferbitmap     = nil
     @letterbyletter   = false
@@ -144,8 +145,8 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     self.contents = Bitmap.new(1,1)
     @font             = font
     pbSetSystemFont(self.contents)
-    pbSetSmallFont(self.contents) if font == 1
-    pbSetSmallestFont(self.contents) if font == 2
+    pbSetSmallFont(self.contents) if @font == 1
+    pbSetSmallestFont(self.contents) if @font == 2
     self.resizeToFit(text,Graphics.width)
     colors = getDefaultTextColors(self.windowskin)
     @baseColor        = colors[0]
@@ -168,6 +169,8 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     return if disposed?
     @pausesprite.dispose if @pausesprite
     @pausesprite = nil
+    @arrow.dispose if @arrow
+    @arrow = nil
     super
   end
 
@@ -281,6 +284,27 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     end
   end
 
+  def setArrow(arrow_skin)
+    if @arrow
+      @arrow.dispose
+      @arrow = nil
+    end
+    if arrow_skin
+      @arrow = IconSprite.new(0, 0, @viewport)
+      @arrow.setBitmap(arrow_skin)
+      @arrow.ox = @arrow.bitmap.width / 2
+      @arrow.oy = @arrow.bitmap.height
+      @arrow.x  = self.x + self.width / 2
+      @arrow.y  = self.y + self.height
+      @arrow.z  = 100
+    end
+  end
+
+  def opacity=(value)
+    super(value)
+    @arrow.opacity = value if @arrow
+  end
+
   def setTextToFit(text,maxwidth=-1)
     resizeToFit(text,maxwidth)
     self.text = text
@@ -314,8 +338,12 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
     else
       if @letterbyletter
         @fmtchars = []
+        box_width = self.width-self.borderX-SpriteWindow_Base::TEXTPADDING
+        if self.borderX == 80
+          box_width += 16
+        end
         fmt = getFormattedText(self.contents,0,0,
-           self.width-self.borderX-SpriteWindow_Base::TEXTPADDING,-1,
+           box_width,-1,
            shadowctag(@baseColor,@shadowColor)+value,@lineHeight,true)
         @oldfont = self.contents.font.clone
         for ch in fmt
@@ -719,6 +747,10 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
 
   def update
     super
+    if @arrow
+      @arrow.x  = self.x + self.width / 2
+      @arrow.y  = self.y + self.height
+    end
     @pausesprite.update if @pausesprite && @pausesprite.visible
     if @waitcount>0
       @waitcount -= 1

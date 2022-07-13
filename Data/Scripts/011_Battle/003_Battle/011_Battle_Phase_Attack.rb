@@ -61,6 +61,7 @@ class PokeBattle_Battle
       # Switch Pokémon
       pbRecallAndReplace(b.index,idxNewPkmn)
       b.pbEffectsOnSwitchIn(true)
+      pbBoss.checkTriggers(self, :Switch)
     end
   end
 
@@ -82,6 +83,7 @@ class PokeBattle_Battle
       else
         next
       end
+      pbBoss.checkTriggers(self, :Item)
       return if @decision > 0
     end
     pbCalculatePriority if Settings::RECALCULATE_TURN_ORDER_AFTER_SPEED_CHANGES
@@ -185,6 +187,7 @@ class PokeBattle_Battle
     pbAttackPhaseItems
     return if @decision>0
     pbAttackPhaseMegaEvolution
+    pbBoss.checkTriggers(self, :StartOfTurn)
     pbAttackPhaseMoves
   end
 end

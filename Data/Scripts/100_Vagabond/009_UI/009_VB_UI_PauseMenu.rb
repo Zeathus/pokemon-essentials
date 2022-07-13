@@ -1,668 +1,570 @@
-class PokeBarSmallSprite < SpriteWrapper
-  attr_reader :selected
-  attr_reader :preselected
-  attr_reader :switching
-  attr_reader :pokemon
-  attr_reader :active
-  attr_accessor :text
+class PauseOptionSprite < SpriteWrapper
 
-  def initialize(pokemon,trainerid,index,viewport=nil)
+  def initialize(viewport, index)
     super(viewport)
-    pokemon = nil if !pokemon || pokemon == 0
-    @viewport = viewport
-    @pokemon=pokemon
-    @trainerid = trainerid
-    @index=index
-    @barbitmap=AnimatedBitmap.new("Graphics/Pictures/Party/bar_small")
-    @other = (index % 2) == 1
-    @spriteXOffset=@other ? 70 : 2
-    @spriteYOffset=0
-    @statusX=@other ? 56 : 36
-    @statusY=@other ? 4 : 18
-    @gaugeX=@other ? 10 : 42
-    @gaugeY=@other ? 22 : 8
-    @xvalue = -2
-    @yvalues=[]
-    @ystart = 142
-    for i in 0...6
-      if i % 2 == 0
-        @yvalues.push(@ystart + 27 * i)
-      else
-        @yvalues.push(@ystart + 27 * (i - 1) + 20)
-      end
-    end
-    @statuses=AnimatedBitmap.new(_INTL("Graphics/Pictures/Party/statuses_small"))
-    @pkmnsprite=PokemonIconSprite.new(pokemon,viewport)
-    @pkmnsprite.active=false
-    @pkmnsprite.zoom_x = 0.5
-    @pkmnsprite.zoom_y = 0.5
-    @spriteX=@xvalue
-    @spriteY=@yvalues[@index]
-    @pkmnsprite.z=self.z+2
-    self.x=@spriteX
-    self.y=@spriteY
-    refresh
+    @viewport  = viewport
+    @index     = index
+    @selected  = false
+    @timer     = 0
+    @sprite_x  = 252 + 132 * (index % 3)
+    @sprite_y  = 164 + 132 * (index / 3).floor
+    @sprite_bg = IconSprite.new(@sprite_x, @sprite_y, @viewport)
+    @sprite_fg = IconSprite.new(@sprite_x, @sprite_y, @viewport)
+    @sprite_bg.setBitmap("Graphics/Pictures/Pause/options")
+    @sprite_fg.setBitmap("Graphics/Pictures/Pause/options")
+    @sprite_bg.ox = 64
+    @sprite_bg.oy = 64
+    @sprite_bg.z  = 1
+    @sprite_fg.ox = 64
+    @sprite_fg.oy = 64
+    @sprite_fg.z  = 2
+    self.update
+  end
+
+  def selected=(value)
+    @selected = value
+    self.update
   end
 
   def dispose
-    @barbitmap.dispose
-    @statuses.dispose
-    @pkmnsprite.dispose
-    self.bitmap.dispose
-    super
+    @sprite_bg.dispose
+    @sprite_fg.dispose
+    super()
   end
-  
-  def setValues(pokemon, trainerid)
-    pokemon = nil if !pokemon || pokemon == 0
-    @pokemon = pokemon
-    @trainerid = trainerid
-    if @pkmnsprite && !@pkmnsprite.disposed?
-      @pkmnsprite.pokemon = pokemon
+
+  def update
+    if @selected
+      @timer += 1
+      @sprite_bg.angle = Math.sin(@timer / 16.0) * 6
+    else
+      @timer = 0
+      @sprite_bg.angle = 0
     end
-    refresh
+    @sprite_bg.src_rect = Rect.new(@index * 128, @selected ? 128 : 0, 128, 128)
+    @sprite_fg.src_rect = Rect.new(@index * 128, 256, 128, 128)
+    @sprite_bg.update
+    @sprite_fg.update
   end
-  
-  def pokemon=(value)
-    @pokemon=value
-    if @pkmnsprite && !@pkmnsprite.disposed?
-      @pkmnsprite.pokemon=value
+
+  def opacity=(value)
+    super(value)
+    @sprite_bg.opacity = value
+    @sprite_fg.opacity = value
+  end
+
+  def color=(value)
+    super(value)
+    @sprite_bg.color = value
+    @sprite_fg.color = value
+  end
+
+end
+
+class PauseControlsSprite < IconSprite
+
+  def initialize(viewport, index)
+    super(viewport)
+    @index = index
+    self.setBitmap("Graphics/Pictures/Pause/controls")
+    self.x = Graphics.width / 2 - self.bitmap.width / 2
+    self.y = Graphics.height - self.bitmap.height
+    @overlay = Sprite.new(viewport)
+    @overlay.bitmap = Bitmap.new(self.bitmap.width, self.bitmap.height)
+    @keybind_icons = AnimatedBitmap.new("Graphics/Pictures/keybinds")
+    @controls = [
+      ["Quick Swap", "Pokemon"], # Pokemon
+      ["Recent", "Quests"], # Quests
+      ["Registered", "Items"], # Items
+      ["This Area", "Pokedex"], # Pokedex
+      ["How are", "you here"], # None
+      ["???", "Card"], # Trainer
+      ["Recent", "Guide"], # Guide
+      ["Save", "Options"], # System
+      ["Map", "Phone"]  # Phone
+    ]
+    self.update
+    self.refresh
+  end
+
+  def index=(value)
+    if @index != value
+      @index = value
+      self.refresh
     end
-    refresh
-  end
-  
-  def hp
-    return @pokemon.hp
   end
 
   def refresh
-    return if disposed?
-    if !self.bitmap || self.bitmap.disposed?
-      self.bitmap=BitmapWrapper.new(@barbitmap.width,@barbitmap.height)
+    @overlay.bitmap.clear
+    @overlay.bitmap.blt(14, 14, @keybind_icons.bitmap, $Keybinds.rect(Input::ACTION))
+    @overlay.bitmap.blt(158, 14, @keybind_icons.bitmap, $Keybinds.rect(Input::USE))
+    textpos = [
+      [@controls[@index][0],46,12,0,Color.new(252,252,252),Color.new(0,0,0),true],
+      [@controls[@index][1],190,12,0,Color.new(252,252,252),Color.new(0,0,0),true]
+    ]
+    pbSetSmallFont(@overlay.bitmap)
+    pbDrawTextPositions(@overlay.bitmap, textpos)
+  end
+
+  def update
+    @overlay.x = self.x
+    @overlay.y = self.y
+    @overlay.z = self.z + 1
+    @overlay.update
+    super
+  end
+
+  def dispose
+    @keybind_icons.dispose
+    @overlay.dispose
+    super
+  end
+
+  def opacity=(value)
+    super(value)
+    @overlay.opacity = value
+  end
+
+  def color=(value)
+    super(value)
+    @overlay.color = value
+  end
+
+end
+
+class PauseInfoBox < IconSprite
+
+  def initialize(viewport, index)
+    super(viewport)
+    @index = index
+    self.setBitmap("Graphics/Pictures/Pause/info")
+    self.x = Graphics.width - self.bitmap.width
+    self.y = Graphics.height / 2 - 100 + @index * 82
+    self.src_rect = Rect.new(0, @index * 76, self.bitmap.width, 76)
+    @overlay = Sprite.new(viewport)
+    @overlay.bitmap = Bitmap.new(self.bitmap.width, self.bitmap.height)
+    pbSetSmallFont(@overlay.bitmap)
+    self.refresh
+    self.update
+  end
+
+  def refresh
+    @overlay.bitmap.clear
+    case @index
+    when 0 # Money
+      @value = $Trainer.money
+      text = "$" + self.number_with_delimiter(@value)
+      textpos = [[text, 82, 28, 0, Color.new(252,252,252), Color.new(0,0,0), true]]
+      pbDrawTextPositions(@overlay.bitmap, textpos)
+    when 1 # Time
+      @value = pbGetTimeNow.to_i_min
+      text = (pbGetLanguage()==2) ? pbGetTimeNow.getDigitalString : pbGetTimeNow.getDigitalString(true, true)
+      textpos = [[text, 82, 28, 0, Color.new(252,252,252), Color.new(0,0,0), true]]
+      pbDrawTextPositions(@overlay.bitmap, textpos)
+    when 2 # Weather
+      @value = pbGetForecast[$game_map.map_id]
+      text = "[WIP]"
+      textpos = [[text, 82, 28, 0, Color.new(252,252,252), Color.new(0,0,0), true]]
+      pbDrawTextPositions(@overlay.bitmap, textpos)
     end
-    if @pkmnsprite && !@pkmnsprite.disposed?
-      @pkmnsprite.x=self.x+@spriteXOffset
-      @pkmnsprite.y=self.y+@spriteYOffset
+  end
+
+  def update
+    case @index
+    when 0 # Money
+      self.refresh if @value != $Trainer.money
+    when 1 # Time
+      self.refresh if @value != pbGetTimeNow.to_i_min
+    when 2 # Weather
+      self.refresh if @value != pbGetForecast[$game_map.map_id]
     end
-    self.bitmap.clear if self.bitmap
-    return if !@pokemon
-    self.bitmap.blt(0,0,@barbitmap.bitmap,Rect.new(@other ? 106 : 0,36 * @trainerid,106,36))
-    if @pokemon && !@pokemon.egg?
-      tothp=@pokemon.totalhp
-      hpgauge=@pokemon.totalhp==0 ? 0 : (self.hp*54/@pokemon.totalhp)
-      hpgauge=1 if hpgauge==0 && self.hp>0
+    @overlay.x = self.x
+    @overlay.y = self.y
+    @overlay.z = self.z + 1
+    @overlay.update
+    super
+  end
+
+  def dispose
+    @overlay.dispose
+    super
+  end
+
+  def opacity=(value)
+    super(value)
+    @overlay.opacity = value
+  end
+
+  def color=(value)
+    super(value)
+    @overlay.color = value
+  end
+
+  def number_with_delimiter(num)
+    neg = (num < 0)
+    num = num.abs
+    str = num.to_s
+    ret = ""
+    if str.include?(".")
+      ret = str[str.index(".")...str.length]
+      str = str[0...str.index(".")]
+    end
+    while str.length > 3
+      sub = str[(str.length-3)...str.length]
+      str = str[0...(str.length-3)]
+      ret = "," + sub + ret
+    end
+    ret = str + ret
+    ret = "-" + ret if neg
+    return ret
+  end
+
+end
+
+class PausePokemonBox < IconSprite
+
+  def initialize(viewport, index)
+    super(viewport)
+    @index = index
+    @party = (@index >= 3) ? 0 : 1
+    @index -= 3 if @index >= 3
+    @pokemon = getActivePokemon(@party)[@index]
+    @species = @pokemon ? @pokemon.species : nil
+    @hp = @pokemon ? @pokemon.hp : 0
+    @totalhp = @pokemon ? @pokemon.totalhp : 0
+    @status = @pokemon ? @pokemon.status : 0
+    self.setBitmap("Graphics/Pictures/Pause/pokemon_bg")
+    self.x = 0
+    self.y = Graphics.height / 2 - 50 + @index * 60
+    self.y -= (getActivePokemon(0).length - 1) * 60 if @party == 0
+    self.y += 72 if @party == 1
+    @overlay = Sprite.new(viewport)
+    @overlay.bitmap = Bitmap.new(self.bitmap.width, self.bitmap.height)
+    pbSetSmallFont(@overlay.bitmap)
+    @pokemon_icon = PokemonIconSprite.new(@pokemon, viewport)
+    @pokemon_icon.x = self.x - 2
+    @pokemon_icon.y = self.y - 22
+    @status_icon = IconSprite.new(0, 0, viewport)
+    @status_icon.setBitmap(_INTL("Graphics/Pictures/statuses"))
+    @status_icon.x = self.x + 52
+    @status_icon.y = self.y + 6
+    self.refresh
+    self.update
+  end
+
+  def refresh
+    @overlay.bitmap.clear
+    if @pokemon
+      self.visible = true
+      if @pokemon.hp <= 0
+        id = 5
+        @status_icon.src_rect = Rect.new(0, 32*id, 32, 32)
+      elsif @pokemon.status == :NONE
+        @status_icon.visible = false
+      else
+        id = GameData::Status.get(@pokemon.status).id_number - 1
+        @status_icon.src_rect = Rect.new(0, 32*id, 32, 32)
+      end
       hpzone=0
-      hpzone=1 if self.hp<=(@pokemon.totalhp/2).floor
-      hpzone=2 if self.hp<=(@pokemon.totalhp/4).floor
+      hpzone=1 if @hp<=(@totalhp/2).floor
+      hpzone=2 if @hp<=(@totalhp/4).floor
       hpcolors=[
          Color.new(14,152,22),Color.new(24,192,32),   # Green
          Color.new(202,138,0),Color.new(232,168,0),   # Orange
          Color.new(218,42,36),Color.new(248,72,56)    # Red
       ]
-      # fill with HP color
-      self.bitmap.fill_rect(@gaugeX,@gaugeY,hpgauge,2,hpcolors[hpzone*2])
-      self.bitmap.fill_rect(@gaugeX,@gaugeY+2,hpgauge,2,hpcolors[hpzone*2+1])
-      self.bitmap.fill_rect(@gaugeX,@gaugeY+4,hpgauge,2,hpcolors[hpzone*2])
-      if @pokemon.hp==0 || @pokemon.status != :NONE
-        status=(@pokemon.hp==0) ? 5 : (GameData::Status.get(@pokemon.status).id_number - 1)
-        statusrect=Rect.new(0,14*status,14,14)
-        self.bitmap.blt(@statusX,@statusY,@statuses.bitmap,statusrect)
-      else
-        textpos = [[_INTL("HP"),@statusX - (@other ? -2 : 2),@statusY - 6,false,Color.new(252,252,252),nil]]
-        pbSetSmallestFont(self.bitmap)
-        pbDrawTextPositions(self.bitmap,textpos,false)
+      bar_len = 46
+      for i in 0...4
+        color_index = [0,1,1,0][i]
+        @overlay.bitmap.fill_rect(84, 18+i*2, [(@hp*1.0*bar_len/@totalhp/2).ceil*2,bar_len-i*2].min, 2, hpcolors[hpzone*2 + color_index])
       end
+    else
+      self.visible = false
     end
   end
 
   def update
-    super
-    if @pkmnsprite && !@pkmnsprite.disposed? && @pokemon
-      @pkmnsprite.update
-      @pkmnsprite.x=self.x+@spriteXOffset
-      @pkmnsprite.y=self.y+@spriteYOffset
+    if @pokemon != getActivePokemon(@party)[@index] || (@pokemon && @pokemon.species != @species)
+      @pokemon = getActivePokemon(@party)[@index]
+      @species = @pokemon ? @pokemon.species : nil
+      @pokemon_icon.pokemon = @pokemon
+      @pokemon_icon.update
+      @hp = @pokemon ? @pokemon.hp : 0
+      @totalhp = @pokemon ? @pokemon.totalhp : 0
+      self.refresh
+    elsif @pokemon && (@hp != @pokemon.hp || @totalhp != @pokemon.totalhp || @status != @pokemon.status)
+      @hp = @pokemon.hp
+      @totalhp = @pokemon.totalhp
+      @status = @pokemon.status
+      self.refresh
     end
+    @overlay.x = self.x
+    @overlay.y = self.y
+    @overlay.z = self.z + 1
+    @overlay.update
+    super
   end
+
+  def dispose
+    @overlay.dispose
+    @pokemon_icon.dispose
+    @status_icon.dispose
+    super
+  end
+
+  def visible=(value)
+    super(value)
+    @overlay.visible = value
+    @pokemon_icon.visible = value
+    @status_icon.visible = value
+  end
+
+  def opacity=(value)
+    super(value)
+    @overlay.opacity = value
+    @pokemon_icon.opacity = value
+    @status_icon.opacity = value
+  end
+
+  def color=(value)
+    super(value)
+    @overlay.color = value
+    @pokemon_icon.color = value
+    @status_icon.color = value
+  end
+
 end
 
+class PauseScreen
+
+  def update
+    for i in 0...9
+      if i != 4
+        @sprites[_INTL("option_{1}", i)].selected = (@index == i)
+      end
+    end
+    @sprites["controls"].index = @index
+  end
+
+  def pbStartPauseScreen
+    @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
+    @viewport.z = 9999
+    @sprites = {}
+    @index = 0
+    if $game_variables && $game_variables[LAST_PAUSE_INDEX].is_a?(Numeric)
+      @index = $game_variables[LAST_PAUSE_INDEX]
+    end
+    for i in 0...9
+      if i != 4
+        option_sprite = PauseOptionSprite.new(@viewport, i)
+        @sprites[_INTL("option_{1}", i)] = option_sprite
+        if i == @index
+          option_sprite.selected = true
+        end
+      end
+    end
+    @sprites["controls"] = PauseControlsSprite.new(@viewport, @index)
+    for i in 0...3
+      @sprites[_INTL("info_{1}", i)] = PauseInfoBox.new(@viewport, i)
+    end
+    for i in 0...6
+      @sprites[_INTL("pokemon_{1}", i)] = PausePokemonBox.new(@viewport, i)
+    end
+    pbFadeInAndShow(@sprites)
+  end
+
+  def pbEndPauseScreen(remember_index=true)
+    if remember_index
+      $game_variables[LAST_PAUSE_INDEX] = @index
+    end
+    pbFadeOutAndHide(@sprites)
+    pbDisposeSpriteHash(@sprites)
+    @viewport.dispose
+  end
+
+  def pbChooseOption
+    loop do
+      self.update
+      Graphics.update
+      Input.update
+      pbUpdateSpriteHash(@sprites)
+      @viewport.update
+      if Input.trigger?(Input::BACK)
+        return -1
+      elsif Input.trigger?(Input::USE)
+        return @index
+      elsif Input.trigger?(Input::ACTION)
+        return @index + 10
+      elsif Input.repeat?(Input::RIGHT)
+        if @index % 3 == 2
+          @index -= 2
+        elsif @index == 3
+          @index += 2
+        else
+          @index += 1
+        end
+      elsif Input.repeat?(Input::LEFT)
+        if @index % 3 == 0
+          @index += 2
+        elsif @index == 5
+          @index -= 2
+        else
+          @index -= 1
+        end
+      elsif Input.repeat?(Input::UP)
+        if @index <= 2
+          @index += 6
+        elsif @index == 7
+          @index -= 6
+        else
+          @index -= 3
+        end
+      elsif Input.repeat?(Input::DOWN)
+        if @index >= 6
+          @index -= 6
+        elsif @index == 1
+          @index += 6
+        else
+          @index += 3
+        end
+      end
+    end
+  end
+
+end
 
 def pbPauseMenu
   return if !$game_switches || $game_switches[LOCK_PAUSE_MENU]
-  viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
-  viewport.z=99999
-  midx=Graphics.width/2
-  midy=Graphics.height/2-16
-  sprites={}
-  sprites["topDisplay"]=Sprite.new(viewport)
-  file="Graphics/Pictures/Pause/topDisplay"
-  sprites["topDisplay"].bitmap=RPG::Cache.load_bitmap("",file)
-  sprites["topDisplay"].x=0
-  sprites["topDisplay"].y=-128
-  sprites["topDisplay"].z=0
-  sprites["topOverlay"]=Sprite.new(viewport)
-  sprites["topOverlay"].bitmap=Bitmap.new(640,128)
-  sprites["topOverlay"].x=-64
-  sprites["topOverlay"].y=-128
-  sprites["topOverlay"].z=1
-  sprites["topMainIcon"]=Sprite.new(viewport)
-  sprites["topMainIcon"].bitmap=Bitmap.new(256,128)
-  sprites["topMainIcon"].x=128
-  sprites["topMainIcon"].y=-128
-  sprites["topMainIcon"].z=2
-  sprites["topInfo"]=Sprite.new(viewport)
-  sprites["topInfo"].bitmap=Bitmap.new(512,128)
-  sprites["topInfo"].x=0
-  sprites["topInfo"].y=-128
-  sprites["topInfo"].z=3
-  
-  # Party Summary
-  sprites["partyHeader"]=Sprite.new(viewport)
-  file="Graphics/Pictures/Party/header_small"
-  sprites["partyHeader"].bitmap=RPG::Cache.load_bitmap("",file)
-  sprites["partyHeader"].x=-130
-  sprites["partyHeader"].y=120
-  trainerid = getPartyActive(0)
-  otherid = getPartyActive(1)
-  party = getPartyPokemon(trainerid)
-  otherparty = getPartyPokemon(otherid)
-  for i in 0...3
-    sprites[_INTL("pokemon{1}",i*2)]=PokeBarSmallSprite.new(party[i], trainerid, i*2, viewport)
-    if otherid >= 0
-      sprites[_INTL("pokemon{1}",i*2+1)]=PokeBarSmallSprite.new(otherparty[i], otherid, i*2+1, viewport)
-    else
-      sprites[_INTL("pokemon{1}",i*2+1)]=Sprite.new(viewport)
-    end
-  end
-  
-  for i in 0...6
-    sprites[_INTL("pokemon{1}",i)].x -= 128
-    sprites[_INTL("pokemon{1}",i)].update
-  end
-  
-  # Area Map
-  draw_minimap = false
-  if draw_minimap
-    tilew = 2
-    tileh = 2
-    areaBitmap = Bitmap.new($game_map.width * tilew, $game_map.height * tileh)
-    colorPassable = Color.new(250,250,250)
-    colorGrass = Color.new(30,200,30)
-    colorSolid = Color.new(40,40,40)
-    colorWater = Color.new(40,40,250)
-    for y in 0...$game_map.height
-      for x in 0...$game_map.width
-        tag = $game_map.terrain_tag(x,y)
-        if PBTerrain.isAnyGrass?(tag)
-          areaBitmap.fill_rect(x*tilew,y*tileh,tilew,tileh,colorGrass)
-        elsif $game_map.passable?(x,y,2) ||
-              $game_map.passable?(x,y,4) ||
-              $game_map.passable?(x,y,6) ||
-              $game_map.passable?(x,y,8)
-          areaBitmap.fill_rect(x*tilew,y*tileh,tilew,tileh,colorPassable)
-        elsif PBTerrain.isWater?(tag)
-          areaBitmap.fill_rect(x*tilew,y*tileh,tilew,tileh,colorWater)
-        else
-          areaBitmap.fill_rect(x*tilew,y*tileh,tilew,tileh,colorSolid)
-        end
-      end
-    end
-    sprites["areaMap"]=Sprite.new(viewport)
-    sprites["areaMap"].bitmap = areaBitmap
-    sprites["areaMap"].x = 256 - areaBitmap.width / 2
-    sprites["areaMap"].y = 360 - areaBitmap.height
-  end
-  
-  commands=pbPauseMenuItems
-  lastitem=commands[0]
-  bitmaps={}
-  for i in commands
-    file=_INTL("Graphics/Pictures/Pause/icon{1}",i)
-    bitmap=RPG::Cache.load_bitmap("",file)
-    bitmaps[i]=bitmap
-  end
-  pbPauseMenuDrawOverlay(
-      sprites["topOverlay"].bitmap,
-      sprites["topMainIcon"].bitmap,
-      sprites["topInfo"].bitmap,
-      commands,bitmaps)
-  8.times do
-    sprites["topDisplay"].y+=128/8
-    sprites["topOverlay"].y+=128/8
-    sprites["topMainIcon"].y+=128/8
-    sprites["topInfo"].y+=128/8
-    sprites["partyHeader"].x+=128/8
-    for i in 0...6
-      sprites[_INTL("pokemon{1}",i)].x += 128/8
-      sprites[_INTL("pokemon{1}",i)].update
-    end
-    Graphics.update
-    viewport.update
-    Input.update
-  end
-  time=0.0
-  close=0
-  anim=""
-  swapping=false
+  pause_screen = PauseScreen.new
+  pause_screen.pbStartPauseScreen
   loop do
-    time+=1.0
-    inAnim=!(time > 8 || (anim != "left" && anim != "right"))
-    pbUpdateUI
-    Graphics.update
-    viewport.update
-    Input.update
-    pbUpdateSceneMap
-    if Input.press?(Input::LEFT) && !inAnim
-      commands.unshift(commands[commands.length-1])
-      commands.pop
-      anim="left"
-      time=0
-    elsif Input.press?(Input::RIGHT) && !inAnim
-      commands.push(commands[0])
-      commands.shift
-      anim="right"
-      time=0
-    elsif Input.trigger?(Input::BACK)
-      break
-    elsif Input.trigger?(Input::USE)
-      close=pbPauseCommandSelect(commands[0],[sprites,viewport,bitmaps])
-      break if close == 1
-      if close == 2
-        tries = 0
-        while commands[0] != lastitem
-          item = commands.shift
-          commands.push(item)
-          tries+=1
-          break if tries > 20 # Ensure no infinite loops
-        end
-        break
-      end
-      lastitem=commands[0]
-      # Update party summary
-      trainerid = getPartyActive(0)
-      otherid = getPartyActive(1)
-      party = getPartyPokemon(trainerid)
-      otherparty = getPartyPokemon(otherid)
-      for i in 0...3
-        sprites[_INTL("pokemon{1}",i*2)].setValues(party[i],trainerid)
-        if otherid >= 0
-          sprites[_INTL("pokemon{1}",i*2+1)].setValues(otherparty[i],otherid)
-        end
-      end
-    elsif Input.trigger?(Input::ACTION)
-      if anim != "left" && anim != "right"
-        time=0
-        if !swapping
-          swapping=commands[0]
-        else
-          for i in 0...commands.length
-            if commands[i] == swapping
-              commands[i] = commands[0]
-              commands[0] = swapping
-            end
+    option = pause_screen.pbChooseOption
+    shortcut = (option >= 10)
+    option -= 10 if shortcut
+    break if option == -1
+    case option
+    when 0 # Pokemon
+      if shortcut
+
+      else
+        sscene=PokemonScreen_Scene.new
+        sscreen=PokemonScreen.new(sscene,getActivePokemon(0))
+        hiddenmove=nil
+        pbFadeOutIn(99999) { 
+          hiddenmove=sscreen.pbPokemonScreen
+          if hiddenmove
+            pbPauseMenuClose(toDispose)
           end
-          swapping=false
+        }
+        if hiddenmove
+          pause_screen.pbEndPauseScreen
+          Kernel.pbUseHiddenMove(hiddenmove[0],hiddenmove[1])
+          return 1
         end
       end
-    end
-    pbPauseMenuDrawOverlay(
-      sprites["topOverlay"].bitmap,
-      sprites["topMainIcon"].bitmap,
-      sprites["topInfo"].bitmap,
-      commands,bitmaps,time,anim,swapping)
-    if time <= 8
-      if anim == "left"
-        sprites["topOverlay"].x=-144+80*(time/8)
-      elsif anim == "right"
-        sprites["topOverlay"].x=16-80*(time/8)
-      end
-    else
-      anim = ""
-    end
-  end
-  if close == 0
-    8.times do
-      sprites["topDisplay"].y-=128/8
-      sprites["topOverlay"].y-=128/8
-      sprites["topMainIcon"].y-=128/8
-      sprites["topInfo"].y-=128/8
-      sprites["partyHeader"].x-=128/8
-      for i in 0...6
-        sprites[_INTL("pokemon{1}",i)].x -= 128/8
-        sprites[_INTL("pokemon{1}",i)].update
-      end
-      Graphics.update
-      viewport.update
-      Input.update
-    end
-  end
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  for i in bitmaps
-    bitmaps[i[0]].dispose
-  end
-end
+    when 1 # Quests
+      if shortcut
 
-def pbPauseMenuClose(toDispose)
-  pbDisposeSpriteHash(toDispose[0])
-  toDispose[1].dispose
-  for i in toDispose[2]
-    toDispose[2][i[0]].dispose
-  end
-end
-
-def pbPauseMenuDrawOverlay(overlay,mainIcon,info,commands,bitmaps,time=0,anim="",swapping=false)
-  mainIcon.clear
-  ssize=34
-  bsize=68
-  animtime=8.0
-  count=commands.length
-  
-  textpos=[]
-  smalltextpos=[]
-  maintextpos=[]
-  mainsmalltextpos=[]
-  base=Color.new(248,248,248)
-  shadow=Color.new(104,104,104)
-  redrawOverlay=false
-  
-  if time <= 0
-    redrawOverlay=true
-  end
-  # Not moving
-  if time > animtime || (anim != "left" && anim != "right")
-    # Main Icon
-    bitmap=bitmaps[commands[0]]
-    x=128-bsize/2
-    y=48-bsize/2
-    y+=Math.sin(time/4.0)*2
-    mainIcon.stretch_blt(
-      Rect.new(x,y,bsize,bsize),
-               bitmap,Rect.new(0,0,bsize,bsize))
-    maintextpos.push([pbPauseCommandName(commands[0]),128,64,2,base,shadow])
-    opacity=-Math.cos(time/24.0)*255
-    if opacity>0
-      mainsmalltextpos.push([pbPauseCommandHotkey(commands[0]),128,-2,2,
-          Color.new(248,248,248,opacity),Color.new(104,104,104,opacity)])
-    end
-  # Playing moving animation
-  else
-    if anim == "left"
-      # Old Main Icon
-      bitmap=bitmaps[commands[1]]
-      size=bsize+((ssize-bsize)*(time/animtime)).floor
-      x=128-size/2+(94*(time/animtime)).floor
-      y=48-size/2+(-18*(time/animtime)).floor
-      mainIcon.stretch_blt(
-        Rect.new(x,y,size,size),
-                 bitmap,Rect.new(0,0,bsize,bsize))
-      tx=128+(94*(time/animtime)).floor
-      ty=64+(-26*(time/animtime)).floor
-      mainsmalltextpos.push([pbPauseCommandName(commands[1]),tx,ty,2,base,shadow])
-      # New Main Icon
-      bitmap=bitmaps[commands[0]]
-      size=ssize+((bsize-ssize)*(time/animtime)).floor
-      x=128-size/2+(-94*(1-time/animtime)).floor
-      y=48-size/2+(-18*(1-time/animtime)).floor
-      mainIcon.stretch_blt(
-        Rect.new(x,y,size,size),
-                 bitmap,Rect.new(0,0,bsize,bsize))
-      tx=32+(94*(time/animtime)).floor
-      ty=38+(26*(time/animtime)).floor
-      mainsmalltextpos.push([pbPauseCommandName(commands[0]),tx,ty,2,base,shadow])
-    elsif anim == "right"
-      # Old Main Icon
-      bitmap=bitmaps[commands[count-1]]
-      size=bsize+((ssize-bsize)*(time/animtime)).floor
-      x=128-size/2+(-94*(time/animtime)).floor
-      y=48-size/2+(-18*(time/animtime)).floor
-      mainIcon.stretch_blt(
-        Rect.new(x,y,size,size),
-                 bitmap,Rect.new(0,0,bsize,bsize))
-      tx=128+(-94*(time/animtime)).floor
-      ty=64+(-18*(time/animtime)).floor
-      mainsmalltextpos.push([pbPauseCommandName(commands[count-1]),tx,ty,2,base,shadow])
-      # New Main Icon
-      bitmap=bitmaps[commands[0]]
-      size=ssize+((bsize-ssize)*(time/animtime)).floor
-      x=128-size/2+(94*(1-time/animtime)).floor
-      y=48-size/2+(-18*(1-time/animtime)).floor
-      mainIcon.stretch_blt(
-        Rect.new(x,y,size,size),
-                 bitmap,Rect.new(0,0,bsize,bsize))
-      tx=222+(-94*(time/animtime)).floor
-      ty=38+(18*(time/animtime)).floor
-      mainsmalltextpos.push([pbPauseCommandName(commands[0]),tx,ty,2,base,shadow])
-    end
-    if time >= animtime
-      anim=""
-      redrawOverlay=true
-    end
-  end
-  
-  if redrawOverlay
-    overlay.clear
-    # Right of main icon
-    for i in 0..3
-      next if i==0 && anim=="left"
-      next if !commands[i+1]
-      bitmap=bitmaps[commands[i+1]]
-      overlay.stretch_blt(
-        Rect.new(414+i*80-ssize/2,30-ssize/2,ssize,ssize),
-                 bitmap,Rect.new(0,0,bsize,bsize))
-      smalltextpos.push([pbPauseCommandName(commands[i+1]),414+i*80,38,2,base,shadow])
-    end
-    # Left of main icon
-    for i in 0..3
-      next if i==0 && anim=="right"
-      next if !commands[count-i-1]
-      bitmap=bitmaps[commands[count-i-1]]
-      overlay.stretch_blt(
-        Rect.new(224-i*80-ssize/2,30-ssize/2,ssize,ssize),
-                 bitmap,Rect.new(0,0,bsize,bsize))
-      smalltextpos.push([pbPauseCommandName(commands[count-i-1]),224-i*80,38,2,base,shadow])
-    end
-  end
-  
-  # Time display
-  if pbGetTimeNow.update || time==0
-    info.clear
-    infotextpos=[]
-    infotextpos.push([pbGetTimeNow.getDigitalString(false),374,70,2,base,shadow])
-    # Weather Display
-    weather = "Cloudy"
-    if $game_screen && $game_screen.weather_type
-      weather = pbPauseWeatherName($game_screen.weather_type)
-    end
-    infotextpos.push([weather,138,70,2,base,shadow])
-    
-    pbSetSmallFont(info)
-    pbDrawTextPositions(info,infotextpos)
-  end
-  
-  if swapping
-    for i in 0...maintextpos.length
-      if maintextpos[i][0]==pbPauseCommandName(swapping)
-        maintextpos[i][4]=Color.new(0,224,0)
-        maintextpos[i][5]=Color.new(0,150,0)
-      end
-    end
-    for i in 0...mainsmalltextpos.length
-      if mainsmalltextpos[i][0]==pbPauseCommandName(swapping)
-        mainsmalltextpos[i][4]=Color.new(0,224,0)
-        mainsmalltextpos[i][5]=Color.new(0,150,0)
-      end
-    end
-    for i in 0...smalltextpos.length
-      if smalltextpos[i][0]==pbPauseCommandName(swapping)
-        smalltextpos[i][4]=Color.new(0,224,0)
-        smalltextpos[i][5]=Color.new(0,150,0)
-      end
-    end
-  end
-  
-  pbSetSmallFont(mainIcon)
-  pbDrawTextPositions(mainIcon,mainsmalltextpos)
-  pbSetSystemFont(mainIcon)
-  pbDrawTextPositions(mainIcon,maintextpos)
-  
-  if redrawOverlay
-    pbSetSmallFont(overlay)
-    pbDrawTextPositions(overlay,smalltextpos)
-    pbSetSystemFont(overlay)
-    pbDrawTextPositions(overlay,textpos)
-  end
-end
-
-def pbPauseCommandName(command)
-  case command
-  when "Card"
-    return $Trainer.name
-  when "Dex"
-    return "Pokédex"
-  when "Gear"
-    return "Pokégear"
-  end
-  return command
-end
-
-def pbPauseCommandHotkey(command)
-  return ""
-  case command
-  when "Bag"
-    return "Hotkey: B"
-  when "Dex"
-    return "Hotkey: D"
-  when "Gear"
-    return "Hotkey: G"
-  when "Party"
-    return "Hotkey: P"
-  when "Quests"
-    return "Hotkey: Q"
-  end
-  return ""
-end
-
-def pbPauseWeatherName(weather)
-  return "Swap: Z"
-  names = [
-    "Cloudy",
-    "Raining",
-    "Storm",
-    "Snowing",
-    "Blizzard",
-    "Sandstorm",
-    "Heavy Rain",
-    "Sunny",
-    "Windy",
-    "Blood Moon"
-  ]
-  return names[weather]
-end
-
-def pbPauseMenuItems
-  if !$game_variables[PAUSE_MENU_ITEMS].is_a?(Array)
-    $game_variables[PAUSE_MENU_ITEMS]=[]
-  end
-  commands=$game_variables[PAUSE_MENU_ITEMS]
-  commands.push("Dex") if !commands.include?("Dex")
-  commands.push("Party") if !commands.include?("Party")
-  commands.push("Bag") if !commands.include?("Bag")
-  commands.push("Quests") if !commands.include?("Quests") && $game_switches[HAS_QUEST_LIST]
-  commands.push("Gear") if !commands.include?("Gear") && $game_switches[HAS_POKEGEAR]
-  commands.push("Card") if !commands.include?("Card")
-  commands.push("Save") if !commands.include?("Save")
-  commands.push("Options") if !commands.include?("Options")
-  return commands
-end
-
-def pbPauseCommandSelect(command,toDispose)
-  case command
-  when "Bag"
-    item=0
-    scene=PokemonBag_Scene.new
-    screen=PokemonBagScreen.new(scene,$PokemonBag)
-    pbFadeOutIn(99999) { 
-       item=screen.pbStartScreen 
-       if item
-         pbPauseMenuClose(toDispose)
-       end
-    }
-    if item
-      pbUseKeyItemInField(item)
-      return 1
-    end
-  when "Dex"
-    if Settings::USE_CURRENT_REGION_DEX
-      pbFadeOutIn {
-        scene = PokemonPokedex_Scene.new
-        screen = PokemonPokedexScreen.new(scene)
-        screen.pbStartScreen
-      }
-    else
-      if $Trainer.pokedex.accessible_dexes.length == 1 && !$game_switches[HAS_HABITAT_DEX]
-        $PokemonGlobal.pokedexDex = $Trainer.pokedex.accessible_dexes[0]
+      else
         pbFadeOutIn {
-          scene = PokemonPokedex_Scene.new
-          screen = PokemonPokedexScreen.new(scene)
+          pbShowQuests
+        }
+      end
+    when 2 # Items
+      if shortcut
+
+      else
+        item=0
+        scene=PokemonBag_Scene.new
+        screen=PokemonBagScreen.new(scene,$PokemonBag)
+        pbFadeOutIn(99999) { 
+          item=screen.pbStartScreen 
+          if item
+            pbPauseMenuClose(toDispose)
+          end
+        }
+        if item
+          pause_screen.pbEndPauseScreen
+          pbUseKeyItemInField(item)
+          return 1
+        end
+      end
+    when 3 # Pokedex
+      if shortcut
+
+      else
+        if Settings::USE_CURRENT_REGION_DEX
+          pbFadeOutIn {
+            scene = PokemonPokedex_Scene.new
+            screen = PokemonPokedexScreen.new(scene)
+            screen.pbStartScreen
+          }
+        else
+          if $Trainer.pokedex.accessible_dexes.length == 1 && !$game_switches[HAS_HABITAT_DEX]
+            $PokemonGlobal.pokedexDex = $Trainer.pokedex.accessible_dexes[0]
+            pbFadeOutIn {
+              scene = PokemonPokedex_Scene.new
+              screen = PokemonPokedexScreen.new(scene)
+              screen.pbStartScreen
+            }
+          else
+            pbFadeOutIn {
+              scene = PokemonPokedexMenu_Scene.new
+              screen = PokemonPokedexMenuScreen.new(scene)
+              screen.pbStartScreen
+            }
+          end
+        end
+      end
+    when 5 # Trainer
+      if shortcut
+        pbFadeOutIn {
+          scene = PokemonJobs_Scene.new
+          screen = PokemonJobsScreen.new(scene)
           screen.pbStartScreen
         }
       else
         pbFadeOutIn {
-          scene = PokemonPokedexMenu_Scene.new
-          screen = PokemonPokedexMenuScreen.new(scene)
+          scene = PokemonTrainerCard_Scene.new
+          screen = PokemonTrainerCardScreen.new(scene)
+          screen.pbStartScreen
+        }
+      end
+    when 6 # Guide
+      if shortcut
+        pbFadeOutIn {
+          pbStartGuideScreen($game_variables[NEW_GUIDE])
+        }
+      else
+        pbFadeOutIn {
+          pbStartGuideScreen
+        }
+      end
+    when 7 # System
+      if shortcut
+        pause_screen.pbEndPauseScreen(false)
+        scene = PokemonSave_Scene.new
+        screen = PokemonSaveScreen.new(scene)
+        screen.pbSaveScreen
+        return 2
+      else
+        pbFadeOutIn {
+          scene = PokemonOption_Scene.new
+          screen = PokemonOptionScreen.new(scene)
+          screen.pbStartScreen
+          pbUpdateSceneMap
+        }
+      end
+    when 8 # Phone
+      if shortcut
+        pbShowMap(-1,false)
+      else
+        pbFadeOutIn {
+          scene = PokemonPokegear_Scene.new
+          screen = PokemonPokegearScreen.new(scene)
           screen.pbStartScreen
         }
       end
     end
-  when "Gear"
-    pbFadeOutIn {
-      scene = PokemonPokegear_Scene.new
-      screen = PokemonPokegearScreen.new(scene)
-      screen.pbStartScreen
-    }
-  when "Party"
-    sscene=PokemonScreen_Scene.new
-    sscreen=PokemonScreen.new(sscene,getActivePokemon(0))
-    hiddenmove=nil
-    pbFadeOutIn(99999) { 
-       hiddenmove=sscreen.pbPokemonScreen
-       if hiddenmove
-         pbPauseMenuClose(toDispose)
-       end
-    }
-    if hiddenmove
-      Kernel.pbUseHiddenMove(hiddenmove[0],hiddenmove[1])
-      return 1
-    end
-  when "Quests"
-    pbFadeOutIn {
-      pbShowQuests
-    }
-  when "Card"
-    pbFadeOutIn {
-      scene = PokemonTrainerCard_Scene.new
-      screen = PokemonTrainerCardScreen.new(scene)
-      screen.pbStartScreen
-    }
-  when "Options"
-    pbFadeOutIn {
-      scene = PokemonOption_Scene.new
-      screen = PokemonOptionScreen.new(scene)
-      screen.pbStartScreen
-      pbUpdateSceneMap
-    }
-  when "Save"
-    pbPauseMenuClose(toDispose)
-    scene = PokemonSave_Scene.new
-    screen = PokemonSaveScreen.new(scene)
-    screen.pbSaveScreen
-    return 2
   end
-  return 0
+  pause_screen.pbEndPauseScreen
 end
-
-
-
-
-
-
-

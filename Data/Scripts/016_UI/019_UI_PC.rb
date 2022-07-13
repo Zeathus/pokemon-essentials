@@ -241,6 +241,10 @@ def pbTrainerPC
 end
 
 def pbPokeCenterPC
+  pbFadeOutIn {
+    pbBootShellOS()
+  }
+  return
   pbMessage(_INTL("\\se[PC open]{1} booted up the PC.",$Trainer.name))
   command = 0
   loop do

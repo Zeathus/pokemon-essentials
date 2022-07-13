@@ -1175,6 +1175,12 @@ PokemonDebugMenuCommands.register("delete", {
         screen.scene.pbRelease(pkmnid, heldpoke)
         (heldpoke) ? screen.heldpkmn = nil : screen.storage.pbDelete(pkmnid[0], pkmnid[1])
         screen.scene.pbRefresh
+      else
+        if $Trainer.party[pkmnid]
+          if $Trainer.party[pkmnid] == pkmn
+            $Trainer.party -= [$Trainer.party[pkmnid]]
+          end
+        end
       end
       next true
     end

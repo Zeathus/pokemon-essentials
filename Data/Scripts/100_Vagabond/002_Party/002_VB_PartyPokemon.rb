@@ -1,9 +1,8 @@
 
 def getActivePokemon(pos)
   id = getPartyActive(pos)
-  if id == PBParty::Player
-    return $Trainer.party
-  end
+  return [] if id == -1
+  return $Trainer.party if id == PBParty::Player
   return pbGet(PARTY_POKEMON)[id]
 end
 
@@ -11,6 +10,8 @@ def getPartyPokemon(id)
   id = getID(PBParty,id) if id.is_a?(Symbol)
   if id == PBParty::Player
     return $Trainer.party
+  elsif id == -1
+    return $Trainer.inactive_party
   end
   return pbGet(PARTY_POKEMON)[id]
 end
@@ -21,7 +22,7 @@ def initPartyPokemon(id)
   parties = pbGet(PARTY_POKEMON)
   party = []
   case id
-  when PBParty::Merrick
+  when PBParty::Duke
     party.push(createPartyPokemon(
       id,:RIOLU,10,[:QUICKATTACK,:METALCLAW,:VACUUMWAVE,:ENDURE],1,
       :HASTY,0,[10,31,16,31,16,5]))
@@ -29,15 +30,31 @@ def initPartyPokemon(id)
       id,:BRONZOR,9,[:CONFUSION,:TACKLE,:CONFUSERAY,:PAYBACK],0,
       :CALM,2,[16,5,31,10,16,31]))
   when PBParty::Amethyst
+    levels = [18, 18]
+    for i in getPartyPokemon(PBParty::Duke)
+      if i.species == :BRONZOR || i.species == :BRONZONG
+        levels[0] = i.level if i.level > levels[0]
+      elsif i.species == :RIOLU || i.species == :LUCARIO
+        levels[1] = i.level if i.level > levels[1]
+      end
+    end
     party.push(createPartyPokemon(
-      id,:SNEASEL,5,[],0,:CALM,1,[10,31,16,31,5,16]))
+      id,:MISDREAVUS,levels[0],[],1,:TIMID,1,[16,5,10,31,31,16]))
     party.push(createPartyPokemon(
-      id,:MISDREAVUS,5,[],1,:HASTY,0,[16,5,10,31,31,16]))
+      id,:STARMIE,levels[1],[],0,:MODEST,0,[31,5,10,31,16,16]))
   when PBParty::Kira
+    levels = [20, 20]
+    for i in getPartyPokemon(PBParty::Amethyst)
+      if i.species == :MISDREAVUS || i.species == :MISMAGIUS
+        levels[0] = i.level if i.level > levels[0]
+      elsif i.species == :STARMIE
+        levels[1] = i.level if i.level > levels[1]
+      end
+    end
     party.push(createPartyPokemon(
-      id,:SANDSHREW,5,[],1,:ADAMANT,2,[16,31,31,16,5,10]))
+      id,:SANDSHREW,levels[1],[],1,:ADAMANT,2,[16,31,31,16,5,10]))
     party.push(createPartyPokemon(
-      id,:LARVESTA,5,[],0,:TIMID,0,[16,5,16,10,31,31]))
+      id,:LARVESTA,levels[0],[],0,:TIMID,0,[16,5,16,10,31,31]))
   when PBParty::Eliana
     
   when PBParty::Fintan
@@ -59,9 +76,9 @@ def addTestPokemon2
   party = pbGet(PARTY_POKEMON)[PBParty::Kira]
   party.push(createPartyPokemon(
     PBParty::Kira,:TYRANTRUM,50,[],1,:ADAMANT,0,[31,31,16,10,5,16]))
-  party = pbGet(PARTY_POKEMON)[PBParty::Merrick]
+  party = pbGet(PARTY_POKEMON)[PBParty::Duke]
   party.push(createPartyPokemon(
-    PBParty::Merrick,:CELEBI,50,[],1,:SERIOUS,0,[31,31,16,16,31,16]))
+    PBParty::Duke,:CELEBI,50,[],1,:SERIOUS,0,[31,31,16,16,31,16]))
   party = pbGet(PARTY_POKEMON)[PBParty::Amethyst]
   party.push(createPartyPokemon(
     PBParty::Amethyst,:STARMIE,50,[],1,:TIMID,0,[31,31,16,10,5,16]))

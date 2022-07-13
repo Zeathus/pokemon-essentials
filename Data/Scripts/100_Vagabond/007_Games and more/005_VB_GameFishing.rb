@@ -332,7 +332,7 @@ def pbFishingGame(encounter,tutorial=false,item=false)
     if catch
       if item
         pbExclaim($game_player)
-        Kernel.pbItemBall(encounter)
+        pbItemBall(encounter)
       else
         addReeledIn(encounter[0])
         pbExclaim($game_player)
@@ -341,7 +341,7 @@ def pbFishingGame(encounter,tutorial=false,item=false)
       $game_temp.in_menu = false
       return true
     else
-      Kernel.pbMessage("It got away...")
+      pbMessage("It got away...")
       $game_temp.in_menu = false
       return false
     end

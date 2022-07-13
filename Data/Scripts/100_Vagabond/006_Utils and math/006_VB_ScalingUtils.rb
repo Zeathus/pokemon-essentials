@@ -1,3 +1,10 @@
+def pbNextGymLevel(gym=nil)
+  gym = $game_variables[BADGE_COUNT] if !gym
+  levels = [20, 30, 40, 50, 60, 65, 70, 75, 80, 85, 90]
+  gym = [gym, levels.length].min
+  return levels[gym]
+end
+
 def pbPreferredLevel
   return pbPlayerLevel
 end

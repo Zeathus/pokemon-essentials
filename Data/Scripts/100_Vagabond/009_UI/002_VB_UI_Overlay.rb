@@ -158,8 +158,8 @@ def pbUI_QuestDiscovery(anim)
       sprites["locwindow"].setSkin("Graphics/Windowskins/quest_popup")
       sprites["locwindow"].baseColor=Color.new(230,230,230)
       sprites["locwindow"].shadowColor=Color.new(6,70,120)
-      #sprites["locwindow"].contents.font.size=18
-      #sprites["locwindow"].contents.font.name = "Smallest"
+      sprites["locwindow"].contents.font.size=18
+      sprites["locwindow"].contents.font.name = "Smallest"
       stops = " 0.,!?:;"
       steptext = quest.steps[quest.step]
       text = ""
@@ -172,7 +172,7 @@ def pbUI_QuestDiscovery(anim)
       sprites["locwindow"].visible = true
       sprites["locwindow"].setTextToFit(text)
       sprites["locwindow"].width = 200
-      #sprites["locwindow"].contents.font.name = "Smallest"
+      sprites["locwindow"].contents.font.name = "Smallest"
       sprites["locwindow"].redrawText
     end
     if frame>0

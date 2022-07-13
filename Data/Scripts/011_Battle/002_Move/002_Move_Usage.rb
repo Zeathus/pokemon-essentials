@@ -185,16 +185,8 @@ class PokeBattle_Move
     # Disguise takes the damage
     return if target.damageState.disguise
     # Boss Sturdy (can be at any HP)
-    if target.opposes? && !pbBoss.is_a?(Numeric)
-      phases = pbBoss.getSturdy
-      for i in phases
-        i *= opponent.totalhp
-        i = (i * 1.0 / 100).ceil
-        if opponent.hp > i && oppnent.hp - damage < i
-          damage = opponent.hp - i
-        end
-      end
-    end
+    sturdy_damage = pbBoss.sturdy?(target, damage)
+    damage = sturdy_damage if sturdy_damage
     # Target takes the damage
     if damage>=target.hp
       damage = target.hp
@@ -250,7 +242,7 @@ class PokeBattle_Move
         if Effectiveness.resistant?(b.damageState.typeMod);          effectiveness = 1
         elsif Effectiveness.super_effective?(b.damageState.typeMod); effectiveness = 2
         end
-        animArray.push([b,oldHP,effectiveness])
+        animArray.push([b,oldHP,effectiveness,b.damageState.critical,user.lastMoveUsed])
       end
       if animArray.length>0
         @battle.scene.pbHitAndHPLossAnimation(animArray)
@@ -264,7 +256,7 @@ class PokeBattle_Move
   #=============================================================================
   def pbEffectivenessMessage(user,target,numTargets=1)
     return if target.damageState.disguise
-    if Effectiveness.super_effective?(target.damageState.typeMod)
+    if Effectiveness.super_effective?(target.damageState.typeMod) && false
       if numTargets>1
         @battle.pbDisplay(_INTL("It's super effective on {1}!",target.pbThis(true)))
       else
@@ -284,7 +276,7 @@ class PokeBattle_Move
     if target.damageState.substitute
       @battle.pbDisplay(_INTL("The substitute took damage for {1}!",target.pbThis(true)))
     end
-    if target.damageState.critical
+    if target.damageState.critical && false
       if numTargets>1
         @battle.pbDisplay(_INTL("A critical hit on {1}!",target.pbThis(true)))
       else

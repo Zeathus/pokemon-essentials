@@ -1,24 +1,27 @@
 module PBParty
   Player    = 0
-  Merrick   = 1
+  Duke      = 1
   Amethyst  = 2
   Kira      = 3
   Eliana    = 4
   Fintan    = 5
   Nekane    = 6
-  Ziran     = 7
+  Cerise    = 7
+  Ziran     = 8
   
   def PBParty.len
-    return 8
+    return 9
   end
   
   def PBParty.getName(id)
     id = getID(PBParty,id) if id.is_a?(Symbol)
     case id
+    when -1
+      return "Inactive"
     when PBParty::Player
       return $Trainer ? $Trainer.name : "Player"
-    when PBParty::Merrick
-      return "Duke"     # Duke sounds large. Merrick is a nod to Serebii-man
+    when PBParty::Duke
+      return "Duke"     # Duke sounds large
     when PBParty::Amethyst
       return "Amethyst" # The gem, colored after her name
     when PBParty::Kira
@@ -29,6 +32,8 @@ module PBParty
       return "Fintan"   # Irish, meaning "White Fire" (Reshiram)
     when PBParty::Nekane
       return "Nekane"   # Basque, meaning "Sorrows", as she is empty at first
+    when PBParty::Cerise
+      return "Cerise"   # French word for Cherry
     when PBParty::Ziran
       return "Ziran"    # Chinese, refers to a point of view in Daoist belief
     end
@@ -40,7 +45,7 @@ module PBParty
     case id
     when PBParty::Player
       return :PROTAGONIST
-    when PBParty::Merrick
+    when PBParty::Duke
       return :FORETELLER
     when PBParty::Amethyst
       return :AMETHYST
@@ -52,6 +57,8 @@ module PBParty
       return :DAO_Fintan
     when PBParty::Nekane
       return :NEKANE
+    when PBParty::Cerise
+      return :CERISE
     when PBParty::Ziran
       return :DAO_Ziran
     end
@@ -63,7 +70,7 @@ module PBParty
     case id
     when PBParty::Player
       return $Trainer ? $Trainer.id : 0
-    when PBParty::Merrick
+    when PBParty::Duke
       return 25111 # Celebi, with last digit repeated
     when PBParty::Amethyst
       return 1482  # SiO2: Chemical Symbol for Amethyst
@@ -75,6 +82,8 @@ module PBParty
       return 16283 # 16 + Reshiram dex num in hex (base 16)
     when PBParty::Nekane
       return 66666 # Obvious
+    when PBParty::Cerise
+      return 153298 # Keldeo's regional DEX# in BW followed by B2W2
     when PBParty::Ziran
       return 65829 # Mirrorable, balanced
     end
@@ -86,7 +95,7 @@ module PBParty
     case id
     when PBParty::Player
       return $Trainer ? $Trainer.gender : 2
-    when PBParty::Merrick
+    when PBParty::Duke
       return 0
     when PBParty::Amethyst
       return 1
@@ -97,6 +106,8 @@ module PBParty
     when PBParty::Fintan
       return 0
     when PBParty::Nekane
+      return 1
+    when PBParty::Cerise
       return 1
     when PBParty::Ziran
       return 0
@@ -143,6 +154,20 @@ def removePartyMember(id)
   id = getID(PBParty,id) if id.is_a?(Symbol)
   pbSet(PARTY,[true]) if !pbGet(PARTY).is_a?(Array)
   pbGet(PARTY)[id]=false
+  members = pbGet(PARTY_ACTIVE)
+  if members[0] == id
+    setPartyActive(members[1], 0)
+  end
+  if members[1] == id
+    active = -1
+    for i in 0...PBParty.len
+      if pbGet(PARTY)[i] && i != members[0]
+        active = i
+        break
+      end
+    end
+    setPartyActive(active, 1)
+  end
 end
 
 def setPartyActive(id,pos)
@@ -166,10 +191,8 @@ def setPartyActive(id,pos)
       members[pos] = id
     end
   end
-  if members[1] >= 0
-    $game_player.sprite.partner.character = _INTL("member{1}", members[1])
-    $game_player.sprite.update
-  end
+  $game_player.sprite.partner.character = _INTL("member{1}", members[1])
+  $game_player.sprite.update
 end
 
 def getPartyActive(pos=nil)
@@ -183,9 +206,19 @@ def getPartyActive(pos=nil)
   end
 end
 
+def pbSetPartnerVisibility(value)
+  $game_player.sprite.partner.visibility=value
+end
 
-
-
-
+def pbForceVisualPartyLeader(value)
+  if value == -1
+    $game_variables[FORCED_VISUAL_LEADER] = 0
+    $game_switches[FORCE_VISUAL_LEADER] = false
+  else
+    id = getID(PBParty,id) if id.is_a?(Symbol)
+    $game_variables[FORCED_VISUAL_LEADER] = id
+    $game_switches[FORCE_VISUAL_LEADER] = true
+  end
+end
 
 

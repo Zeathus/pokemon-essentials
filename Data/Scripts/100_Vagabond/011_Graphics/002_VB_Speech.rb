@@ -70,23 +70,13 @@ def pbFormat(phrase)
   phrase.gsub!("[O]","[o]")
   phrase.gsub!("[W]","[w]")
   
-  if $game_system.message_position!=1 && $game_system.message_frame!=1
-    phrase.gsub!("[r]","<c2=043c3aff>")
-    phrase.gsub!("[g]","<c2=06644bd2>")
-    phrase.gsub!("[b]","<c2=65467b14>")
-    phrase.gsub!("[y]","<c2=129B43DF>")
-    phrase.gsub!("[p]","<c2=7C1F7EFF>")
-    phrase.gsub!("[o]","<c2=017F473F>")
-    phrase.gsub!("[w]","<c2=296B5EF5>")
-  else
-    phrase.gsub!("[r]","<c2=3aff043c>")
-    phrase.gsub!("[g]","<c2=4bd20664>")
-    phrase.gsub!("[b]","<c2=7b146546>")
-    phrase.gsub!("[y]","<c2=43DF129B>")
-    phrase.gsub!("[p]","<c2=7EFF7C1F>")
-    phrase.gsub!("[o]","<c2=473F017F>")
-    phrase.gsub!("[w]","<c2=7FFF2D49>")
-  end
+  phrase.gsub!("[r]","<c2=3aff043c>")
+  phrase.gsub!("[g]","<c2=4bd20664>")
+  phrase.gsub!("[b]","<c2=7b146546>")
+  phrase.gsub!("[y]","<c2=43DF129B>")
+  phrase.gsub!("[p]","<c2=7EFF7C1F>")
+  phrase.gsub!("[o]","<c2=473F017F>")
+  phrase.gsub!("[w]","<c2=7FFF2D49>")
   
   phrase.gsub!("[/R]","[/]")
   phrase.gsub!("[/G]","[/]")
@@ -162,6 +152,7 @@ def pbTalk(text, opts={})
   format_text = pbFormat(text)
 
   window_type = opts["window_type"]
+  has_window = ($game_system.message_frame == 0)
   speaker = opts["speaker"]
   speaker = nil if speaker == "none"
   name_tag = opts["name_tag"] || speaker
@@ -170,14 +161,13 @@ def pbTalk(text, opts={})
   portrait = opts["portrait"] || speaker
   emotion = opts["emotion"] || "neutral"
   hide_name = opts["hide_name"] || 0
+  hide_namebox = opts["hide_namebox"] || (!has_window && 1) || 0
   shout = opts["shout"]
   textpos = opts["textpos"]
   lines = opts["lines"] || 3
 
   # Only show portrait if message boxes are at the bottom and frame visible
-  if $game_system.message_position != 2 ||
-     $game_system.message_frame == 1 ||
-     text.include?("\\ch[")
+  if $game_system.message_position != 2 || !has_window
     portrait = nil
   end
 
@@ -194,13 +184,8 @@ def pbTalk(text, opts={})
   color = nil
   if speaker
     color = "<c2="
-    if $game_system.message_frame != 1
-      color += colorToRgb16(getCharColor(speaker, 0)).to_s
-      color += colorToRgb16(getCharColor(speaker, 1)).to_s
-    else
-      color += colorToRgb16(getCharColor(speaker, 1)).to_s
-      color += colorToRgb16(getCharColor(speaker, 0)).to_s
-    end
+    color += colorToRgb16(getCharColor(speaker, 0, has_window)).to_s
+    color += colorToRgb16(getCharColor(speaker, 1, has_window)).to_s
     color += ">"
   end
 
@@ -241,24 +226,26 @@ def pbTalk(text, opts={})
   if name_tag && hide_name != 2
     # Background
     sprites["namebox"] = IconSprite.new(0, 0, viewport)
-    sprites["namebox"].setBitmap("Graphics/Messages/name_box")
+    name_box_image = getNameBox(speaker)
+    sprites["namebox"].setBitmap(name_box_image)
     case namepos
     when "left"
-      sprites["namebox"].x = 94
+      sprites["namebox"].x = 94 + 16
     when "center"
       sprites["namebox"].x = Graphics.width / 2 - sprites["namebox"].bitmap.width / 2
     when "right"
-      sprites["namebox"].x = 520
+      sprites["namebox"].x = 520 - 16
     end
     case $game_system.message_position
     when 0
-      sprites["namebox"].y = window_height - 16
+      sprites["namebox"].y = window_height - 16 - 4
     when 1
       sprites["namebox"].y = Graphics.height / 2 - window_height / 2 - 48
     when 2
-      sprites["namebox"].y = Graphics.height - window_height - 48
+      sprites["namebox"].y = Graphics.height - window_height - 48 + 12
     end
     sprites["namebox"].z = 1
+    sprites["namebox"].visible = (hide_namebox == 0)
     # Actual Name
     sprites["name"] = Sprite.new(viewport)
     sprites["name"].bitmap = Bitmap.new(Graphics.width, Graphics.height)
@@ -267,8 +254,10 @@ def pbTalk(text, opts={})
     sprites["name"].bitmap.clear
     text_x = sprites["namebox"].x + sprites["namebox"].bitmap.width / 2
     text_y = sprites["namebox"].y + 10
-    textpos = [[(hide_name == 0 ? name_tag : "???"), text_x, text_y, 2, getCharColor(name_tag, 1), Color.new(0, 0, 0), 1]]
-    pbDrawTextPositions(sprites["name"].bitmap, textpos)
+    char_color1 = getCharColor(speaker, 0, true)
+    char_color2 = getCharColor(speaker, 1, true)
+    textpositions = [[(hide_name == 0 ? name_tag : "???"), text_x, text_y, 2, char_color1, char_color2, 1]]
+    pbDrawTextPositions(sprites["name"].bitmap, textpositions)
   end
 
   if !shout

@@ -1,5 +1,7 @@
 class Player < Trainer
 
+    attr_accessor :inactive_party
+
     def inactive_party
         if !@inactive_party
             @inactive_party = []

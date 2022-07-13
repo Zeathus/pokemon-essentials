@@ -3,20 +3,7 @@ class PokeBattle_Battler
   # Effect per hit
   #=============================================================================
   def pbEffectsOnMakingHit(move,user,target)
-    # Boss Battle - No Damage
-    if move.category == 2
-      pbBossTrigger(@battle, target, :Category, move.category)
-      pbBossTrigger(@battle, target, :MoveGroup, [move, user])
-    end
-    pbBossTrigger(@battle, target, :Move, move.id)
     if target.damageState.calcDamage>0 && !target.damageState.substitute
-      # Boss Battle - Has Damage
-      pbBossTrigger(@battle, target, :Damaged, target.damageState.calcDamage)
-      if move.category != 2
-        pbBossTrigger(@battle, target, :Category, move.category)
-        pbBossTrigger(@battle, target, :MoveGroup, [move, user])
-      end
-      pbBossTrigger(@battle, target, :Type, move.type)
       # Target's ability
       if target.abilityActive?(true)
         oldHP = user.hp
@@ -34,7 +21,11 @@ class PokeBattle_Battler
         BattleHandlers.triggerTargetItemOnHit(target.item,user,target,move,@battle)
         user.pbItemHPHealCheck if user.hp<oldHP
       end
+      # Boss Battle - Has Damage
+      pbBoss.checkTriggers(@battle, :Damaged, target)
     end
+    # Boss Battle
+    pbBoss.checkTriggers(@battle, :Hit, target)
     if target.opposes?(user)
       # Rage
       if target.effects[PBEffects::Rage] && !target.fainted?

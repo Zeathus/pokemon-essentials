@@ -26,6 +26,7 @@ class PokeBattle_Battle
       next if exp <= 0
 
       exp = (exp*1.5).floor if trainerBattle?
+      exp = (exp*1.5).floor if $game_variables[WILD_AI_LEVEL] > 0
       exp = (exp*3/2).floor if pbActiveDrink == "exp"
 
       totalexp = (exp * 0.20).floor
@@ -286,6 +287,8 @@ class PokeBattle_Battle
       return
     end
     # Pokémon already knows the maximum number of moves; try to forget one to learn the new move
+    pbDisplay(_INTL("{2} was added to {1}'s move list!",pkmnName,moveName)) { pbSEPlay("Pkmn move learnt") }
+    return
     loop do
       pbDisplayPaused(_INTL("{1} wants to learn {2}, but it already knows {3} moves.",
         pkmnName, moveName, pkmn.moves.length.to_word))

@@ -51,6 +51,13 @@ def pbPartyMovePokemon(move)
 end
 
 def pbRemoveSpecies(species)
+  for i in 0...$Trainer.inactive_party.length
+    #pbMessage($Trainer.inactive_party[i].species.to_s + " == " + species.to_s)
+    if $Trainer.inactive_party[i].species==species
+      $Trainer.inactive_party-=[$Trainer.inactive_party[i]]
+      return true
+    end
+  end
   for i in 0...$Trainer.party.length
     if $Trainer.party[i].species==species
       $Trainer.party-=[$Trainer.party[i]]
@@ -62,7 +69,7 @@ end
 
 def pbHasInParty?(species)
   ret=false
-  for pkmn in $Trainer.party
+  for pkmn in $Trainer.inactive_party + $Trainer.party
     ret=true if pkmn.species==species
   end
   return ret
@@ -85,24 +92,6 @@ def pbHasStarter(species)
   
   return false
 end
-
-def pbHasJewelPokemon
-  pokemon = [
-    :SPOINK,
-    :DRAGONAIR,
-    :CLAMPERL,
-    :PALKIA
-  ]
-  
-  for i in pokemon
-    if pbHasInParty?(i)
-      return i
-    end
-  end
-  
-  return -1
-end
-
 
 
 

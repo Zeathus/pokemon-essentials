@@ -44,7 +44,7 @@ class Game_Map
 
   def setup(map_id)
     @map_id               = map_id
-    @map = load_data(sprintf("Data/Map%03d.rxdata",map_id))
+    @map = load_data(pbMapFile(map_id, Settings::COMPRESS_MAPS))
     tileset = $data_tilesets[@map.tileset_id]
     updateTileset
     @fog_ox               = 0
@@ -365,7 +365,7 @@ class Game_Map
       for i in [2, 1, 0]
         tile_id = data[x, y, i]
         terrain = GameData::TerrainTag.try_get(@terrain_tags[tile_id])
-        next if terrain.id == :None || terrain.ignore_passability
+        next if (terrain.id == :None && passable?(x,y,$game_player.direction,$game_player)) || terrain.ignore_passability
         next if !countBridge && terrain.bridge && $PokemonGlobal.bridge == 0
         next if tile_id && @priorities[tile_id] && @priorities[tile_id]>=3
         return terrain

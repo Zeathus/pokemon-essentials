@@ -620,8 +620,8 @@ class PokemonStorageScene
     @choseFromParty = false
     @command = command
     addBackgroundPlane(@sprites,"background","Storage/bg",@bgviewport)
-    @sprites["border"] = IconSprite.new(0,0,@borderviewport)
-    @sprites["border"].setBitmap("Graphics/Pictures/Storage/border")
+    @border = IconSprite.new(0,0,@borderviewport)
+    @border.setBitmap("Graphics/Pictures/Storage/border")
     @sprites["helptext"] = Window_UnformattedTextPokemon.newWithSize("",
       128, 442, 500, 128, @borderviewport)
     @sprites["helptext"].baseColor   = Color.new(252,252,252)
@@ -668,6 +668,7 @@ class PokemonStorageScene
   def pbCloseBox
     pbFadeOutAndHide(@sprites)
     pbDisposeSpriteHash(@sprites)
+    @border.dispose
     @markingbitmap.dispose if @markingbitmap
     @boxviewport.dispose
     @boxsidesviewport.dispose
@@ -1292,7 +1293,8 @@ class PokemonStorageScene
         pbPartySetArrow(@sprites["arrow"],@selection)
         pbUpdateOverlay(@selection,@storage.party)
       else
-        @selection = screen.pbStartScreen($Trainer.inactive_party,selected[1]-Settings::MAX_PARTY_SIZE)
+        @selection = screen.pbStartScreen($Trainer.inactive_party,selected[1] - Settings::MAX_PARTY_SIZE)
+        @selection += Settings::MAX_PARTY_SIZE
         pbPartySetArrow(@sprites["arrow"],@selection)
         pbUpdateOverlay(@selection,@storage.party)
       end
@@ -1456,7 +1458,7 @@ class PokemonStorageScene
     buttonbase = Color.new(248,248,248)
     buttonshadow = Color.new(80,80,80)
     pbDrawTextPositions(overlay,[
-       [_INTL("Party: {1}",(@storage.party.length rescue 0)),270,326,2,buttonbase,buttonshadow,1],
+       [_INTL("Party: {1}/{2}",(@storage.party.length rescue 0), ($Trainer.inactive_party.length rescue 0)),270,326,2,buttonbase,buttonshadow,1],
        [_INTL("Exit"),446,326,2,buttonbase,buttonshadow,1],
     ])
     pokemon = nil

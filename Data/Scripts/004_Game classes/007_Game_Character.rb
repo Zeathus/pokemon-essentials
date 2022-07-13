@@ -28,6 +28,7 @@ class Game_Character
   attr_accessor :step_anime
   attr_accessor :direction_fix
   attr_accessor :marker_id
+  attr_accessor :marker_text
 
   def initialize(map=nil)
     @map                       = map
@@ -79,10 +80,15 @@ class Game_Character
     @locked                    = false
     @prelock_direction         = 0
     @marker_id                 = -1
+    @marker_text               = nil
   end
 
   def marker_id
     return @marker_id ? @marker_id : -1
+  end
+
+  def marker_text
+    return @marker_text ? @marker_text : nil
   end
   
   def step_anime
@@ -317,7 +323,7 @@ class Game_Character
     ret = screen_y_ground
     this_map = (self.map.valid?(@x, @y)) ? [self.map, @x, @y] : $MapFactory.getNewMap(@x, @y)
     if this_map[0].swamp?(this_map[1], this_map[2])
-      y += 6
+      ret += 6
     end
     if jumping?
       if @jump_count > 0

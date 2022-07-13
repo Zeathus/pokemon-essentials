@@ -15,7 +15,7 @@ def pbGetOptimalRevive(pkmn)
 end
 
 def pbGetOptimalPotion(pkmn)
-  ret=0
+  ret=nil
   return ret if pkmn.hp>=pkmn.totalhp
   items = [
     [:FULLRESTORE,999],
@@ -34,7 +34,7 @@ def pbGetOptimalPotion(pkmn)
   
   for i in 0...items.length
     if $PokemonBag.pbQuantity(items[i][0])>0
-      if ret==0 || (pkmn.totalhp-pkmn.hp)<=items[i][1]
+      if !ret || (pkmn.totalhp-pkmn.hp)<=items[i][1]
         ret = items[i][0]
       end
     end
@@ -44,10 +44,9 @@ def pbGetOptimalPotion(pkmn)
 end
 
 def pbGetOptimalMedicine(pkmn)
-  ret=0
-  return ret if pkmn.status==0
-  items=[]
-  items[0]=[
+  ret=nil
+  return ret if pkmn.status==:NONE
+  all_items=[
     :FULLHEAL,
     :LAVACOOKIE,
     :OLDGATEAU,
@@ -58,23 +57,24 @@ def pbGetOptimalMedicine(pkmn)
     :LUMBERRYSOUP,
     :FULLRESTORE
   ]
-  items[PBStatuses::SLEEP]=[
+  items={}
+  items[:SLEEP]=[
     :AWAKENING,
     :CHESTOBERRY
   ]
-  items[PBStatuses::POISON]=[
+  items[:POISON]=[
     :ANTIDOTE,
     :PECHABERRY
   ]
-  items[PBStatuses::BURN]=[
+  items[:BURN]=[
     :BURNHEAL,
     :RAWSTBERRY
   ]
-  items[PBStatuses::PARALYSIS]=[
+  items[:PARALYSIS]=[
     :PARALYZEHEAL,
     :CHERIBERRY
   ]
-  items[PBStatuses::FROZEN]=[
+  items[:FROZEN]=[
     :ICEHEAL,
     :ASPEARBERRY
   ]
@@ -85,9 +85,9 @@ def pbGetOptimalMedicine(pkmn)
     end
   end
   
-  for i in 0...items[0].length
-    if $PokemonBag.pbQuantity(items[0][i])>0
-      return items[0][i]
+  for i in 0...all_items.length
+    if $PokemonBag.pbQuantity(all_items[i])>0
+      return all_items[i]
     end
   end
   

@@ -10,7 +10,7 @@ end
 def pbShowSpeciesPicture(specie,message="",playcry=true)
   battlername=sprintf("Graphics/Pokemon/Front/%s",specie.to_s)
   bitmap=pbResolveBitmap(battlername)
-  pbPlayCry(specie) if playcry
+  GameData::Species.play_cry(specie, 100, 100) if playcry
   if bitmap # to prevent crashes
     iconwindow=PictureWindow.new(bitmap)
     iconwindow.x=(Graphics.width/2)-(iconwindow.width/2)

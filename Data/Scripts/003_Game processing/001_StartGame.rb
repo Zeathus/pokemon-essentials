@@ -12,7 +12,7 @@ module Game
     pbLoadBattleAnimations
     GameData.load_all
     pbLoadDialog
-    map_file = format('Data/Map%03d.rxdata', $data_system.start_map_id)
+    map_file = pbMapFile($data_system.start_map_id, Settings::COMPRESS_MAPS)
     if $data_system.start_map_id == 0 || !pbRgssExists?(map_file)
       raise _INTL('No starting position was set in the map editor.')
     end

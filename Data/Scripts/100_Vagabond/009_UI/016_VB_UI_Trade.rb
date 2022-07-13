@@ -16,20 +16,21 @@ class TradeAdapter
   end
 
   def getDisplayName(item)
-    itemname=PBItems.getName(item)
-    if pbIsMachine?(item)
-      machine=$ItemData[item][ITEMMACHINE]
-      itemname=_INTL("{1} {2}",itemname,PBMoves.getName(machine))
+    itemname=GameData::Item.get(item).name
+    if GameData::Item.get(item).is_machine?
+      machine=GameData::Item.get(item).move
+      itemname=_INTL("{1} {2}",itemname,GameData::Move.get(machine).name)
     end
     return itemname
   end
 
   def getName(item)
-    return PBItems.getName(item)
+    return nil if item == 0
+    return GameData::Item.get(item).name
   end
 
   def getDescription(item)
-    return pbGetMessage(MessageTypes::ItemDescriptions,item)
+    return GameData::Item.get(item).description
   end
 
   def addItem(item)
@@ -223,7 +224,7 @@ class Window_Trade < Window_DrawableCommand
     @stock=stock
     @adapter=adapter
     super(x,y,width,height,viewport)
-    @selarrow=AnimatedBitmap.new("Graphics/Pictures/tradeSel")
+    @selarrow=AnimatedBitmap.new("Graphics/Pictures/Trade/cursor")
     @baseColor=Color.new(88,88,80)
     @shadowColor=Color.new(168,184,184)
     self.windowskin=nil
@@ -242,7 +243,7 @@ class Window_Trade < Window_DrawableCommand
     rect=drawCursor(index,rect)
     ypos=rect.y
     if index==count-1
-      textpos.push([_INTL("CANCEL"),rect.x,ypos+2,false,
+      textpos.push([_INTL("CANCEL"),rect.x,ypos-4,false,
          self.baseColor,self.shadowColor])
     else
       #item=@stock[index]
@@ -250,7 +251,7 @@ class Window_Trade < Window_DrawableCommand
       #qty=@adapter.getDisplayPrice(item)
       #sizeQty=self.contents.text_size(qty).width
       #xQty=rect.x+rect.width-sizeQty-2-16
-      textpos.push([itemname,rect.x,ypos+2,false,self.baseColor,self.shadowColor])
+      textpos.push([itemname,rect.x,ypos-4,false,self.baseColor,self.shadowColor])
       #textpos.push([qty,xQty,ypos+2,false,self.baseColor,self.shadowColor])
     end
     pbDrawTextPositions(self.contents,textpos)
@@ -267,43 +268,68 @@ class TradeScene
 
   def pbRefresh
     if !@subscene
+      @sprites["itemhints"].bitmap.clear
       itemwindow=@sprites["itemwindow"]
-      #@sprites["icon"].item=itemwindow.item
-      @sprites["itemtextwindow"].text=(itemwindow.item==0) ? _INTL("Quit shopping.") :
-         (itemwindow.item[3] ? itemwindow.item[3] : @adapter.getDescription(itemwindow.item[2][0]))
-      itemwindow.refresh
+      textpos=[]
+      @sprites["itemtextwindow"].text=(itemwindow.item==0) ? _INTL("Exit menu.") :
+        (itemwindow.item[3] ? itemwindow.item[3] : @adapter.getDescription(itemwindow.item[2][0]))
       for i in 0..2
         itemid = itemwindow.item[1][i * 2]
+        itemid = nil if itemid == 0
         quantity = itemwindow.item[1][i * 2 + 1]
         if itemid
+          @sprites[_INTL("icon{1}",i+1)].visible = true
+          @sprites[_INTL("icon{1}",i+1)].item = itemid
           if itemid == :PAY
             @sprites[_INTL("item{1}text",i+1)].text = 
               _INTL("${1}", pbFormatNumber(quantity))
           else
             @sprites[_INTL("item{1}text",i+1)].text = 
-              _INTL("{1}x {2}", quantity, @adapter.getName(itemid))
+              _INTL("{1} ({2}/{3})", @adapter.getName(itemid), $PokemonBag.pbQuantity(itemid), quantity)
+          end
+          itemhint = pbItemHint(itemid)
+          if itemhint
+            textpos.push([
+              itemhint,@item_x-24,@item_1_y+18+i*90,0,Color.new(80, 80, 88),Color.new(160, 160, 168),false
+            ])
           end
         else
+          @sprites[_INTL("icon{1}",i+1)].visible = false
+          @sprites[_INTL("icon{1}",i+1)].item = nil
+          @sprites[_INTL("item{1}text",i+1)].text = ""
+        end
+        if (itemwindow.item==0)
+          @sprites[_INTL("icon{1}",i+1)].visible = false
           @sprites[_INTL("icon{1}",i+1)].item = nil
           @sprites[_INTL("item{1}text",i+1)].text = ""
         end
       end
       for i in 0..1
         itemid = itemwindow.item[2][i * 2]
+        itemid = nil if itemid == 0
         quantity = itemwindow.item[2][i * 2 + 1]
         if itemid
+          @sprites[_INTL("icon{1}",i+4)].visible = true
+          @sprites[_INTL("icon{1}",i+4)].item = itemid
           if itemid == :GET
             @sprites[_INTL("item{1}text",i+4)].text = 
               _INTL("${1}", pbFormatNumber(quantity))
           else
             @sprites[_INTL("item{1}text",i+4)].text = 
-              _INTL("{1}x {2}", quantity, @adapter.getName(itemid))
+              _INTL("{1} ({2}/{3})", @adapter.getName(itemid), $PokemonBag.pbQuantity(itemid), quantity)
           end
         else
+          @sprites[_INTL("icon{1}",i+4)].visible = false
+          @sprites[_INTL("icon{1}",i+4)].item = nil
+          @sprites[_INTL("item{1}text",i+4)].text = ""
+        end
+        if (itemwindow.item==0)
+          @sprites[_INTL("icon{1}",i+4)].visible = false
           @sprites[_INTL("icon{1}",i+4)].item = nil
           @sprites[_INTL("item{1}text",i+4)].text = ""
         end
       end
+      pbDrawTextPositions(@sprites["itemhints"].bitmap, textpos)
     end
     #@sprites["moneywindow"].text=_INTL("Money:\n<r>${1}",@adapter.getMoney())
   end
@@ -317,32 +343,39 @@ class TradeScene
     @adapter=adapter
     @sprites={}
     @sprites["background"]=IconSprite.new(0,0,@viewport)
-    @sprites["background"].setBitmap("Graphics/Pictures/tradeScreen")
-    @sprites["icon1"]=ItemIconSprite.new(266,38,-1,@viewport)
-    @sprites["icon2"]=ItemIconSprite.new(266,38+48,-1,@viewport)
-    @sprites["icon3"]=ItemIconSprite.new(266,38+96,-1,@viewport)
-    @sprites["icon4"]=ItemIconSprite.new(266,196,-1,@viewport)
-    @sprites["icon5"]=ItemIconSprite.new(266,196+48,-1,@viewport)
+    @sprites["background"].setBitmap("Graphics/Pictures/Trade/bg")
+    @item_x = 314
+    @item_text_x = @item_x + 24
+    @item_1_y = 52
+    @item_2_y = 348
+    @sprites["icon1"]=ItemIconSprite.new(@item_x,@item_1_y,-1,@viewport)
+    @sprites["icon2"]=ItemIconSprite.new(@item_x,@item_1_y+90,-1,@viewport)
+    @sprites["icon3"]=ItemIconSprite.new(@item_x,@item_1_y+180,-1,@viewport)
+    @sprites["icon4"]=ItemIconSprite.new(@item_x,@item_2_y,-1,@viewport)
+    @sprites["icon5"]=ItemIconSprite.new(@item_x,@item_2_y+60,-1,@viewport)
     @sprites["item1text"]=Window_UnformattedTextPokemon.new("")
     @sprites["item2text"]=Window_UnformattedTextPokemon.new("")
     @sprites["item3text"]=Window_UnformattedTextPokemon.new("")
     @sprites["item4text"]=Window_UnformattedTextPokemon.new("")
     @sprites["item5text"]=Window_UnformattedTextPokemon.new("")
+    @sprites["itemhints"]=Sprite.new(@viewport)
+    @sprites["itemhints"].bitmap = Bitmap.new(Graphics.width,Graphics.height)
+    pbSetSmallFont(@sprites["itemhints"].bitmap)
     pbPrepareWindow(@sprites["item1text"])
     pbPrepareWindow(@sprites["item2text"])
     pbPrepareWindow(@sprites["item3text"])
     pbPrepareWindow(@sprites["item4text"])
     pbPrepareWindow(@sprites["item5text"])
-    @sprites["item1text"].x=230+48
-    @sprites["item1text"].y=10
-    @sprites["item2text"].x=230+48
-    @sprites["item2text"].y=10+48
-    @sprites["item3text"].x=230+48
-    @sprites["item3text"].y=10+96
-    @sprites["item4text"].x=230+48
-    @sprites["item4text"].y=168
-    @sprites["item5text"].x=230+48
-    @sprites["item5text"].y=168+48
+    @sprites["item1text"].x=@item_text_x
+    @sprites["item1text"].y=@item_1_y - 32
+    @sprites["item2text"].x=@item_text_x
+    @sprites["item2text"].y=@item_1_y - 32 + 90
+    @sprites["item3text"].x=@item_text_x
+    @sprites["item3text"].y=@item_1_y - 32 + 180
+    @sprites["item4text"].x=@item_text_x
+    @sprites["item4text"].y=@item_2_y - 32
+    @sprites["item5text"].x=@item_text_x
+    @sprites["item5text"].y=@item_2_y - 32 + 60
     for i in 1..5
       @sprites[_INTL("item{1}text",i)].width = 300
       @sprites[_INTL("item{1}text",i)].height = 128
@@ -353,14 +386,14 @@ class TradeScene
     BuyAdapter.new(adapter)
     winAdapter=ItemTradeAdapter.new(adapter)
     @sprites["itemwindow"]=Window_Trade.new(stock,winAdapter,
-       -12,12,330+16,Graphics.height-126)#Graphics.width-316-16,12,330+16,Graphics.height-126)
+       -12,12,264,Graphics.height-126)#Graphics.width-316-16,12,330+16,Graphics.height-126)
     @sprites["itemwindow"].viewport=@viewport
     @sprites["itemwindow"].index=0
     @sprites["itemwindow"].refresh
     @sprites["itemtextwindow"]=Window_UnformattedTextPokemon.new("")
     pbPrepareWindow(@sprites["itemtextwindow"])
     @sprites["itemtextwindow"].x=40
-    @sprites["itemtextwindow"].y=Graphics.height-96-16
+    @sprites["itemtextwindow"].y=Graphics.height-96-14
     @sprites["itemtextwindow"].width=Graphics.width-64
     @sprites["itemtextwindow"].height=128
     @sprites["itemtextwindow"].baseColor=Color.new(248,248,248)
@@ -377,9 +410,11 @@ class TradeScene
     @buying=true
     pbRefresh
     Graphics.frame_reset
+    pbFadeInAndShow(@sprites) { update }
   end
 
   def pbEndBuyScene
+    pbFadeOutAndHide(@sprites) { update }
     pbDisposeSpriteHash(@sprites)
     @viewport.dispose
     # Scroll left after showing screen
@@ -499,50 +534,7 @@ class TradeScene
          self.update
          if itemwindow.item!=olditem
            #@sprites["icon"].item=itemwindow.item
-           @sprites["itemtextwindow"].text=(itemwindow.item==0) ? _INTL("Exit menu.") :
-              (itemwindow.item[3] ? itemwindow.item[3] : @adapter.getDescription(itemwindow.item[2][0]))
-           for i in 0..2
-            itemid = itemwindow.item[1][i * 2]
-            quantity = itemwindow.item[1][i * 2 + 1]
-            if itemid
-              @sprites[_INTL("icon{1}",i+1)].item = itemid
-              if itemid == :PAY
-                @sprites[_INTL("item{1}text",i+1)].text = 
-                  _INTL("${1}", pbFormatNumber(quantity))
-              else
-                @sprites[_INTL("item{1}text",i+1)].text = 
-                  _INTL("{1}x {2}", quantity, @adapter.getName(itemid))
-              end
-            else
-              @sprites[_INTL("icon{1}",i+1)].item = nil
-              @sprites[_INTL("item{1}text",i+1)].text = ""
-            end
-            if (itemwindow.item==0)
-              @sprites[_INTL("icon{1}",i+1)].item = nil
-              @sprites[_INTL("item{1}text",i+1)].text = ""
-            end
-          end
-          for i in 0..1
-            itemid = itemwindow.item[2][i * 2]
-            quantity = itemwindow.item[2][i * 2 + 1]
-            if itemid
-              @sprites[_INTL("icon{1}",i+4)].item = itemid
-              if itemid == :GET
-                @sprites[_INTL("item{1}text",i+4)].text = 
-                  _INTL("${1}", pbFormatNumber(quantity))
-              else
-                @sprites[_INTL("item{1}text",i+4)].text = 
-                  _INTL("{1}x {2}", quantity, @adapter.getName(itemid))
-              end
-            else
-              @sprites[_INTL("icon{1}",i+4)].item = nil
-              @sprites[_INTL("item{1}text",i+4)].text = ""
-            end
-            if (itemwindow.item==0)
-              @sprites[_INTL("icon{1}",i+4)].item = nil
-              @sprites[_INTL("item{1}text",i+4)].text = ""
-            end
-          end
+           pbRefresh
          end
          if Input.trigger?(Input::B)
            return 0
@@ -647,14 +639,6 @@ end
 
 
 def pbItemTrade(stock,speech=nil)
-  for i in 0...stock.length
-    for j in 0...stock[i][1].length
-      stock[i][1][j]=getID(PBItems,stock[i][1][j]) if !stock[i][1][j].is_a?(Integer)
-    end
-    for j in 0...stock[i][2].length
-      stock[i][2][j]=getID(PBItems,stock[i][2][j]) if !stock[i][2][j].is_a?(Integer)
-    end
-  end
   #stock.compact!
   scene=TradeScene.new
   screen=TradeScreen.new(scene,stock)

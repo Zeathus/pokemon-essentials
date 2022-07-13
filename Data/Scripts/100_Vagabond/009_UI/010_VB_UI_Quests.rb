@@ -78,7 +78,7 @@ class QuestBarSprite < Sprite
     if @quest
       self.bitmap.blt(0,0,@barbitmap,
         Rect.new(0,@selected ? 38 : 0,464 - @crop,38))
-      textpos = [[@quest.name,50,6,0,
+      textpos = [[@quest.display_name,50,6,0,
         Color.new(250,250,250),Color.new(100,60,50)],
                  [@quest.location,458,6,1,
         Color.new(250,250,250),Color.new(100,60,50)]]
@@ -115,15 +115,15 @@ class QuestBarSprite < Sprite
       step = @quest.steps.length - 1
     end
     if @quest.status > 0
-      lines = pbLineBreakText(content,@quest.desc.upcase,192)
+      lines = pbLineBreakText(content,@quest.description.upcase,192)
       for i in 0...lines.length
         s = lines[i]
         textpos.push([s,10,18+i*14,0,white,shadow])
       end
       textpos.push([@quest.money.to_s,38,152,0,white,shadow])
       textpos.push([_INTL("{1}%",@quest.exp.to_s),148,152,0,white,shadow])
-      if @quest.item
-        if @quest.hideitem
+      if @quest.items.length > 0
+        if @quest.hide_items
           imagepos.push(
             ["Graphics/Items/000",
              12,184,0,0,48,48,24,24])
@@ -131,15 +131,15 @@ class QuestBarSprite < Sprite
             [["SECRET TO EVERYBODY",40,182,0,white,shadow]],false)
         else
           imagepos.push(
-            [sprintf("Graphics/Items/%s",@quest.item.to_s),
+            [sprintf("Graphics/Items/%s",@quest.items[0][0].to_s),
              12,184,0,0,48,48,24,24])
           pbDrawTextPositions(content,
-            [[GameData::Item.get(@quest.item).name.upcase,40,182,0,white,shadow]],false)
+            [[GameData::Item.get(@quest.items[0][0]).name.upcase,40,182,0,white,shadow]],false)
         end
       end
       offset = 0
       if @quest.status == 2
-        lines = pbLineBreakText(content,@quest.complete.upcase,220)
+        lines = pbLineBreakText(content,@quest.done.upcase,220)
         for s in lines
           content.fill_rect(210,22+offset,228,20,color)
           content.fill_rect(208,24+offset,232,16,color)
@@ -167,7 +167,15 @@ class QuestBarSprite < Sprite
         offset += 10
       end
     else
-      
+      text = "The location of this quest is unknown.".upcase
+      if @quest.full_location
+        text = _INTL("This quest can be found {1}.".upcase, @quest.full_location.upcase)
+      end
+      lines = pbLineBreakText(content, text, 192)
+      for i in 0...lines.length
+        s = lines[i]
+        textpos.push([s,10,18+i*14,0,white,shadow])
+      end
     end
     
     pbDrawTextPositions(content,textpos,false)
@@ -264,22 +272,15 @@ end
 def pbShowQuests(show_quest=nil)
   main_quests=[]
   side_quests=[]
-  if !$game_variables[QUEST_MAIN].is_a?(Array)
-    $game_variables[QUEST_MAIN]=[]
-  end
-  if !$game_variables[QUEST_ARRAY].is_a?(Array)
-    $game_variables[QUEST_ARRAY]=[]
-  end
-  for quest in $game_variables[QUEST_MAIN]
+  $quests.each { |quest|
     if quest.status>=0 || $DEBUG
-      main_quests.push(quest)
+      if quest.type == PBQuestType::Main
+        main_quests.push(quest)
+      else
+        side_quests.push(quest)
+      end
     end
-  end
-  for quest in $game_variables[QUEST_ARRAY]
-    if quest.status>=0 || $DEBUG
-      side_quests.push(quest)
-    end
-  end
+  }
   main_quests = pbSortQuests(main_quests)
   side_quests = pbSortQuests(side_quests)
   if $game_variables[CURRENTMINIQUEST].is_a?(MiniQuest)
@@ -557,7 +558,7 @@ def pbSortQuests(list)
       (a.status<0 ? 3 : i[a.status])<=>(b.status<0 ? 3 : i[b.status])}
   when 1 # Alphabetical
     list.sort!{|a,b|
-      a.name<=>b.name}
+      a.display_name<=>b.display_name}
   when 2 # Location
     list.sort!{|a,b|
       a.location<=>b.location}

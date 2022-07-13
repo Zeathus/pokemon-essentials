@@ -46,13 +46,13 @@ class Game_Player < Game_Character
   def move_generic(dir, turn_enabled = true)
     turn_generic(dir, true) if turn_enabled
     if !$PokemonTemp.encounterTriggered
+      x_offset = (dir == 4) ? -1 : (dir == 6) ? 1 : 0
+      y_offset = (dir == 8) ? -1 : (dir == 2) ? 1 : 0
+      if pbStairs(x_offset,y_offset)
+        check_event_trigger_touch(dir)
+        return
+      end
       if can_move_in_direction?(dir)
-        x_offset = (dir == 4) ? -1 : (dir == 6) ? 1 : 0
-        y_offset = (dir == 8) ? -1 : (dir == 2) ? 1 : 0
-        if pbStairs(x_offset,y_offset)
-          check_event_trigger_touch(dir)
-          return
-        end
         return if pbLedge(x_offset, y_offset)
         return if pbEndSurf(x_offset, y_offset)
         turn_generic(dir, true)

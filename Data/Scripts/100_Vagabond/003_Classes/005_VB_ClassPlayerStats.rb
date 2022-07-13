@@ -49,27 +49,6 @@ class PlayerStats
   
   def update
     $game_switches[TAKEN_STEP]=false
-    return if $game_variables[QUEST_ARRAY]==0
-    quests = $game_variables[QUEST_ARRAY]
-    if battles_won >= 10 && pbGetQuestStatus(:NoviceBattler) != 2
-      pbFinishQuest(:NoviceBattler)
-    end
-    if battles_won >= 50 && pbGetQuestStatus(:IntermediateBattler) != 2
-      pbFinishQuest(:IntermediateBattler)
-    end
-    if battles_won >= 150 && pbGetQuestStatus(:VeteranBattler) != 2
-      pbFinishQuest(:VeteranBattler)
-    end
-    if pokemon_caught >= 10 && pbGetQuestStatus(:NoviceCollector) != 2
-      pbFinishQuest(:NoviceCollector)
-    end
-    if pokemon_caught >= 25 && pbGetQuestStatus(:IntermediateCollector) != 2
-      pbFinishQuest(:IntermediateCollector)
-    end
-    if pokemon_caught >= 50 && pbGetQuestStatus(:VeteranCollector) != 2
-      pbFinishQuest(:VeteranCollector)
-    end
-    pbCheckQuestUnlocks
   end
   
 end

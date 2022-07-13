@@ -114,6 +114,7 @@ class PokeBattle_Battler
     end
     # Check for end of primordial weather
     @battle.pbEndPrimordialWeather
+    pbBoss.checkTriggers(@battle, :Faint, self)
     return true
   end
 

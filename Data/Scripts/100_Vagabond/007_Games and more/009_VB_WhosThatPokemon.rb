@@ -317,7 +317,7 @@ class Game_Guess_Pokemon
       @bitmaps.push(self.rotate_180(self.current_pokemon_bitmap))
     end
   end
-
+  
   def create_round(round)
     species_keys = GameData::Species::DATA.keys
     species_data = GameData::Species.get(species_keys[rand(species_keys.length)])
@@ -331,12 +331,21 @@ class Game_Guess_Pokemon
       :MINUN_R,
       :SUNFLORA_R
     ]
-    while species_data.form != 0 || exclude.include?(species_data.species)
-      species_data = GameData::Species.get(species_keys[rand(species_keys.length)])
-    end
-    species = species_data.species
+    while true
+      begin
+        while species_data.form != 0 || exclude.include?(species_data.species)
+          species_data = GameData::Species.get(species_keys[rand(species_keys.length)])
+        end
+        species = species_data.species
 
-    @bitmaps.push(self.get_species_bitmap(species))
+        @bitmaps.push(self.get_species_bitmap(species))
+        break
+      rescue
+        msg = "Failed to get bitmap for " + species.to_s
+        echoln msg
+        species_data = GameData::Species.get(species_keys[rand(species_keys.length)])
+      end
+    end
 
     # First few round show off each transformation
     if round == 2
@@ -389,35 +398,55 @@ class Game_Guess_Pokemon
   end
 
   def guess_pokemon(species)
-    if @round > 20 && @lives > 1
-      loop do
-        pbMessage("Are you ready to guess?\\ch[1,0,Yes,Go All In]")
-        if $game_variables[1] == 1
-          if @lives <= 1
-            pbMessage("You can't Go All In with just one life left.")
-          else
-            pbMessage("Are you sure you want to Go All In?\\ch[1,0,Yes,No]")
-            if $game_variables[1] == 0
-              pbMessage("It's all or nothing, good luck.")
-              @all_in = 1
+    while true
+      if @round > 20 && @lives > 1
+        if @all_in == 1
+          loop do
+            pbMessage("Are you ready to guess?\\ch[1,0,Yes,Go All In]")
+            if $game_variables[1] == 1
+              if @lives <= 1
+                pbMessage("You can't Go All In with just one life left.")
+              else
+                pbMessage("Are you sure you want to Go All In?\\ch[1,0,Yes,No]")
+                if $game_variables[1] == 0
+                  pbMessage("It's all or nothing, good luck.")
+                  @all_in = 1
+                  break
+                end
+              end
+            else
               break
             end
           end
-        else
-          break
         end
-      end
-      guess = pbEnterText("Who's that Pokémon?", 1, 12).downcase
-      species_data = GameData::Species.get(species)
-      if guess == species_data.name.downcase || guess == species.to_s.downcase
-        return true
-      end
-    else
-      pbMessage("Are you ready to guess?\\ch[1,0,Yes]")
-      guess = pbEnterText("Who's that Pokémon?", 1, 12).downcase
-      species_data = GameData::Species.get(species)
-      if guess == species_data.name.downcase || guess == species.to_s.downcase
-        return true
+        guess = pbEnterText("Who's that Pokémon?", 1, 12).downcase
+        species_data = GameData::Species.get(species)
+        for s in species_keys = GameData::Species::DATA.keys
+          sd = GameData::Species.get(s)
+          if guess == sd.name.downcase || guess == s.to_s.downcase
+            if guess == species_data.name.downcase || guess == species.to_s.downcase
+              return true
+            else
+              return false
+            end
+          end
+        end
+        pbMessage("I do not believe there is a Pokemon with that name. Please try another.")
+      else
+        pbMessage("Are you ready to guess?\\ch[1,0,Yes]")
+        guess = pbEnterText("Who's that Pokémon?", 1, 12).downcase
+        species_data = GameData::Species.get(species)
+        for s in species_keys = GameData::Species::DATA.keys
+          sd = GameData::Species.get(s)
+          if guess == sd.name.downcase || guess == s.to_s.downcase
+            if guess == species_data.name.downcase || guess == species.to_s.downcase
+              return true
+            else
+              return false
+            end
+          end
+        end
+        pbMessage("I do not believe there is a Pokemon with that name. Please try another.")
       end
     end
     return false
@@ -469,6 +498,12 @@ class Game_Guess_Pokemon
     @sprites["hud"] = Sprite.new(@viewport)
     @sprites["hud"].bitmap = Bitmap.new(Graphics.width, Graphics.height)
 
+    pbMessage("Welcome to...")
+    pbMessage("WHO'S!")
+    pbMessage("THAT!")
+    pbMessage("POKEMON!")
+    pbMessage("The first five rounds we will show different ways the image can be distorted. Then we go to the real thing!")
+
     while @round <= 100
       @lives_lost_this_round = 0
       @all_in = 0
@@ -483,13 +518,54 @@ class Game_Guess_Pokemon
         @sprites["pokemon"].opacity = i * 4
         self.update
       end
+
+      if @round == 1
+        pbMessage("This is a Pokemon without any distortions.")
+      elsif @round == 2
+        pbMessage("This Pokemon has been flipped vertically.\nThey can also be flipped horizontally.")
+      elsif @round == 3
+        pbMessage("This Pokemon has been rotated 90 degress. They can be rotated 90, 180 or 270 degrees.")
+      elsif @round == 4
+        pbMessage("This Pokemon has been jumbled into 4 different squares.")
+        pbMessage("Each square is shown with a background color to be easily distinguishable.")
+      elsif @round == 5
+        pbMessage("This Pokemon has been jumbled into 9 different squares, but each square has been randomly flipped individually.")
+        pbMessage("You won't see this distortion until the later rounds.")
+      elsif @round == 6
+        pbMessage("Now begins the real part of the show.\nAll Pokemon from here on are silhouettes!")
+        pbMessage("The following Pokemon are without any distiortions.")
+      elsif @round == 10
+        pbMessage("The following Pokemon will be rotated or flipped randomly.")
+      elsif @round == 20
+        pbMessage("The following Pokemon will be jumbled into 4 squares.")
+      elsif @round == 25
+        pbMessage("The following Pokemon will be jumbled into 9 squares.")
+      elsif @round == 30
+        pbMessage("The following Pokemon will be jumbled into 4 squares, then rotated or flipped.")
+      elsif @round == 35
+        pbMessage("The following Pokemon will be jumbled into 4 squares, but each square can be flipped individually.")
+      elsif @round == 40
+        pbMessage("The following Pokemon will be jumbled into 4 invididually flipped squares, then rotated or flipped.")
+      elsif @round == 45
+        pbMessage("The following Pokemon will be jubmled into 9 individually flipped squares.")
+      elsif @round == 50
+        pbMessage("The following Pokemon will be jumbled into 9 individually flipped squares, then rotated or flipped.")
+      elsif @round == 70
+        pbMessage("The following Pokemon will be jumbled into 9 individually flipped squares, but with no square colors.")
+      elsif @round == 90
+        pbMessage("The following Pokemon will be jumbled into 4 squares, then the new image is jumbled into 9 squares.")
+      elsif @round == 100
+        pbMessage("It's the final round! I have never seen anyone get this far, and neither did I think anyone would!")
+        pbMessage("This final Pokemon is jumbled into 4 flipped squares, then 9 flipped squares, and finally rotated or flipped.")
+      end
+
       while !guess_pokemon(species)
         pbMessage("Wrong...")
         @lives_lost_this_round += 1
         @lives -= 1
-        if @all_in > 0 && @lives > 1
+        if @all_in > 0 && @lives > 0
           pbMessage("You went all in, and this is where you confidence got you...")
-          @lives = 0 
+          @lives = 0
         end
         self.refresh_hud
         if @lives <= 0

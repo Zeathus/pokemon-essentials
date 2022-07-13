@@ -63,6 +63,7 @@ class PokeBattle_Battler
     PBDebug.logonerr{
       pbUseMove(choice,choice[2]==@battle.struggle)
     }
+    pbBoss.checkTriggers(@battle, :MoveUsed, self)
     @battle.pbJudge
     # Update priority order
     @battle.pbCalculatePriority if Settings::RECALCULATE_TURN_ORDER_AFTER_SPEED_CHANGES
@@ -649,6 +650,13 @@ class PokeBattle_Battler
         move.pbCalcDamage(user,b,targets.length)   # Stored in damageState.calcDamage
         # Lessen damage dealt because of False Swipe/Endure/etc.
         move.pbReduceDamage(user,b)   # Stored in damageState.hpLost
+      end
+    end
+    # Show critical hit animation if applicable
+    targets.each do |b|
+      if b.damageState.critical
+        @battle.scene.pbCriticalAnimation(user)
+        break
       end
     end
     # Show move animation (for this hit)

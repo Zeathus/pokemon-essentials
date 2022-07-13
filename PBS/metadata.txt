@@ -78,6 +78,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,8,13
+SnapEdges = true
 MapSize = 1,111
 #-------------------------------
 [010]
@@ -95,16 +96,18 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,4,11
+SnapEdges = true
 BattleBack = woodland
 MapSize = 2,1111
 #-------------------------------
 [012]
-# Mica Town
+# Mica District
 Outdoor = true
 ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,8,10
+SnapEdges = true
 BattleBack = mountain_grass
 MapSize = 1,1
 #-------------------------------
@@ -173,16 +176,17 @@ MapPosition = 0,8,9
 MapSize = 1,1
 #-------------------------------
 [021]
-# Feldspar Town
+# Feldspar District
 Outdoor = true
 ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,8,8
+SnapEdges = true
 MapSize = 1,1
 #-------------------------------
 [022]
-# Feldspar Passage
+# Lapis Lazuli Park
 Outdoor = false
 ShowArea = false
 Bicycle = true
@@ -222,6 +226,7 @@ MapSize = 2,11
 Outdoor = true
 ShowArea = true
 MapPosition = 0,16,5
+SnapEdges = true
 MapSize = 2,11
 #-------------------------------
 [048]
@@ -235,13 +240,38 @@ MapPosition = 0,8,9
 Outdoor = false
 BattleBack = gpo
 #-------------------------------
+[058]
+# Halcyon Clearing
+SnapEdges = true
+#-------------------------------
+[061]
+# Halcyon Forest
+SnapEdges = true
+#-------------------------------
 [062]
 # Breccia Trail
 Outdoor = true
 ShowArea = true
 MapPosition = 0,2,11
+SnapEdges = true
 BattleBack = field
 MapSize = 2,11
+#-------------------------------
+[063]
+# Halcyon Hollow
+SnapEdges = true
+#-------------------------------
+[065]
+# Lapis Lazuli Gym
+SnapEdges = true
+#-------------------------------
+[066]
+# Maintenance Room 1
+SnapEdges = true
+#-------------------------------
+[067]
+# Maintenance Room 2
+SnapEdges = true
 #-------------------------------
 [072]
 # Quartz Passing
@@ -265,6 +295,10 @@ Outdoor = true
 ShowArea = true
 MapPosition = 0,4,7
 #-------------------------------
+[104]
+# Feldspar Gym 3F
+SnapEdges = true
+#-------------------------------
 [106]
 # Canjon Valley
 Outdoor = true
@@ -283,7 +317,56 @@ MapSize = 1,1
 # Lazuli District
 Outdoor = true
 MapPosition = 0,16,4
+SnapEdges = true
 MapSize = 2,11
+#-------------------------------
+[116]
+# Crosswoods Cave Ruins
+BattleBack = ruins
+#-------------------------------
+[121]
+# Crosswoods Cave Chamber
+BattleBack = ruins_boss
+#-------------------------------
+[118]
+# Crosswoods Cave Ruins
+BattleBack = ruins
+#-------------------------------
+[119]
+# Crosswoods Cave Ruins
+BattleBack = ruins
+#-------------------------------
+[122]
+# Crosswoods Cave Chamber
+BattleBack = ruins_boss
+#-------------------------------
+[124]
+# Crosswoods Cave Ruins
+BattleBack = ruins
+#-------------------------------
+[125]
+# Crosswoods Cave Chamber
+BattleBack = ruins_boss
+#-------------------------------
+[145]
+# Crosswoods Cave Ruins
+BattleBack = ruins
+#-------------------------------
+[230]
+# Crosswoods Cave Chamber
+BattleBack = ruins_boss
+#-------------------------------
+[146]
+# Crosswoods Cave Ruins
+BattleBack = ruins
+#-------------------------------
+[147]
+# Crosswoods Cave Chamber
+BattleBack = ruins_boss
+#-------------------------------
+[141]
+# Maintenance Room 3
+SnapEdges = true
 #-------------------------------
 [149]
 # Uncanny Valley
@@ -346,6 +429,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,15
+SnapEdges = true
 BattleBack = woodland
 MapSize = 1,1
 #-------------------------------
@@ -356,6 +440,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,15
+SnapEdges = true
 BattleBack = woodland
 MapSize = 1,1
 #-------------------------------
@@ -366,6 +451,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,15
+SnapEdges = true
 BattleBack = woodland
 MapSize = 1,1
 #-------------------------------
@@ -376,6 +462,7 @@ ShowArea = true
 Bicycle = true
 BicycleAlways = false
 MapPosition = 0,20,14
+SnapEdges = true
 BattleBack = woodland
 MapSize = 1,1
 #-------------------------------

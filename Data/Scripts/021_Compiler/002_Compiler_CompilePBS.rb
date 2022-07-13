@@ -69,10 +69,10 @@ module Compiler
       record.push(csvInt!(thisline,lineno))
       record.push(csvEnumFieldOrInt!(thisline,hashenum,"",sprintf("(line %d)",lineno)))
       record.push(csvInt!(thisline,lineno))
-      if !pbRgssExists?(sprintf("Data/Map%03d.rxdata",record[0]))
+      if !pbRgssExists?(pbMapFile(record[0]))
         print _INTL("Warning: Map {1}, as mentioned in the map connection data, was not found.\r\n{2}",record[0],FileLineData.linereport)
       end
-      if !pbRgssExists?(sprintf("Data/Map%03d.rxdata",record[3]))
+      if !pbRgssExists?(pbMapFile(record[3]))
         print _INTL("Warning: Map {1}, as mentioned in the map connection data, was not found.\r\n{2}",record[3],FileLineData.linereport)
       end
       case record[1]

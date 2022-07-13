@@ -8,7 +8,11 @@ end
 # Use for getting pokemon information and stats only
 # Invalid result may cause problems if trying to modify pokemon
 def pbGetFirstSpecies(species)
-  species=getID(PBSpecies,species) if species.is_a?(Symbol)
+  for i in 0...$Trainer.inactive_party.length
+    if $Trainer.inactive_party[i].species==species
+      return $Trainer.inactive_party[i]
+    end
+  end
   for i in 0...$Trainer.party.length
     if $Trainer.party[i].species==species
       return $Trainer.party[i]
@@ -18,13 +22,11 @@ def pbGetFirstSpecies(species)
 end
 
 def pbGetNatureModifier(nature, stat)
-  stat = getID(PBStats,stat) if stat.is_a?(Symbol)
-  if (nature/5).floor == stat && (nature%5).floor == stat
-    return 0
-  elsif (nature/5).floor == stat
-    return 1
-  elsif (nature%5).floor == stat
-    return -1
+  changes = GameData::Nature.get(nature).stat_changes
+  for i in changes
+    if i[0] == stat
+      return i[1] / 10
+    end
   end
   return 0
 end

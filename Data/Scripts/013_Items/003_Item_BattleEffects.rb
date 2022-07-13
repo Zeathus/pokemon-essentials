@@ -54,6 +54,10 @@ ItemHandlers::CanUseInBattle.addIf(proc { |item| GameData::Item.get(item).is_pok
       end
       next false
     end
+    if battler.hp > battler.totalhp
+      scene.pbDisplay(_INTL("The Pokémon's HP is too high to be caught!")) if showMessages
+      next false
+    end
     next true
   }
 )

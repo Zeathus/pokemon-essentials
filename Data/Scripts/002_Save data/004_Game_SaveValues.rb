@@ -133,3 +133,10 @@ SaveData.register(:game_version) do
   load_value { |value| $game_version = value }
   new_game_value { Settings::GAME_VERSION }
 end
+
+SaveData.register(:quests) do
+  ensure_class :QuestList
+  save_value { $quests }
+  load_value { |value| $quests = value }
+  new_game_value { QuestList.new }
+end

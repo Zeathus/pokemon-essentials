@@ -12,6 +12,7 @@ class EncounterModifiers
   attr_accessor(:shiny)
   attr_accessor(:hpmult)
   attr_accessor(:form)
+  attr_accessor(:species)
   
   def initialize()
     @iv      = nil
@@ -27,6 +28,8 @@ class EncounterModifiers
     @shiny   = nil
     @hpmult  = nil
     @form    = nil
+    @species = nil
+    @next    = nil
   end
   
   def moves=(value)
@@ -34,18 +37,22 @@ class EncounterModifiers
   end
   
   def status=(value)
-    value = getID(PBStatuses,value) if value.is_a?(Symbol)
     @status = value
   end
   
   def nature=(value)
-    value = getID(PBNatures,value) if value.is_a?(Symbol)
     @nature = value
   end
   
   def item=(value)
-    value = getID(PBItems,value) if value.is_a?(Symbol)
     @item = value
+  end
+
+  def next
+    if !@next
+      @next = EncounterModifiers.new()
+    end
+    return @next
   end
   
   def optimize

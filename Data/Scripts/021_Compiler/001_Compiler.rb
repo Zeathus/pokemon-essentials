@@ -718,16 +718,16 @@ module Compiler
     compile_trainer_lists          # Depends on TrainerType
     yield(_INTL("Compiling metadata"))
     compile_metadata               # Depends on TrainerType
+    yield(_INTL("Compiling quests"))
+    compile_quests                 # Depends on Item
     yield(_INTL("Compiling animations"))
     compile_animations
     yield(_INTL("Converting events"))
     compile_trainer_events(mustCompile)
-    if !IMPORT_EXPORT_MODE || IMPORT_EXPORT_MODE != 3
-      yield(_INTL("Saving messages"))
-      pbSetTextMessages
-      MessageTypes.saveMessages
-      MessageTypes.loadMessageFile("Data/messages.dat") if safeExists?("Data/messages.dat")
-    end
+    yield(_INTL("Saving messages"))
+    pbSetTextMessages
+    MessageTypes.saveMessages
+    MessageTypes.loadMessageFile("Data/messages.dat") if safeExists?("Data/messages.dat")
     System.reload_cache
     echoln ""
     echoln _INTL("*** Finished full compile ***")
@@ -738,6 +738,27 @@ module Compiler
   def main
     return if !$DEBUG
     begin
+      mapIDs = []
+      for i in 0...1000
+        filename = pbMapFile(i, false)
+        if safeExists?(filename)
+          mapIDs.push(i)
+        end
+      end
+      compressMaps = []
+      for m in mapIDs
+        if !safeExists?(pbMapFile(m, true))
+          compressMaps.push(m)
+        end
+      end
+      if compressMaps.length > 0
+        $data_tilesets = load_data('Data/Tilesets.rxdata')
+        for m in compressMaps
+          msg = sprintf("Compressing Map %03d", m)
+          pbSetWindowText(msg); echoln(msg)
+          pbOptimizeMap(m)
+        end
+      end
       dataFiles = [
          "berry_plants.dat",
          "encounters.dat",
@@ -761,6 +782,7 @@ module Compiler
          "trainer_types.dat",
          "trainers.dat",
          "types.dat",
+         "quests.dat",
          "dialog.dat"
       ]
       textFiles = [
@@ -781,7 +803,8 @@ module Compiler
          "trainerlists.txt",
          "trainers.txt",
          "trainertypes.txt",
-         "types.txt"
+         "types.txt",
+         "quests.txt"
       ]
       latestDataTime = 0
       latestTextTime = 0

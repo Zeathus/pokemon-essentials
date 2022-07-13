@@ -307,6 +307,8 @@ class PokemonLoadScreen
       when cmd_continue
         @scene.pbEndScene
         Game.load(@save_data)
+        #pbInitMainQuests
+        #pbInitQuests
         return
       when cmd_new_game
         @scene.pbEndScene

@@ -181,5 +181,9 @@ class PokeBattle_Scene
     shaSprite = PokemonBattlerShadowSprite.new(@viewport,sideSize,idxBattler)
     shaSprite.visible = false
     @sprites["shadow_#{idxBattler}"] = shaSprite
+    splashSprite = IconSprite.new(0, 0, @viewport)
+    splashSprite.visible = false
+    splashSprite.z = batSprite.z + 100
+    @sprites["splash_#{idxBattler}"] = splashSprite
   end
 end

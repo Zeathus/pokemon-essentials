@@ -26,7 +26,7 @@ def pbStadiumCups
       "Getting used to the stadium?WT I'm your final match this Cup!",
       "This was just the tutorial Cup.WT Just wait until you get to the really tough matches!"]
   ])
-  doubles.push(false)
+  doubles.push(true)
   
   if pbStadiumHasWonCup("Tutorial Cup") || $DEBUG
     
@@ -46,6 +46,19 @@ def pbStadiumCups
       [:GUITARIST, "Randal", 0,
         "Want to do another Round?",
         "Go my Pokemon! Work together and create the perfect symphony!"]
+    ])
+    doubles.push(true)
+
+    titles.push("May-Have-Been Cup")
+    descriptions.push("Sidelined trainers are here to battle! In another world, they may have had stories to tell.")
+    stats.push([36,4,3])
+    trainers.push([
+      [:JANUS, "Janus", 0,
+        "Have we met?WT You remind me of the friend I made when I started my journey!",
+        "You sure hit hard.WT You would definitely be strong where I came from."],
+      [:OLDPROTAGONIST, "Indigo", 0,
+        "I see you have company with you.WT You've made friends with both Amethyst and Kira.WT They are both alike and different from the ones I knew.",
+        "I'm glad to see you are taking good care of my friends in my stead."]
     ])
     doubles.push(true)
 
@@ -75,7 +88,7 @@ def pbStadiumCups
       [:BURGLAR, "Morgana", 0, "..."],
       [:GAMBLER, "Ren", 0, "..."]
     ])
-    doubles.push(false)
+    doubles.push(true)
     
     # Aegis Cup (Xenoblade)
     titles.push("Aegis Cup")
@@ -88,7 +101,7 @@ def pbStadiumCups
       [:NURSE, "Nia", 0, "..."],
       [:MINER, "Rex", 0, "..."]
     ])
-    doubles.push(false)
+    doubles.push(true)
 
     # VGC Champions Cup
     titles.push("VGC Champions Cup")
@@ -135,7 +148,7 @@ def pbStadiumCups
         "I will go all out this time, for a rematch!",
         "You've come so far since the Tutorial Cup.WT This was a fun battle. "]
     ])
-    doubles.push(false)
+    doubles.push(true)
   
   end
   

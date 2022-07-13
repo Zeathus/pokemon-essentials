@@ -203,6 +203,28 @@ class SliderOption
   end
 end
 
+class ButtonOption
+  include PropertyMixin
+  attr_reader :name
+
+  def initialize(name,pressProc)
+    @name       = name
+    @pressProc  = pressProc
+  end
+
+  def next(current)
+    return 0
+  end
+
+  def prev(current)
+    return 0
+  end
+
+  def press
+    @pressProc.call
+  end
+end
+
 #===============================================================================
 # Main options list
 #===============================================================================
@@ -290,6 +312,11 @@ class Window_PokemonOption < Window_DrawableCommand
       xpos += optionwidth-self.contents.text_size(value).width
       pbDrawShadowText(self.contents,xpos,rect.y,optionwidth,rect.height,value,
          @selBaseColor,@selShadowColor)
+    elsif @options[index].is_a?(ButtonOption)
+      value = "Edit current controls"
+      xpos = optionwidth+rect.x
+      pbDrawShadowText(self.contents,xpos,rect.y,optionwidth,rect.height,value,
+         @selBaseColor,@selShadowColor)
     else
       value = @options[index].values[self[index]]
       xpos = optionwidth+rect.x
@@ -312,6 +339,10 @@ class Window_PokemonOption < Window_DrawableCommand
         self[self.index] = @options[self.index].next(self[self.index])
         dorefresh = true
         @mustUpdateOptions = true
+      elsif Input.trigger?(Input::USE)
+        if @options[self.index].is_a?(ButtonOption)
+          @options[self.index].press
+        end
       end
     end
     refresh if dorefresh
@@ -340,6 +371,11 @@ class PokemonOption_Scene
     # setter and a getter for that option. To delete an option, comment it out
     # or delete it. The game's options may be placed in any order.
     @PokemonOptions = [
+       ButtonOption.new(_INTL("Controls"),
+         proc {
+           System.show_settings
+         }
+       ),
        SliderOption.new(_INTL("Music Volume"),0,100,5,
          proc { $PokemonSystem.bgmvolume },
          proc { |value|
@@ -387,20 +423,20 @@ class PokemonOption_Scene
          proc { $PokemonSystem.runstyle },
          proc { |value| $PokemonSystem.runstyle = value }
        ),
-       NumberOption.new(_INTL("Speech Frame"),1,Settings::SPEECH_WINDOWSKINS.length,
-         proc { $PokemonSystem.textskin },
-         proc { |value|
-           $PokemonSystem.textskin = value
-           MessageConfig.pbSetSpeechFrame("Graphics/Windowskins/" + Settings::SPEECH_WINDOWSKINS[value])
-         }
-       ),
-       NumberOption.new(_INTL("Menu Frame"),1,Settings::MENU_WINDOWSKINS.length,
-         proc { $PokemonSystem.frame },
-         proc { |value|
-           $PokemonSystem.frame = value
-           MessageConfig.pbSetSystemFrame("Graphics/Windowskins/" + Settings::MENU_WINDOWSKINS[value])
-         }
-       ),
+       #NumberOption.new(_INTL("Speech Frame"),1,Settings::SPEECH_WINDOWSKINS.length,
+       #  proc { $PokemonSystem.textskin },
+       #  proc { |value|
+       #    $PokemonSystem.textskin = value
+       #    MessageConfig.pbSetSpeechFrame("Graphics/Windowskins/" + Settings::SPEECH_WINDOWSKINS[value])
+       #  }
+       #),
+       #NumberOption.new(_INTL("Menu Frame"),1,Settings::MENU_WINDOWSKINS.length,
+       #  proc { $PokemonSystem.frame },
+       #  proc { |value|
+       #    $PokemonSystem.frame = value
+       #    MessageConfig.pbSetSystemFrame("Graphics/Windowskins/" + Settings::MENU_WINDOWSKINS[value])
+       #  }
+       #),
        EnumOption.new(_INTL("Text Entry"),[_INTL("Cursor"),_INTL("Keyboard")],
          proc { $PokemonSystem.textinput },
          proc { |value| $PokemonSystem.textinput = value }
@@ -413,7 +449,7 @@ class PokemonOption_Scene
              pbSetResizeFactor($PokemonSystem.screensize)
            end
          }
-       )
+       ),
     ]
     @PokemonOptions = pbAddOnOptions(@PokemonOptions)
     @sprites["option"] = Window_PokemonOption.new(@PokemonOptions,0,
@@ -468,6 +504,7 @@ class PokemonOption_Scene
   end
 
   def pbEndScene
+    $Keybinds = KeybindList.new
     pbPlayCloseMenuSE
     pbFadeOutAndHide(@sprites) { pbUpdate }
     # Set the values of each option

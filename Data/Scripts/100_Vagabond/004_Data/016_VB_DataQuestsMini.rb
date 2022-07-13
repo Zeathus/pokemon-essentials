@@ -408,7 +408,6 @@ def pbRandomRewardItem(difficulty)
     # Difficulty 2
     [:BALMMUSHROOM,
      :ROCKYHELMET,
-     :HAZARDARMOR,
      :BIGPEARL,
      [:OLDAMBER,
       :HELIXFOSSIL,
@@ -442,7 +441,8 @@ def pbRandomRewardItem(difficulty)
       :WAVEINCENSE,
       :ROSEINCENSE,
       :ODDINCENSE,
-      :ROCKINCENSE],
+      :ROCKINCENSE,
+      :TROPICALINCENSE],
      :FULLRESTORE,
      :MAXREVIVE,
      :HPUP,

@@ -158,7 +158,7 @@ def compile_dialog
           feed.push(choice)
           buffer.push([Dialog::Choice, choice[2]])
         when "speaker"
-          name = arguments[0]
+          name = arguments[0].gsub("_", " ")
           name = nil if ["0", "none", "nil"].include?(name.downcase)
           speaker = [Dialog::Command, "speaker", name]
           speaker.push(arguments[1]) if arguments[1]
@@ -171,7 +171,7 @@ def compile_dialog
           arg = nil if arg == "0"
           feed.push([Dialog::Command, "portrait", arg])
         when "name"
-          arg = arguments[0]
+          arg = arguments[0].gsub("_", " ")
           arg = nil if arg == "0"
           feed.push([Dialog::Command, "name", arg])
         when "namepos"
@@ -187,6 +187,12 @@ def compile_dialog
             compile_dialog_error(file, line_no, "/hidename only accepts 0, 1 or 2 as arguments")
           end
           feed.push([Dialog::Command, "hidename", arg.to_i])
+        when "hidenamebox"
+          arg = arguments[0]
+          if !["0", "1"].include?(arg)
+            compile_dialog_error(file, line_no, "/hidenamebox only accepts 0, 1 as arguments")
+          end
+          feed.push([Dialog::Command, "hidenamebox", arg.to_i])
         when "window"
           arg = arguments[0]
           arg = nil if arg == "0"
@@ -334,6 +340,12 @@ def compile_dialog
               feed.push([Dialog::Command, "event", arguments[1], arguments[2], (arguments[3]=="true"), event_id])
             elsif arguments[1] == "exclaim"
               feed.push([Dialog::Command, "event", arguments[1], event_id])
+            elsif arguments[1] == "popup"
+              emote_id = PBEmote.fromName(arguments[2])
+              if emote_id == -1
+                compile_dialog_error(file, line_no, _INTL("Invalid emote popup name: {1}", arguments[2]))
+              end
+              feed.push([Dialog::Command, "event", arguments[1], event_id, emote_id])
             else
               compile_dialog_error(file, line_no, _INTL("Unknown /event command: {1}", arguments[1]))
             end

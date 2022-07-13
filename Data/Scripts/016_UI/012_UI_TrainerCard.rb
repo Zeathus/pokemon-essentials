@@ -32,6 +32,7 @@ class PokemonTrainerCard_Scene
   end
 
   def pbGetQuestProgress
+    return [0, 0]
     count = $game_variables[QUEST_ARRAY].length
     complete = 0
     for i in 1..count

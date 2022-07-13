@@ -117,7 +117,7 @@ end
 #===============================================================================
 # Change a Pokémon's level
 #===============================================================================
-def pbChangeLevel(pkmn,newlevel,scene)
+def pbChangeLevel(pkmn,newlevel,scene,showstats=true)
   newlevel = newlevel.clamp(1, GameData::GrowthRate.max_level)
   if pkmn.level==newlevel
     pbMessage(_INTL("{1}'s level remained unchanged.",pkmn.name))
@@ -149,11 +149,12 @@ def pbChangeLevel(pkmn,newlevel,scene)
     spatkdiff   = pkmn.spatk
     spdefdiff   = pkmn.spdef
     totalhpdiff = pkmn.totalhp
-    pkmn.level = newlevel
+    oldlevel    = pkmn.level
+    pkmn.level  = newlevel
     pkmn.changeHappiness("vitamin")
     pkmn.calc_stats
     scene.pbRefresh
-    if scene.is_a?(PokemonPartyScreen)
+    if scene.is_a?(PokemonPartyScreen) || scene.is_a?(PokemonScreen_Scene)
       scene.pbDisplay(_INTL("{1} grew to Lv. {2}!",pkmn.name,pkmn.level))
     else
       pbMessage(_INTL("{1} grew to Lv. {2}!",pkmn.name,pkmn.level))
@@ -164,14 +165,16 @@ def pbChangeLevel(pkmn,newlevel,scene)
     spatkdiff   = pkmn.spatk-spatkdiff
     spdefdiff   = pkmn.spdef-spdefdiff
     totalhpdiff = pkmn.totalhp-totalhpdiff
-    pbTopRightWindow(_INTL("Max. HP<r>+{1}\r\nAttack<r>+{2}\r\nDefense<r>+{3}\r\nSp. Atk<r>+{4}\r\nSp. Def<r>+{5}\r\nSpeed<r>+{6}",
-       totalhpdiff,attackdiff,defensediff,spatkdiff,spdefdiff,speeddiff),scene)
-    pbTopRightWindow(_INTL("Max. HP<r>{1}\r\nAttack<r>{2}\r\nDefense<r>{3}\r\nSp. Atk<r>{4}\r\nSp. Def<r>{5}\r\nSpeed<r>{6}",
-       pkmn.totalhp,pkmn.attack,pkmn.defense,pkmn.spatk,pkmn.spdef,pkmn.speed),scene)
+    if showstats
+      pbTopRightWindow(_INTL("Max. HP<r>+{1}\r\nAttack<r>+{2}\r\nDefense<r>+{3}\r\nSp. Atk<r>+{4}\r\nSp. Def<r>+{5}\r\nSpeed<r>+{6}",
+        totalhpdiff,attackdiff,defensediff,spatkdiff,spdefdiff,speeddiff),scene)
+      pbTopRightWindow(_INTL("Max. HP<r>{1}\r\nAttack<r>{2}\r\nDefense<r>{3}\r\nSp. Atk<r>{4}\r\nSp. Def<r>{5}\r\nSpeed<r>{6}",
+        pkmn.totalhp,pkmn.attack,pkmn.defense,pkmn.spatk,pkmn.spdef,pkmn.speed),scene)
+    end
     # Learn new moves upon level up
     movelist = pkmn.getMoveList
     for i in movelist
-      next if i[0]!=pkmn.level
+      next if (i[0] <= oldlevel || i[0] > pkmn.level)
       pbLearnMove(pkmn,i[1],true) { scene.pbUpdate }
     end
     # Check for evolution
@@ -410,6 +413,14 @@ def pbLearnMove(pkmn,move,ignoreifknown=false,bymachine=false,&block)
     pbMessage(_INTL("\\se[]{1} learned {2}!\\se[Pkmn move learnt]",pkmnname,movename),&block)
     return true
   end
+  if bymachine
+    scene=PokemonSummaryScene.new()
+    screen=PokemonSummary.new(scene)
+    screen.pbStartScreen([pkmn], 0, move)
+  else
+    pbMessage(_INTL("\\se[]{2} was added to {1}'s move list!\\se[Pkmn move learnt]",pkmnname,movename))
+  end
+  return
   loop do
     pbMessage(_INTL("{1} wants to learn {2}, but it already knows {3} moves.\1",
       pkmnname, movename, pkmn.numMoves.to_word), &block) if !bymachine
@@ -538,11 +549,11 @@ def pbUseItemOnPokemon(item,pkmn,scene)
     return false if !machine
     movename = GameData::Move.get(machine).name
     if pkmn.shadowPokemon?
-      pbMessage(_INTL("Shadow Pokémon can't be taught any moves.")) { scene.pbUpdate }
+      @scene.pbDisplay(_INTL("Shadow Pokémon can't be taught any moves."))
     elsif !pkmn.compatible_with_move?(machine)
-      pbMessage(_INTL("{1} can't learn {2}.",pkmn.name,movename)) { scene.pbUpdate }
+      @scene.pbDisplay(_INTL("{1} can't learn {2}.",pkmn.name,movename))
     else
-      pbMessage(_INTL("\\se[PC access]You booted up {1}.\1",itm.name)) { scene.pbUpdate }
+      @scene.pbDisplay(_INTL("You booted up {1}.",itm.name))
       if pbConfirmMessage(_INTL("Do you want to teach {1} to {2}?",movename,pkmn.name)) { scene.pbUpdate }
         if pbLearnMove(pkmn,machine,false,true) { scene.pbUpdate }
           $PokemonBag.pbDeleteItem(item) if itm.is_TR?
@@ -560,7 +571,7 @@ def pbUseItemOnPokemon(item,pkmn,scene)
   if ret && useType==1   # Usable on Pokémon, consumed
     $PokemonBag.pbDeleteItem(item)
     if !$PokemonBag.pbHasItem?(item)
-      pbMessage(_INTL("You used your last {1}.",itm.name)) { scene.pbUpdate }
+      @scene.pbDisplay(_INTL("You used your last {1}.",itm.name))
     end
   end
   return ret
@@ -603,14 +614,19 @@ def pbGiveItemToPokemon(item,pkmn,scene,pkmnid=0)
   end
   if pkmn.hasItem?
     olditemname = pkmn.item.name
+    text = ""
     if pkmn.hasItem?(:LEFTOVERS)
-      scene.pbDisplay(_INTL("{1} is already holding some {2}.\1",pkmn.name,olditemname))
+      text = _INTL("{1} is already holding some {2}.",pkmn.name,olditemname)
     elsif newitemname.starts_with_vowel?
-      scene.pbDisplay(_INTL("{1} is already holding an {2}.\1",pkmn.name,olditemname))
+      text = _INTL("{1} is already holding an {2}.",pkmn.name,olditemname)
     else
-      scene.pbDisplay(_INTL("{1} is already holding a {2}.\1",pkmn.name,olditemname))
+      text = _INTL("{1} is already holding a {2}.",pkmn.name,olditemname)
     end
-    if scene.pbConfirm(_INTL("Would you like to switch the two items?"))
+    if pkmn.hasItem?(item)
+      scene.pbDisplay(text)
+      return false
+    end
+    if scene.pbConfirm(_INTL("{1}\nWould you like to switch the two items?", text))
       $PokemonBag.pbDeleteItem(item)
       if !$PokemonBag.pbStoreItem(pkmn.item)
         if !$PokemonBag.pbStoreItem(item)

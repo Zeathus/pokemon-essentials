@@ -93,7 +93,7 @@
 99,SIMTRAINER_F,Sim Trainer,0,,,,Female,255,
 100,LEADER_Raphael,Gym Leader,200,Battle! VS Gym Leader (Fighting Spirit),,,Male,,raphael
 101,LEADER_Faunus,Gym Leader,200,Battle! VS Gym Leader (Fighting Spirit),,,Male,,
-102,LEADER_Yadon,Gym Leader,200,Battle! VS Gym Leader (Fighting Spirit),,,Male
+102,LEADER_Leroy,Gym Leader,200,Battle! VS Gym Leader (Fighting Spirit),,,Male
 103,LEADER_4,Gym Leader,200,Battle! VS Gym Leader (Fighting Spirit),,,Male
 104,LEADER_5,Gym Leader,200,Battle! VS Gym Leader (Fighting Spirit),,,Male
 108,AETHER_M,Aether Employee,100,,,,Male
@@ -102,3 +102,5 @@
 111,CYRUS,Otherworld Inhabitant,200,,,,Male
 130,HOOPARING,Mysterious,200,cameo_2,,,Mixed,0,
 131,AURA,,0,Battle Aura,,,Mixed,200,
+200,JANUS,Friend,0,,,,Male
+201,OLDPROTAGONIST,Protagonist,0,,,,Male

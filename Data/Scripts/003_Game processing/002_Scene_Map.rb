@@ -48,7 +48,7 @@ class Scene_Map
     playingBGM = $game_system.playing_bgm
     playingBGS = $game_system.playing_bgs
     return if !playingBGM && !playingBGS
-    map = load_data(sprintf("Data/Map%03d.rxdata", mapid))
+    map = load_data(pbMapFile(mapid, Settings::COMPRESS_MAPS))
     if playingBGM && map.autoplay_bgm
       if (PBDayNight.isNight? rescue false)
         pbBGMFade(0.8) if playingBGM.name!=map.bgm.name && playingBGM.name!=map.bgm.name+"_n"
@@ -94,7 +94,7 @@ class Scene_Map
 
   def call_menu
     if Input.press?(Input::CTRL) && $DEBUG
-      event_id = pbNumericUpDown("Set selfswitch of [Event ID]")
+      event_id = pbNumericUpDown("Set selfswitch of [Event ID]",1,200)
       event_name = "NULL"
       for event in $game_map.events.values
         if event.id == event_id
@@ -191,6 +191,7 @@ class Scene_Map
       $game_player.update
       $game_system.update
       $game_screen.update
+      pbUpdateTextBubbles
       break unless $game_temp.player_transferring
       transfer_player
       break if $game_temp.transition_processing
@@ -224,7 +225,17 @@ class Scene_Map
           $PokemonTemp.keyItemCalling = true
         end
       elsif Input.press?(Input::F9)
-        $game_temp.debug_calling = true if $DEBUG
+        if Input.press?(Input::LEFT) && Input.press?(Input::RIGHT) &&
+           Input.press?(Input::DOWN) && Input.press?(Input::UP)
+          $DEBUG = !$DEBUG
+          if $DEBUG
+            pbMessage("DEBUG MODE ENABLED")
+          else
+            pbMessage("debug mode disabled")
+          end
+        elsif $DEBUG
+          $game_temp.debug_calling = true
+        end
       end
     end
     unless $game_player.moving?

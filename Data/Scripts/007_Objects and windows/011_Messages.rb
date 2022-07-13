@@ -849,6 +849,7 @@ end
 
 def pbShowCommands(msgwindow,commands=nil,cmdIfCancel=0,defaultCmd=0)
   return 0 if !commands
+  return pbCenterCommands(msgwindow,commands,cmdIfCancel,defaultCmd)
   cmdwindow=Window_CommandPokemonEx.new(commands)
   cmdwindow.z=99999
   cmdwindow.visible=true

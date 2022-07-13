@@ -323,6 +323,10 @@ class Pokemon
     return self.types.include?(type)
   end
 
+  def affinity
+    return species_data.affinity1
+  end
+
   def affinity1
     return species_data.affinity1
   end
@@ -685,7 +689,13 @@ class Pokemon
   # @return [Boolean] whether the Pokémon is compatible with the given move
   def compatible_with_move?(move_id)
     move_data = GameData::Move.try_get(move_id)
-    return move_data && species_data.tutor_moves.include?(move_data.id)
+    if move_data && species_data.tutor_moves.include?(move_data.id)
+      return true
+    end
+    if move_data && species_data.egg_moves.include?(move_data.id)
+      return true
+    end
+    return false
   end
 
   def can_relearn_move?

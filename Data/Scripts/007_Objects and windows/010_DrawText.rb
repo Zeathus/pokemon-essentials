@@ -1249,6 +1249,16 @@ def drawTextEx(bitmap,x,y,width,numlines,text,baseColor,shadowColor,adjust=false
   end
 end
 
+def drawSmallTextEx(bitmap,x,y,width,numlines,text,baseColor,shadowColor)
+  boxheight=numlines*22
+  pbSetSmallFont(bitmap)
+  normtext=getLineBrokenChunks(bitmap,text,width,nil,true)
+  lines=getNormTextLines(normtext)
+  perfectlySpacedLines(bitmap,normtext,boxheight,lines,numlines)
+  renderLineBrokenChunksWithShadow(bitmap,x,y,normtext,numlines*32,
+      baseColor,shadowColor)
+end
+
 def drawFormattedTextEx(bitmap,x,y,width,text,baseColor=nil,shadowColor=nil,lineheight=32)
   base=!baseColor ? Color.new(12*8,12*8,12*8) : baseColor.clone
   shadow=!shadowColor ? Color.new(26*8,26*8,25*8) : shadowColor.clone

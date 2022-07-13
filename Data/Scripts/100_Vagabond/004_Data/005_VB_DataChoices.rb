@@ -1,8 +1,7 @@
 module PBChoices
   None               = 0
   Starter            = 1
-  PlumIsTrainer      = 3
-  ElianaIntroduction = 4
+  ToldCh1Dream       = 2
 end
 
 def pbSetChoice(choice, value)

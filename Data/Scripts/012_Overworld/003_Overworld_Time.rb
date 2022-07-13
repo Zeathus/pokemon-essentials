@@ -64,7 +64,7 @@ class CustomTime
     return false
   end
   
-  def getDigitalString(showday=false)
+  def getDigitalString(showday=false, shortday=false)
     if pbGetLanguage()==2 # English, 12-hour format
       hour_now = self.hour
       suffix = "AM"
@@ -74,12 +74,12 @@ class CustomTime
       end
       hour_now = 12 if hour_now == 0
       if showday
-        return wday + " " + _ISPRINTF("{1:02d}:{2:02d}",hour_now,self.min) + " " + suffix
+        return (shortday ? wday[0...3] : wday) + " " + _ISPRINTF("{1:02d}:{2:02d}",hour_now,self.min) + " " + suffix
       end
       return _ISPRINTF("{1:02d}:{2:02d}",hour_now,self.min) + " " + suffix
     else # Other country 24-hour format
       if showday
-        return wday + " " + _ISPRINTF("{1:02d}:{2:02d}",self.hour,self.min)
+        return (shortday ? wday[0...3] : wday) + " " + _ISPRINTF("{1:02d}:{2:02d}",self.hour,self.min)
       end
       return _ISPRINTF("{1:02d}:{2:02d}",self.hour,self.min)
     end

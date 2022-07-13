@@ -319,10 +319,6 @@ class PokeBattle_Battle
       b.pbRecoverHP(hpGain)
       pbDisplay(_INTL("{1} absorbed nutrients with its roots!",b.pbThis))
     end
-    priority.each do |b|
-      # Boss Status
-      pbBossTrigger(self, b, :Status, b.status)
-    end
     # Leech Seed
     priority.each do |b|
       next if b.effects[PBEffects::LeechSeed]<0
@@ -610,24 +606,9 @@ class PokeBattle_Battle
 
     # BOSS BATTLE
     priority.each do |b|
-      next if b.isFainted? || opposes?(b.index)
-      # Timed and Interval
-      if b.turnCount > 0
-        pbBossTrigger(self, b, :Interval, b.turnCount)
-        pbBossTrigger(self, b, :Timed, b.turnCount)
-      end
-      # Below certain HP
-      pbBossTrigger(self, b, :HP, b)
-      # Weather active
-      pbBossTrigger(self, b, :Weather, pbWeather)
-      # Terrain active
-      pbBossTrigger(self, b, :Terrain, @field.effects)
-      # Field effect
-      pbBossTrigger(self, b, :Field, b.pbOwnSide.effects)
-      # Side effect
-      pbBossTrigger(self, b, :Effect, b.effects)
-      # Custom effect
-      pbBossTrigger(self, b, :Custom, [self, b])
+      next if b.isFainted?
+      # Boss Battle - No Damage
+      pbBoss.checkTriggers(self, :EndOfTurn, b)
     end
 
     # Form checks

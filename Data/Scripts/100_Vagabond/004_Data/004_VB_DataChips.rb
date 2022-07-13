@@ -1,66 +1,52 @@
 def pbAllDataChipMoves
   moves = [
-    [:AERIALACE,1],
-    [:FALSESWIPE,1],
-    [:FORESIGHT,1],
-    [:MAGICALLEAF,1],
-    [:SHOCKWAVE,1],
-    [:SMACKDOWN,1],
     [:WORKUP,1],
+    [:AERIALACE,1],
+    [:SHOCKWAVE,1],
+    [:MAGICALLEAF,1],
+    [:FORESIGHT,1],
     [:ANCIENTPOWER,2],
-    [:BRICKBREAK,2],
-    [:CHARGEBEAM,2],
-    [:CLEARSMOG,2],
-    [:FIREPLEDGE,2],
-    [:GRASSPLEDGE,2],
     [:HELPINGHAND,2],
-    [:POWERUPPUNCH,2],
+    [:ROUND,2],
     [:THIEF,2],
-    [:WATERPLEDGE,2],
-    [:CURSE,3],
-    [:DEFOG,3],
-    [:DRAGONCLAW,3],
-    [:ELECTRICTERRAIN,3],
+    [:CURSE,2],
+    [:PSYCHUP,2],
     [:FLY,3],
-    [:GRASSYTERRAIN,3],
-    [:HIGHHORSEPOWER,3],
-    [:MISTYTERRAIN,3],
-    [:PSYCHUP,3],
-    [:PSYCHICTERRAIN,3],
-    [:SHADOWFORCE,3],
     [:STRENGTH,3],
-    [:ICYWIND,4],
-    [:POLLENPUFF,4],
-    [:STEALTHROCK,4],
-    [:SUBSTITUTE,4],
-    [:THROATCHOP,4],
-    [:WILDCHARGE,4]
+    [:THERMODYNAMICS,3],
+    [:STEALTHROCK,3],
+    [:SEISMICTOSS,3],
+    [:SUBSTITUTE,4]
   ]
   
   if $PokemonBag.pbQuantity(:DATARECOVERYDEVICE)>0
     moves += [
       [:ROOST,3],
-      #[:TERRAINPULSE,3],
+      [:TERRAINPULSE,3],
       [:WEATHERBALL,3],
+      [:FUTURESIGHT,3],
+      [:BOUNCE,3],
       [:FREEZEDRY,4],
-      [:FUTURESIGHT,4],
-      [:GIGADRAIN,4],
       [:LIQUIDATION,4],
       [:PLAYROUGH,4],
-      [:SEISMICTOSS,4],
-      [:SURF,4],
-      #[:BODYPRESS,5],
+      [:GIGADRAIN,4],
       [:DYNAMICPUNCH,5],
-      [:EXPLOSION,5],
+      [:PERMAFROST,5],
+      [:INFERNO,5],
+      [:ZAPCANNON,5]
+    ]
+  end
+
+  if $PokemonBag.pbQuantity(:DATARECOVERYDEVICEV2)>0
+    moves += [
+      [:BODYPRESS,4],
+      [:EXPLOSION,4],
       [:FLAREBLITZ,5],
       [:HURRICANE,5],
-      [:INFERNO,5],
       [:MEGAHORN,5],
-      #[:STEELBEAM,5],
-      [:ZAPCANNON,5],
-      [:DRACOMETEOR,6],
-      [:SKYATTACK,6],
-      [:METRONOME,10],
+      [:DRACOMETEOR,5],
+      [:SKYATTACK,5],
+      [:METRONOME,8]  
     ]
   end
   
@@ -98,7 +84,7 @@ def pbGetDataChipMoves(pokemon)
   # Finally, add a compatability value to each move
   # Sort compatible moves first in list
   for i in chipMoves
-    i[2] = pokemon.isCompatibleWithMove?(i[0])
+    i[2] = pokemon.compatible_with_move?(i[0])
   end
   moves = []
   for i in chipMoves
@@ -112,17 +98,15 @@ end
 
 def pbGetTMMoves(pokemon)
   return [] if !pokemon || pokemon.egg? || (pokemon.isShadow? rescue false)
-  #itemdata=readItemList("Data/items.dat")
   moves=[]
-  for i in 0...$ItemData.length
-    if $ItemData[i][ITEMUSE]==3 && $PokemonBag.pbQuantity(i)>0
-      machine=$ItemData[i][ITEMMACHINE]
-      if pokemon.isCompatibleWithMove?(machine)
-        moves.push(machine)
+  GameData::Item.each { |i|
+    if i.is_TM? && $PokemonBag.pbQuantity(i) > 0
+      if pokemon.compatible_with_move?(i.move)
+        moves.push([i.move, i.name])
       end
     end
-  end
-  return moves|[] # remove duplicates
+  }
+  return moves | [] # remove duplicates
 end
 
 def pbGiveAllTMs
@@ -132,4 +116,28 @@ def pbGiveAllTMs
     end
   end
   Kernel.pbMessage("Got all TMs")
+end
+
+def pbGetLevelUpMoves(pokemon)
+  return [] if !pokemon || pokemon.egg? || pokemon.shadowPokemon?
+  moves = []
+  level_moves = []
+  pokemon.getMoveList.each do |m|
+    #next if pokemon.hasMove?(m[1])
+    if !moves.include?(m[1])
+      level_moves.push([m[1], m[0]])
+      moves.push(m[1])
+    end
+  end
+  if pokemon.first_moves
+    for i in pokemon.first_moves
+      #next if pokemon.hasMove?(i)
+      if !moves.include?(i)
+        level_moves.push([i, 0])
+        moves.push(i)
+      end
+    end
+  end
+  level_moves.sort! {|a,b| a[1]<=>b[1]}
+  return level_moves
 end

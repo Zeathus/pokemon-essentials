@@ -1,923 +1,647 @@
-def pbStadiumBattle(cup,index=0)
-  
-  name = cup[0]
-  trainers = cup[3]
-  trainertypes = []
-  for i in trainers
-    trainertypes.push(i[0])
+class StadiumTransition
+
+  def initialize(cup, index=nil)
+    @index = index
+    @name = cup[0]
+    @trainers = cup[3]
+    @trainertypes = []
+    for t in @trainers
+      @trainertypes.push(t[0])
+    end
+
+    if @index
+      @opponent = [@trainertypes[@index], @trainers[@index][1]]
+    else
+      @opponent = nil
+    end
+
+    @index = @trainers.length - 1 if !@opponent
+
+    self.initSprites
   end
+
+  def initSprites
+    @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.z = 99999
+
+    @sprites = {}
+
+    @sprites["bg"] = AnimatedPlane.new(@viewport)
+    @sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
+    @sprites["bg"].z = 1
+    @sprites["bg"].opacity = 0
+    @sprites["bg"].update
+
+    @rows = [[1],[2],[3],[4],[3,2],[3,3],[4,3],[4,4]]
+    @rows = @rows[@trainers.length - 1]
+    xcoords = [128,329,269,218,165]
+    ycoords = @rows.length == 1 ? [305,347,195] : [250,292,140,334]
+    
+    @sprites["title"] = IconSprite.new(0,0,@viewport)
+    @sprites["title"].setBitmap("Graphics/Pictures/Stadium/title")
+    @sprites["title"].z = 2
+    @sprites["title"].x = xcoords[4]
+    @sprites["title"].y = ycoords[0]
+    
+    @sprites["subtitle"] = IconSprite.new(0,0,@viewport)
+    @sprites["subtitle"].setBitmap("Graphics/Pictures/Stadium/subtitle")
+    @sprites["subtitle"].z = 2
+    @sprites["subtitle"].x = xcoords[4]
+    @sprites["subtitle"].y = ycoords[1]
+    
+    # Drawing cup name and battle number
+    pbSetSystemFont(@sprites["title"].bitmap)
+    pbDrawTextPositions(@sprites["title"].bitmap,
+      [[@name.upcase,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    pbSetSystemFont(@sprites["subtitle"].bitmap)
+    if @opponent
+      battletitle = _INTL("BATTLE {1}",@index+1)
+      battletitle = "SEMIFINAL" if (@index+2)==@trainers.length
+      battletitle = "FINAL" if (@index+1)==@trainers.length
+      pbDrawTextPositions(@sprites["subtitle"].bitmap,
+        [[battletitle,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    else
+      battletitle = "RESULTS"
+      pbDrawTextPositions(@sprites["subtitle"].bitmap,
+        [[battletitle,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
+    end
+      
+    @sprites["row1"] = IconSprite.new(0,0,@viewport)
+    @sprites["row1"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",@rows[0]))
+    @sprites["row1"].z = 2
+    @sprites["row1"].x = xcoords[@rows[0]]
+    @sprites["row1"].y = ycoords[2]
+    
+    if @rows.length == 2
+      @sprites["row2"] = IconSprite.new(0,0,@viewport)
+      @sprites["row2"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",@rows[1]))
+      @sprites["row2"].z = 2
+      @sprites["row2"].x = xcoords[@rows[1]]
+      @sprites["row2"].y = ycoords[3]
+    end
   
-  opponent = [trainertypes[index], trainers[index][1]]
+    for i in 0...@trainertypes.length
+      @sprites[_INTL("lock{1}",i)] = IconSprite.new(0,0,@viewport)
+      if @opponent
+        @sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/Stadium/locked")
+      else
+        @sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/Stadium/defeat")
+      end
+      @sprites[_INTL("lock{1}",i)].z = 5
+      @sprites[_INTL("lock{1}",i)].x = (i >= @rows[0]) ? ((i-@rows[0]) * 104) : (i * 104)
+      @sprites[_INTL("lock{1}",i)].x += xcoords[(i >= @rows[0]) ? @rows[1] : @rows[0]] + 8
+      @sprites[_INTL("lock{1}",i)].y = ((i >= @rows[0]) ? ycoords[3] : ycoords[2]) + 8
+      if i <= @index
+        @sprites[_INTL("trainer{1}",i)] = IconSprite.new(0,0,@viewport)
+        sprite = @sprites[_INTL("trainer{1}",i)]
+        sprite.setBitmap(
+          sprintf("Graphics/Trainers/%s",@trainertypes[i].to_s))
+        sprite.src_rect = Rect.new(
+          sprite.bitmap.width / 2 - 47,0,
+          94,94)
+        offset = pbStadiumTrainerOffset(@trainertypes[i])
+        sprite.src_rect.x -= offset[0]
+        sprite.src_rect.y -= offset[1]
+        sprite.x = @sprites[_INTL("lock{1}",i)].x
+        sprite.y = @sprites[_INTL("lock{1}",i)].y
+        sprite.z = 3
+        if @opponent
+          @sprites[_INTL("lock{1}",i)].src_rect = Rect.new(0,0,94,94)
+          if i == @index
+            @sprites["select"] = IconSprite.new(sprite.x,sprite.y,@viewport)
+            @sprites["select"].setBitmap("Graphics/Pictures/Stadium/marker")
+            @sprites["select"].z = 4
+          else
+            sprite.tone = Tone.new(-60,-60,-60,140)
+          end
+        else
+          @sprites[_INTL("lock{1}",i)].visible = false
+          sprite.tone = Tone.new(-60,-60,-60,140)
+        end
+      end
+    end
   
-  pbStadiumStart
-  pbStadiumTrainers(trainertypes,index,name)
-  pbStadiumTeam(opponent[0],opponent[1])
-  pbStadiumEnd
+    if @rows.length == 2
+      @sprites["row1"].y -= 300
+      @sprites["row2"].y += 300
+      @sprites["title"].y -= 300
+      @sprites["subtitle"].y += 300
+      for i in 0...@trainers.length
+        if i >= @rows[0]
+          @sprites[_INTL("lock{1}",i)].y += 300
+        else
+          @sprites[_INTL("lock{1}",i)].y -= 300
+        end
+        if i <= @index
+          @sprites[_INTL("trainer{1}",i)].y = @sprites[_INTL("lock{1}",i)].y
+        end
+        if i == @index
+          @sprites["select"].y = @sprites[_INTL("lock{1}",i)].y
+        end
+      end
+    else
+      @sprites["row1"].y -= 300
+      @sprites["title"].y += 300
+      @sprites["subtitle"].y += 300
+      for i in 0...@trainers.length
+        @sprites[_INTL("lock{1}",i)].y -= 300
+        if i <= @index
+          @sprites[_INTL("trainer{1}",i)].y -= 300
+        end
+        if @opponent && i == @index
+          @sprites["select"].y -= 300
+        end
+      end
+    end
+
+    if @opponent
+      type = @opponent[0]
+      name = @opponent[1]
+
+      trainer = pbLoadTrainer(type,name,0)
+      party = trainer.party
+
+      @sprites["player"] = IconSprite.new(44+128,44+96,@viewport)
+      @sprites["player"].setBitmap("Graphics/Pictures/Stadium/team_player")
+      @sprites["player"].z = 2
+
+      player_type = PBParty.getTrainerType(getPartyActive(0))
+      offset = pbStadiumTrainerOffset(player_type)
+      @sprites["player_img"] = IconSprite.new(60+128,52+96,@viewport)
+      @sprites["player_img"].setBitmap(
+        sprintf("Graphics/Trainers/%s",player_type.to_s))
+      @sprites["player_img"].z = 3
+      @sprites["player_img"].src_rect = Rect.new(
+        @sprites["player_img"].bitmap.width/2 - 47, 0, 94, 94)
+      @sprites["player_img"].src_rect.x -= offset[0]
+      @sprites["player_img"].src_rect.y -= offset[1]
+
+      @sprites["opponent"] = IconSprite.new(44+128,196+96,@viewport)
+      @sprites["opponent"].setBitmap("Graphics/Pictures/Stadium/team_opponent")
+      @sprites["opponent"].z = 2
+      
+      @sprites["opponent_img"] = IconSprite.new(358+128,246+96,@viewport)
+      @sprites["opponent_img"].setBitmap(
+        sprintf("Graphics/Trainers/%s",type.to_s))
+      @sprites["opponent_img"].z = 3
+      @sprites["opponent_img"].src_rect = Rect.new(
+        @sprites["opponent_img"].bitmap.width/2 - 47, 0, 94, 94)
+      offset = pbStadiumTrainerOffset(type)
+      @sprites["opponent_img"].src_rect.x -= offset[0]
+      @sprites["opponent_img"].src_rect.y -= offset[1]
+      
+      @sprites["vs"] = IconSprite.new(206+128,160+96,@viewport)
+      @sprites["vs"].setBitmap("Graphics/Pictures/Stadium/stadium_vs")
+      @sprites["vs"].z = 6
+      @sprites["vs"].opacity = 0
   
+      typename = GameData::TrainerType.get(type).name
+      if typename.length > 11 && typename.include?(" ")
+        typename = typename[(typename.index(" ")+1)..typename.length]
+      end
+    
+      # Drawing cup name and battle number
+      pbSetSmallFont(@sprites["player"].bitmap)
+      pbDrawTextPositions(@sprites["player"].bitmap,
+        [["Trainer",14,98,0,Color.new(250,250,250),Color.new(40,40,40),1],
+         [PBParty.getName(getPartyActive(0)).upcase,14,122,0,Color.new(250,250,250),Color.new(40,40,40),1]])
+      pbSetSmallFont(@sprites["opponent"].bitmap)
+      pbDrawTextPositions(@sprites["opponent"].bitmap,
+        [[typename,312,0,0,Color.new(250,250,250),Color.new(40,40,40),1],
+         [name.upcase,312,20,0,Color.new(250,250,250),Color.new(40,40,40),1]])
+         
+      x_coords = [308,408,508,308,408,508]
+      y_coords = [148,148,148,220,220,220]
+      
+      top_sprites = ["player", "player_img"]
+      bottom_sprites = ["opponent", "opponent_img"]
+      blue_sprites = ["player", "opponent"]
+
+      playerparty = []
+      for i in 0...3
+        if getActivePokemon(0)[i]
+          playerparty.push(getActivePokemon(0)[i])
+        else
+          playerparty.push(false)
+        end
+      end
+      if pbStadiumCup[4] # doubles
+        for i in 0...3
+          if getActivePokemon(1)[i]
+            playerparty.push(getActivePokemon(1)[i])
+          else
+            playerparty.push(false)
+          end
+        end
+      else
+        for i in 0...3
+          playerparty.push(false)
+        end
+      end
+
+      for i in 0...6
+        # Player party
+        @sprites[_INTL("plock{1}",i)] = IconSprite.new(358,246,@viewport)
+        @sprites[_INTL("plock{1}",i)].setBitmap("Graphics/Pictures/Stadium/team_lock")
+        @sprites[_INTL("plock{1}",i)].z = 5
+        @sprites[_INTL("plock{1}",i)].src_rect = Rect.new(0, 0, 90, 64)
+        @sprites[_INTL("plock{1}",i)].x = x_coords[i] - 12
+        @sprites[_INTL("plock{1}",i)].y = y_coords[i]
+        if playerparty[i]
+          @sprites[_INTL("ppokemon{1}",i)] =
+            PokemonIconSprite.new(playerparty[i],@viewport)
+          @sprites[_INTL("ppokemon{1}",i)].z = 4
+          @sprites[_INTL("ppokemon{1}",i)].x = x_coords[i]
+          @sprites[_INTL("ppokemon{1}",i)].y = y_coords[i]
+          top_sprites.push(_INTL("ppokemon{1}",i))
+        end
+        
+        # Opponent party
+        @sprites[_INTL("olock{1}",i)] = IconSprite.new(358,246,@viewport)
+        @sprites[_INTL("olock{1}",i)].setBitmap("Graphics/Pictures/Stadium/team_lock")
+        @sprites[_INTL("olock{1}",i)].z = 5
+        @sprites[_INTL("olock{1}",i)].src_rect = Rect.new(0, 0, 90, 64)
+        @sprites[_INTL("olock{1}",i)].x = x_coords[i] - 126
+        @sprites[_INTL("olock{1}",i)].y = y_coords[i] + 152
+        if party.length > i
+          @sprites[_INTL("opokemon{1}",i)] =
+            PokemonIconSprite.new(party[i],@viewport)
+          @sprites[_INTL("opokemon{1}",i)].z = 4
+          @sprites[_INTL("opokemon{1}",i)].x = x_coords[i] - 114
+          @sprites[_INTL("opokemon{1}",i)].y = y_coords[i] + 152
+          bottom_sprites.push(_INTL("opokemon{1}",i))
+        end
+        top_sprites.push(_INTL("plock{1}",i))
+        bottom_sprites.push(_INTL("olock{1}",i))
+        blue_sprites.push(_INTL("plock{1}",i))
+        blue_sprites.push(_INTL("olock{1}",i))
+      end
+  
+      for s in top_sprites
+        @sprites[s].y -= 300
+      end
+      
+      for s in bottom_sprites
+        @sprites[s].y += 300
+      end
+
+      @top_sprites = top_sprites
+      @bottom_sprites = bottom_sprites
+      @team_blue_sprites = blue_sprites
+      @playerparty = playerparty
+      @opponentparty = party
+    else
+      @sprites["victory"] = IconSprite.new(
+        0,Graphics.height/2-40,@viewport)
+      @sprites["victory"].setBitmap("Graphics/Pictures/Stadium/victory")
+      @sprites["victory"].opacity = 0
+      @sprites["victory"].z = 9
+    end
+  end
+
+  def update
+    Graphics.update
+    @viewport.update
+    Input.update
+    pbUpdateSpriteHash(@sprites)
+    @sprites["bg"].ox -= 16
+    @sprites["bg"].ox = 0 if @sprites["bg"].ox <= -512
+  end
+
+  def updateSelect
+    if @sprites["select"].opacity % 2 == 0
+      @sprites["select"].opacity += 8
+      @sprites["select"].opacity += 1 if @sprites["select"].opacity > 240
+    else
+      @sprites["select"].opacity -= 8
+      @sprites["select"].opacity -= 1 if @sprites["select"].opacity < 100
+    end
+  end
+
+  def start
+    while @sprites["bg"].opacity < 255
+      self.update
+      @sprites["bg"].opacity += 4
+    end
+  end
+
+  def getBlueSprites
+    blue_sprites = ["row1","title","subtitle"]
+    blue_sprites.push("row2") if @rows.length >= 2
+    for i in 0...@trainers.length
+      blue_sprites.push(_INTL("lock{1}",i))
+    end
+    return blue_sprites
+  end
+
+  def showTrainers
+    120.times do
+      self.update
+    end
+
+    pbSEPlay("Stadium Versus")
+
+    15.times do
+      self.update
+      self.rowsAppearFrame
+    end
+    
+    pbSEPlay("Blow4")
+
+    blue_sprites = self.getBlueSprites()
+    
+    i = 0
+    while i < (132 + (@index * 6))
+      self.update
+      self.updateSelect
+      
+      if i > 6
+        for j in 0..@index
+          if (i-6) > j*6
+            @sprites[_INTL("lock{1}",j)].src_rect.y += 12
+            @sprites[_INTL("lock{1}",j)].src_rect.height -= 12
+          end
+        end
+      end
+      
+      if i < 8
+        for s in blue_sprites
+          @sprites[s].tone.red += 12
+          @sprites[s].tone.green += 12
+          @sprites[s].tone.blue += 24
+        end
+      elsif i < 16
+        for s in blue_sprites
+          @sprites[s].tone.red -= 12
+          @sprites[s].tone.green -= 12
+          @sprites[s].tone.blue -= 24
+        end
+      end
+      
+      i+=1
+    end
+  
+    pbSEPlay("Wind1")
+
+    32.times do
+      self.update
+      self.updateSelect
+      self.rowsDisappearFrame
+    end
+  end
+
+  def showVictory
+    150.times do
+      self.update
+    end
+
+    15.times do
+      self.update
+      self.rowsAppearFrame
+    end
+  
+    pbSEPlay("Blow4")
+  
+    blue_sprites = self.getBlueSprites()
+
+    speed = 111
+    i = 0
+    done = false
+    while !done
+      self.update
+      
+      if i >= speed
+        for j in 0..@index
+          if (i-speed) == j*speed/2
+            pbSEPlay("PRSFX- Feint2",120,80+((j*80)/@index))
+            @sprites[_INTL("lock{1}",j)].visible = true
+            if j==@index
+              done = true
+            end
+          end
+        end
+      end
+      
+      if i < 8
+        for s in blue_sprites
+          @sprites[s].tone.red += 12
+          @sprites[s].tone.green += 12
+          @sprites[s].tone.blue += 24
+        end
+      elsif i < 16
+        for s in blue_sprites
+          @sprites[s].tone.red -= 12
+          @sprites[s].tone.green -= 12
+          @sprites[s].tone.blue -= 24
+        end
+      end
+      
+      i+=1
+    end
+
+    (((@index % 2 == 0) ? (speed*1.5) : speed).round).times do
+      self.update
+    end
+
+    pbMEPlay("Slots big win", 100)
+
+    180.times do
+      self.update
+      @sprites["victory"].opacity += 12
+    end
+
+    pbSEPlay("Wind1")
+
+    32.times do
+      self.update
+      self.rowsDisappearFrame
+      @sprites["victory"].opacity -= 16
+    end
+  end
+
+  def showTeam
+    15.times do
+      self.update
+      for s in @top_sprites
+        @sprites[s].y += 20
+      end
+      for s in @bottom_sprites
+        @sprites[s].y -= 20
+      end
+    end
+  
+    pbSEPlay("Blow4")
+
+    played_se = false
+    i = 0
+    while i < 160
+      self.update
+      
+      if i > 6
+        for j in 0...6
+          if (i-6) > j*6
+            if @playerparty[j]
+              @sprites[_INTL("plock{1}",j)].src_rect.y += 12
+              @sprites[_INTL("plock{1}",j)].src_rect.height -= 12
+            end
+            if @opponentparty.length > j
+              @sprites[_INTL("olock{1}",j)].src_rect.y += 12
+              @sprites[_INTL("olock{1}",j)].src_rect.height -= 12
+            end
+          end
+        end
+      end
+      
+      if i % 2 == 0
+        for j in 0...6
+          if @playerparty[j]
+            @sprites[_INTL("ppokemon{1}",j)].update
+          end
+          if @opponentparty.length > j
+            @sprites[_INTL("opokemon{1}",j)].update
+          end
+        end
+      end
+      
+      if i < 8
+        for s in @team_blue_sprites
+          @sprites[s].tone.red += 12
+          @sprites[s].tone.green += 12
+          @sprites[s].tone.blue += 24
+        end
+      elsif i < 16
+        for s in @team_blue_sprites
+          @sprites[s].tone.red -= 12
+          @sprites[s].tone.green -= 12
+          @sprites[s].tone.blue -= 24
+        end
+      end
+      
+      if i > 10 + (@playerparty.length * 6) && i > 10 + (@opponentparty.length * 6) && i < 80
+        pbSEPlay("Harden",160) if !played_se
+        played_se = true
+        @sprites["vs"].opacity += 16
+      end
+      
+      if i > 150
+        @sprites["vs"].opacity -= 16
+      end
+      
+      i+=1
+    end
+  
+    pbSEPlay("Wind1")
+  
+    32.times do
+      self.update
+      
+      @sprites["vs"].opacity -= 16
+      
+      for s in @top_sprites
+        @sprites[s].x -= 24
+      end
+      for s in @bottom_sprites
+        @sprites[s].x += 24
+      end
+    end
+  end
+
+  def rowsAppearFrame
+    if @rows.length == 2
+      @sprites["row1"].y += 20
+      @sprites["row2"].y -= 20
+      @sprites["title"].y += 20
+      @sprites["subtitle"].y -= 20
+      for i in 0...@trainers.length
+        if i >= @rows[0]
+          @sprites[_INTL("lock{1}",i)].y -= 20
+        else
+          @sprites[_INTL("lock{1}",i)].y += 20
+        end
+        if i <= @index
+          @sprites[_INTL("trainer{1}",i)].y = @sprites[_INTL("lock{1}",i)].y
+        end
+        if @opponent && i == @index
+          @sprites["select"].y = @sprites[_INTL("lock{1}",i)].y
+        end
+      end
+    else
+      @sprites["row1"].y += 20
+      @sprites["title"].y -= 20
+      @sprites["subtitle"].y -= 20
+      for i in 0...@trainers.length
+        @sprites[_INTL("lock{1}",i)].y += 20
+        if i <= @index
+          @sprites[_INTL("trainer{1}",i)].y += 20
+        end
+        if @opponent && i == @index
+          @sprites["select"].y += 20
+        end
+      end
+    end
+  end
+
+  def rowsDisappearFrame
+    @sprites["row1"].x += 24
+    @sprites["title"].x -= 24
+    @sprites["subtitle"].x += 24
+    if @rows.length == 2
+      @sprites["row2"].x -= 24
+      for i in 0...@trainers.length
+        if i >= @rows[0]
+          @sprites[_INTL("lock{1}",i)].x -= 24
+        else
+          @sprites[_INTL("lock{1}",i)].x += 24
+        end
+        if i <= @index
+          @sprites[_INTL("trainer{1}",i)].x = @sprites[_INTL("lock{1}",i)].x
+        end
+        if @opponent && i == @index
+          @sprites["select"].x = @sprites[_INTL("lock{1}",i)].x
+        end
+      end
+    else
+      for i in 0...@trainers.length
+        @sprites[_INTL("lock{1}",i)].x += 24
+        if i <= @index
+          @sprites[_INTL("trainer{1}",i)].x += 24
+        end
+        if @opponent && i == @index
+          @sprites["select"].x += 24
+        end
+      end
+    end
+  end
+
+  def end
+    while @sprites["bg"].opacity > 0
+      self.update
+      @sprites["bg"].opacity -= 4
+    end
+  end
+
+  def dispose
+    pbDisposeSpriteHash(@sprites)
+    @viewport.dispose
+  end
+
+end
+
+def pbStadiumBattle(cup,index=0)
+  transition = StadiumTransition.new(cup,index)
+  transition.start
+  transition.showTrainers
+  transition.showTeam
+  transition.end
+  transition.dispose
 end
 
 def pbStadiumFinish(cup)
-  
-  name = cup[0]
-  trainers = cup[3]
-  trainertypes = []
-  for i in trainers
-    trainertypes.push(i[0])
-  end
-  
-  pbStadiumStart(true)
-  pbStadiumVictory(trainertypes,name)
-  pbStadiumEnd
-  
-end
-
-def pbStadiumStart(finish=false)
-  
-  viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-  viewport.z = 99999
-  
-  sprites = {}
-  
-  sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
-  sprites["bg"].z = 1
-  sprites["bg"].opacity = 0
-  sprites["bg"].update
-  
-  pbBGMPlay(finish ? "GSC Intro" : "Stadium Loop")
-  
-  while sprites["bg"].opacity < 255
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].opacity += 4
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  while sprites["bg"].ox < 0
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  
-end
-
-def pbStadiumEnd
-  
-  viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-  viewport.z = 99999
-  
-  sprites = {}
-  
-  sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
-  sprites["bg"].z = 1
-  sprites["bg"].update
-  
-  while sprites["bg"].opacity > 0
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].opacity -= 4
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  
-end
-
-def pbStadiumTrainers(trainers,index,title)
-  
-  viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-  viewport.z = 99999
-  
-  sprites = {}
-  
-  sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
-  sprites["bg"].z = 1
-  sprites["bg"].update
-  
-  rows = [[1],[2],[3],[4],[3,2],[3,3],[4,3],[4,4]]
-  rows = rows[trainers.length - 1]
-  xcoords = [128,329,269,218,165] #[0,201,148,97,44]
-  ycoords = rows.length == 1 ? [305,347,195] : [250,292,140,334] #[209,251,99] : [154,196,44,238]
-  
-  sprites["title"] = IconSprite.new(0,0,viewport)
-  sprites["title"].setBitmap("Graphics/Pictures/Stadium/title")
-  sprites["title"].z = 2
-  sprites["title"].x = xcoords[4]
-  sprites["title"].y = ycoords[0]
-  
-  sprites["subtitle"] = IconSprite.new(0,0,viewport)
-  sprites["subtitle"].setBitmap("Graphics/Pictures/Stadium/subtitle")
-  sprites["subtitle"].z = 2
-  sprites["subtitle"].x = xcoords[4]
-  sprites["subtitle"].y = ycoords[1]
-  
-  # Drawing cup name and battle number
-  pbSetSystemFont(sprites["title"].bitmap)
-  pbDrawTextPositions(sprites["title"].bitmap,
-    [[title.upcase,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
-  battletitle = _INTL("BATTLE {1}",index+1)
-  battletitle = "SEMIFINAL" if (index+2)==trainers.length
-  battletitle = "FINAL" if (index+1)==trainers.length
-  pbSetSystemFont(sprites["subtitle"].bitmap)
-  pbDrawTextPositions(sprites["subtitle"].bitmap,
-    [[battletitle,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
-  
-  sprites["row1"] = IconSprite.new(0,0,viewport)
-  sprites["row1"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[0]))
-  sprites["row1"].z = 2
-  sprites["row1"].x = xcoords[rows[0]]
-  sprites["row1"].y = ycoords[2]
-  
-  if rows.length == 2
-    sprites["row2"] = IconSprite.new(0,0,viewport)
-    sprites["row2"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[1]))
-    sprites["row2"].z = 2
-    sprites["row2"].x = xcoords[rows[1]]
-    sprites["row2"].y = ycoords[3]
-  end
-  
-  
-  for i in 0...trainers.length
-    sprites[_INTL("lock{1}",i)] = IconSprite.new(0,0,viewport)
-    sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/Stadium/locked")
-    sprites[_INTL("lock{1}",i)].z = 5
-    sprites[_INTL("lock{1}",i)].x = (i >= rows[0]) ? ((i-rows[0]) * 104) : (i * 104)
-    sprites[_INTL("lock{1}",i)].x += xcoords[(i >= rows[0]) ? rows[1] : rows[0]] + 8
-    sprites[_INTL("lock{1}",i)].y = ((i >= rows[0]) ? ycoords[3] : ycoords[2]) + 8
-    if i <= index
-      sprites[_INTL("trainer{1}",i)] = IconSprite.new(0,0,viewport)
-      sprite = sprites[_INTL("trainer{1}",i)]
-      sprite.setBitmap(
-        sprintf("Graphics/Trainers/%s",trainers[i].to_s))
-      sprite.src_rect = Rect.new(
-        sprite.bitmap.width / 2 - 47,0,
-        94,94)
-      offset = pbStadiumTrainerOffset(trainers[i])
-      sprite.src_rect.x -= offset[0]
-      sprite.src_rect.y -= offset[1]
-      sprite.x = sprites[_INTL("lock{1}",i)].x
-      sprite.y = sprites[_INTL("lock{1}",i)].y
-      sprite.z = 3
-      sprites[_INTL("lock{1}",i)].src_rect = Rect.new(0,0,94,94)
-      if i == index
-        sprites["select"] = IconSprite.new(sprite.x,sprite.y,viewport)
-        sprites["select"].setBitmap("Graphics/Pictures/Stadium/marker")
-        sprites["select"].z = 4
-      else
-        sprite.tone = Tone.new(-60,-60,-60,140)
-      end
-    end
-  end
-  
-  if rows.length == 2
-    sprites["row1"].y -= 300
-    sprites["row2"].y += 300
-    sprites["title"].y -= 300
-    sprites["subtitle"].y += 300
-    for i in 0...trainers.length
-      if i >= rows[0]
-        sprites[_INTL("lock{1}",i)].y += 300
-      else
-        sprites[_INTL("lock{1}",i)].y -= 300
-      end
-      if i <= index
-        sprites[_INTL("trainer{1}",i)].y = sprites[_INTL("lock{1}",i)].y
-      end
-      if i == index
-        sprites["select"].y = sprites[_INTL("lock{1}",i)].y
-      end
-    end
-  else
-    sprites["row1"].y -= 300
-    sprites["title"].y += 300
-    sprites["subtitle"].y += 300
-    for i in 0...trainers.length
-      sprites[_INTL("lock{1}",i)].y -= 300
-      if i <= index
-        sprites[_INTL("trainer{1}",i)].y -= 300
-      end
-      if i == index
-        sprites["select"].y -= 300
-      end
-    end
-  end
-  
-  120.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbSEPlay("Stadium Versus")
-  
-  15.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    if rows.length == 2
-      sprites["row1"].y += 20
-      sprites["row2"].y -= 20
-      sprites["title"].y += 20
-      sprites["subtitle"].y -= 20
-      for i in 0...trainers.length
-        if i >= rows[0]
-          sprites[_INTL("lock{1}",i)].y -= 20
-        else
-          sprites[_INTL("lock{1}",i)].y += 20
-        end
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].y = sprites[_INTL("lock{1}",i)].y
-        end
-        if i == index
-          sprites["select"].y = sprites[_INTL("lock{1}",i)].y
-        end
-      end
-    else
-      sprites["row1"].y += 20
-      sprites["title"].y -= 20
-      sprites["subtitle"].y -= 20
-      for i in 0...trainers.length
-        sprites[_INTL("lock{1}",i)].y += 20
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].y += 20
-        end
-        if i == index
-          sprites["select"].y += 20
-        end
-      end
-    end
-  end
-  
-  pbSEPlay("Blow4")
-  
-  blue_sprites = ["row1","title","subtitle"]
-  blue_sprites.push("row2") if rows.length >= 2
-  for i in 0...trainers.length
-    blue_sprites.push(_INTL("lock{1}",i))
-  end
-  
-  i = 0
-  while i < (132 + (index * 6))
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    if sprites["select"].opacity % 2 == 0
-      sprites["select"].opacity += 8
-      sprites["select"].opacity += 1 if sprites["select"].opacity > 240
-    else
-      sprites["select"].opacity -= 8
-      sprites["select"].opacity -= 1 if sprites["select"].opacity < 100
-    end
-    
-    if i > 6
-      for j in 0..index
-        if (i-6) > j*6
-          sprites[_INTL("lock{1}",j)].src_rect.y += 12
-          sprites[_INTL("lock{1}",j)].src_rect.height -= 12
-        end
-      end
-    end
-    
-    if i < 8
-      for s in blue_sprites
-        sprites[s].tone.red += 12
-        sprites[s].tone.green += 12
-        sprites[s].tone.blue += 24
-      end
-    elsif i < 16
-      for s in blue_sprites
-        sprites[s].tone.red -= 12
-        sprites[s].tone.green -= 12
-        sprites[s].tone.blue -= 24
-      end
-    end
-    
-    i+=1
-  end
-  
-  pbSEPlay("Wind1")
-  
-  32.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    if sprites["select"].opacity % 2 == 0
-      sprites["select"].opacity += 8
-      sprites["select"].opacity += 1 if sprites["select"].opacity > 240
-    else
-      sprites["select"].opacity -= 8
-      sprites["select"].opacity -= 1 if sprites["select"].opacity < 100
-    end
-    
-    if rows.length == 2
-      sprites["row1"].x += 24
-      sprites["row2"].x -= 24
-      sprites["title"].x -= 24
-      sprites["subtitle"].x += 24
-      for i in 0...trainers.length
-        if i >= rows[0]
-          sprites[_INTL("lock{1}",i)].x -= 24
-        else
-          sprites[_INTL("lock{1}",i)].x += 24
-        end
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].x = sprites[_INTL("lock{1}",i)].x
-        end
-        if i == index
-          sprites["select"].x = sprites[_INTL("lock{1}",i)].x
-        end
-      end
-    else
-      sprites["row1"].x += 24
-      sprites["title"].x -= 24
-      sprites["subtitle"].x += 24
-      for i in 0...trainers.length
-        sprites[_INTL("lock{1}",i)].x += 24
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].x += 24
-        end
-        if i == index
-          sprites["select"].x += 24
-        end
-      end
-    end
-  end
-  
-  while sprites["bg"].ox < 0
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  
-end
-
-def pbStadiumVictory(trainers,title)
-  
-  viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-  viewport.z = 99999
-  
-  sprites = {}
-  
-  sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
-  sprites["bg"].z = 1
-  sprites["bg"].update
-
-  index = trainers.length - 1
-  
-  rows = [[1],[2],[3],[4],[3,2],[3,3],[4,3],[4,4]]
-  rows = rows[trainers.length - 1]
-  xcoords = [128,329,269,218,165] #[0,201,148,97,44]
-  ycoords = rows.length == 1 ? [305,347,195] : [250,292,140,334] #[209,251,99] : [154,196,44,238]
-  
-  sprites["title"] = IconSprite.new(0,0,viewport)
-  sprites["title"].setBitmap("Graphics/Pictures/Stadium/title")
-  sprites["title"].z = 2
-  sprites["title"].x = xcoords[4]
-  sprites["title"].y = ycoords[0]
-  
-  sprites["subtitle"] = IconSprite.new(0,0,viewport)
-  sprites["subtitle"].setBitmap("Graphics/Pictures/Stadium/subtitle")
-  sprites["subtitle"].z = 2
-  sprites["subtitle"].x = xcoords[4]
-  sprites["subtitle"].y = ycoords[1]
-  
-  # Drawing cup name and battle number
-  pbSetSystemFont(sprites["title"].bitmap)
-  pbDrawTextPositions(sprites["title"].bitmap,
-    [[title.upcase,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
-  battletitle = "RESULTS"
-  pbSetSystemFont(sprites["subtitle"].bitmap)
-  pbDrawTextPositions(sprites["subtitle"].bitmap,
-    [[battletitle,212,2,2,Color.new(0,0,0),Color.new(120,120,120),1]])
-  
-  sprites["row1"] = IconSprite.new(0,0,viewport)
-  sprites["row1"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[0]))
-  sprites["row1"].z = 2
-  sprites["row1"].x = xcoords[rows[0]]
-  sprites["row1"].y = ycoords[2]
-  
-  if rows.length == 2
-    sprites["row2"] = IconSprite.new(0,0,viewport)
-    sprites["row2"].setBitmap(_INTL("Graphics/Pictures/Stadium/bar{1}",rows[1]))
-    sprites["row2"].z = 2
-    sprites["row2"].x = xcoords[rows[1]]
-    sprites["row2"].y = ycoords[3]
-  end
-  
-  for i in 0...trainers.length
-    sprites[_INTL("lock{1}",i)] = IconSprite.new(0,0,viewport)
-    sprites[_INTL("lock{1}",i)].setBitmap("Graphics/Pictures/Stadium/defeat")
-    sprites[_INTL("lock{1}",i)].z = 5
-    sprites[_INTL("lock{1}",i)].x = (i >= rows[0]) ? ((i-rows[0]) * 104) : (i * 104)
-    sprites[_INTL("lock{1}",i)].x += xcoords[(i >= rows[0]) ? rows[1] : rows[0]] + 8
-    sprites[_INTL("lock{1}",i)].y = ((i >= rows[0]) ? ycoords[3] : ycoords[2]) + 8
-    if i <= index
-      sprites[_INTL("trainer{1}",i)] = IconSprite.new(0,0,viewport)
-      sprite = sprites[_INTL("trainer{1}",i)]
-      sprite.setBitmap(
-        sprintf("Graphics/Trainers/%s",trainers[i].to_s))
-      sprite.src_rect = Rect.new(
-        sprite.bitmap.width / 2 - 47,0,
-        94,94)
-      offset = pbStadiumTrainerOffset(trainers[i])
-      sprite.src_rect.x -= offset[0]
-      sprite.src_rect.y -= offset[1]
-      sprite.x = sprites[_INTL("lock{1}",i)].x
-      sprite.y = sprites[_INTL("lock{1}",i)].y
-      sprite.z = 3
-      sprites[_INTL("lock{1}",i)].visible = false
-      sprite.tone = Tone.new(-60,-60,-60,140)
-    end
-  end
-  
-  if rows.length == 2
-    sprites["row1"].y -= 300
-    sprites["row2"].y += 300
-    sprites["title"].y -= 300
-    sprites["subtitle"].y += 300
-    for i in 0...trainers.length
-      if i >= rows[0]
-        sprites[_INTL("lock{1}",i)].y += 300
-      else
-        sprites[_INTL("lock{1}",i)].y -= 300
-      end
-      if i <= index
-        sprites[_INTL("trainer{1}",i)].y = sprites[_INTL("lock{1}",i)].y
-      end
-    end
-  else
-    sprites["row1"].y -= 300
-    sprites["title"].y += 300
-    sprites["subtitle"].y += 300
-    for i in 0...trainers.length
-      sprites[_INTL("lock{1}",i)].y -= 300
-      if i <= index
-        sprites[_INTL("trainer{1}",i)].y -= 300
-      end
-    end
-  end
-  
-  150.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  15.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 16
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    if rows.length == 2
-      sprites["row1"].y += 20
-      sprites["row2"].y -= 20
-      sprites["title"].y += 20
-      sprites["subtitle"].y -= 20
-      for i in 0...trainers.length
-        if i >= rows[0]
-          sprites[_INTL("lock{1}",i)].y -= 20
-        else
-          sprites[_INTL("lock{1}",i)].y += 20
-        end
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].y = sprites[_INTL("lock{1}",i)].y
-        end
-      end
-    else
-      sprites["row1"].y += 20
-      sprites["title"].y -= 20
-      sprites["subtitle"].y -= 20
-      for i in 0...trainers.length
-        sprites[_INTL("lock{1}",i)].y += 20
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].y += 20
-        end
-      end
-    end
-  end
-  
-  pbSEPlay("Blow4")
-  
-  blue_sprites = ["row1","title","subtitle"]
-  blue_sprites.push("row2") if rows.length >= 2
-  for i in 0...trainers.length
-    blue_sprites.push(_INTL("lock{1}",i))
-  end
-  
-  speed = 111
-  i = 0
-  done = false
-  while !done
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    
-    if i >= speed
-      for j in 0..index
-        if (i-speed) == j*speed/2
-          pbSEPlay("PRSFX- Feint2",120,80+((j*80)/index))
-          sprites[_INTL("lock{1}",j)].visible = true
-          if j==index
-            done = true
-          end
-        end
-      end
-    end
-    
-    if i < 8
-      for s in blue_sprites
-        sprites[s].tone.red += 12
-        sprites[s].tone.green += 12
-        sprites[s].tone.blue += 24
-      end
-    elsif i < 16
-      for s in blue_sprites
-        sprites[s].tone.red -= 12
-        sprites[s].tone.green -= 12
-        sprites[s].tone.blue -= 24
-      end
-    end
-    
-    i+=1
-  end
-  
-  (((index % 2 == 0) ? (speed*1.5) : speed).round).times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbMEPlay("Slots big win", 100)
-  
-  sprites["victory"] = IconSprite.new(
-    0,Graphics.height/2-40,viewport)
-  sprites["victory"].setBitmap("Graphics/Pictures/Stadium/victory")
-  sprites["victory"].opacity = 0
-  sprites["victory"].z = 9
-  
-  180.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    
-    sprites["victory"].opacity += 12
-  end
-  
-  pbSEPlay("Wind1")
-  
-  32.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    
-    sprites["victory"].opacity -= 16
-    
-    if rows.length == 2
-      sprites["row1"].x += 24
-      sprites["row2"].x -= 24
-      sprites["title"].x -= 24
-      sprites["subtitle"].x += 24
-      for i in 0...trainers.length
-        if i >= rows[0]
-          sprites[_INTL("lock{1}",i)].x -= 24
-        else
-          sprites[_INTL("lock{1}",i)].x += 24
-        end
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].x = sprites[_INTL("lock{1}",i)].x
-        end
-      end
-    else
-      sprites["row1"].x += 24
-      sprites["title"].x -= 24
-      sprites["subtitle"].x += 24
-      for i in 0...trainers.length
-        sprites[_INTL("lock{1}",i)].x += 24
-        if i <= index
-          sprites[_INTL("trainer{1}",i)].x += 24
-        end
-      end
-    end
-  end
-  
-  while sprites["bg"].ox < 0
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  
-end
-
-
-
-def pbStadiumTeam(type,name,team=0)
-  
-  trainer = pbLoadTrainer(type,name,team)
-  party = trainer.party
-  
-  viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-  viewport.z = 99999
-  
-  sprites = {}
-  
-  sprites["bg"] = AnimatedPlane.new(viewport)
-  sprites["bg"].setBitmap("Graphics/Pictures/Stadium/bg")
-  sprites["bg"].z = 1
-  sprites["bg"].update
-  
-  sprites["player"] = IconSprite.new(44+128,44+96,viewport)
-  sprites["player"].setBitmap("Graphics/Pictures/Stadium/team_player")
-  sprites["player"].z = 2
-  
-  player_type = PBParty.getTrainerType(getPartyActive(0))
-  offset = pbStadiumTrainerOffset(player_type)
-  sprites["player_img"] = IconSprite.new(60+128,52+96,viewport)
-  sprites["player_img"].setBitmap(
-    sprintf("Graphics/Trainers/%s",player_type.to_s))
-  sprites["player_img"].z = 3
-  sprites["player_img"].src_rect = Rect.new(
-    sprites["player_img"].bitmap.width/2 - 47, 0, 94, 94)
-  sprites["player_img"].src_rect.x -= offset[0]
-  sprites["player_img"].src_rect.y -= offset[1]
-  
-  sprites["opponent"] = IconSprite.new(44+128,196+96,viewport)
-  sprites["opponent"].setBitmap("Graphics/Pictures/Stadium/team_opponent")
-  sprites["opponent"].z = 2
-  
-  sprites["opponent_img"] = IconSprite.new(358+128,246+96,viewport)
-  sprites["opponent_img"].setBitmap(
-    sprintf("Graphics/Trainers/%s",type.to_s))
-  sprites["opponent_img"].z = 3
-  sprites["opponent_img"].src_rect = Rect.new(
-    sprites["opponent_img"].bitmap.width/2 - 47, 0, 94, 94)
-  offset = pbStadiumTrainerOffset(type)
-  sprites["opponent_img"].src_rect.x -= offset[0]
-  sprites["opponent_img"].src_rect.y -= offset[1]
-    
-  sprites["vs"] = IconSprite.new(206+128,160+96,viewport)
-  sprites["vs"].setBitmap("Graphics/Pictures/Stadium/stadium_vs")
-  sprites["vs"].z = 6
-  sprites["vs"].opacity = 0
-  
-  typename = GameData::TrainerType.get(type).name
-  if typename.length > 11 && typename.include?(" ")
-    typename = typename[(typename.index(" ")+1)..typename.length]
-  end
-    
-  # Drawing cup name and battle number
-  pbSetSmallFont(sprites["player"].bitmap)
-  pbDrawTextPositions(sprites["player"].bitmap,
-    [["Trainer",14,98,0,Color.new(250,250,250),Color.new(40,40,40),1],
-     [PBParty.getName(getPartyActive(0)).upcase,14,122,0,Color.new(250,250,250),Color.new(40,40,40),1]])
-  pbSetSmallFont(sprites["opponent"].bitmap)
-  pbDrawTextPositions(sprites["opponent"].bitmap,
-    [[typename,312,0,0,Color.new(250,250,250),Color.new(40,40,40),1],
-     [name.upcase,312,20,0,Color.new(250,250,250),Color.new(40,40,40),1]])
-  
-  x_coords = [308,408,508,308,408,508]
-  y_coords = [148,148,148,220,220,220]
-  
-  top_sprites = ["player", "player_img"]
-  bottom_sprites = ["opponent", "opponent_img"]
-  blue_sprites = ["player", "opponent"]
-  
-  playerparty = []
-  for i in 0...3
-    if getActivePokemon(0)[i]
-      playerparty.push(getActivePokemon(0)[i])
-    else
-      playerparty.push(false)
-    end
-  end
-  if pbStadiumCup[4] # doubles
-    for i in 0...3
-      if getActivePokemon(1)[i]
-        playerparty.push(getActivePokemon(1)[i])
-      else
-        playerparty.push(false)
-      end
-    end
-  else
-    for i in 0...3
-      playerparty.push(false)
-    end
-  end
-
-  for i in 0...6
-    # Player party
-    sprites[_INTL("plock{1}",i)] = IconSprite.new(358,246,viewport)
-    sprites[_INTL("plock{1}",i)].setBitmap("Graphics/Pictures/Stadium/team_lock")
-    sprites[_INTL("plock{1}",i)].z = 5
-    sprites[_INTL("plock{1}",i)].src_rect = Rect.new(0, 0, 90, 64)
-    sprites[_INTL("plock{1}",i)].x = x_coords[i] - 12
-    sprites[_INTL("plock{1}",i)].y = y_coords[i]
-    if playerparty[i]
-      sprites[_INTL("ppokemon{1}",i)] =
-        PokemonIconSprite.new(playerparty[i],viewport)
-      sprites[_INTL("ppokemon{1}",i)].z = 4
-      sprites[_INTL("ppokemon{1}",i)].x = x_coords[i]
-      sprites[_INTL("ppokemon{1}",i)].y = y_coords[i]
-      top_sprites.push(_INTL("ppokemon{1}",i))
-    end
-    
-    # Opponent party
-    sprites[_INTL("olock{1}",i)] = IconSprite.new(358,246,viewport)
-    sprites[_INTL("olock{1}",i)].setBitmap("Graphics/Pictures/Stadium/team_lock")
-    sprites[_INTL("olock{1}",i)].z = 5
-    sprites[_INTL("olock{1}",i)].src_rect = Rect.new(0, 0, 90, 64)
-    sprites[_INTL("olock{1}",i)].x = x_coords[i] - 126
-    sprites[_INTL("olock{1}",i)].y = y_coords[i] + 152
-    if party.length > i
-      sprites[_INTL("opokemon{1}",i)] =
-        PokemonIconSprite.new(party[i],viewport)
-      sprites[_INTL("opokemon{1}",i)].z = 4
-      sprites[_INTL("opokemon{1}",i)].x = x_coords[i] - 114
-      sprites[_INTL("opokemon{1}",i)].y = y_coords[i] + 152
-      bottom_sprites.push(_INTL("opokemon{1}",i))
-    end
-    top_sprites.push(_INTL("plock{1}",i))
-    bottom_sprites.push(_INTL("olock{1}",i))
-    blue_sprites.push(_INTL("plock{1}",i))
-    blue_sprites.push(_INTL("olock{1}",i))
-  end
-  
-  for s in top_sprites
-    sprites[s].y -= 300
-  end
-  
-  for s in bottom_sprites
-    sprites[s].y += 300
-  end
-  
-  15.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    for s in top_sprites
-      sprites[s].y += 20
-    end
-    for s in bottom_sprites
-      sprites[s].y -= 20
-    end
-  end
-  
-  pbSEPlay("Blow4")
-  
-  played_se = false
-  i = 0
-  while i < 160
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    
-    if i > 6
-      for j in 0...6
-        if (i-6) > j*6
-          if playerparty[j]
-            sprites[_INTL("plock{1}",j)].src_rect.y += 12
-            sprites[_INTL("plock{1}",j)].src_rect.height -= 12
-          end
-          if party.length > j
-            sprites[_INTL("olock{1}",j)].src_rect.y += 12
-            sprites[_INTL("olock{1}",j)].src_rect.height -= 12
-          end
-        end
-      end
-    end
-    
-    if i % 2 == 0
-      for j in 0...6
-        if playerparty[j]
-          sprites[_INTL("ppokemon{1}",j)].update
-        end
-        if party.length > j
-          sprites[_INTL("opokemon{1}",j)].update
-        end
-      end
-    end
-    
-    if i < 8
-      for s in blue_sprites
-        sprites[s].tone.red += 12
-        sprites[s].tone.green += 12
-        sprites[s].tone.blue += 24
-      end
-    elsif i < 16
-      for s in blue_sprites
-        sprites[s].tone.red -= 12
-        sprites[s].tone.green -= 12
-        sprites[s].tone.blue -= 24
-      end
-    end
-    
-    if i > 10 + (playerparty.length * 6) && i > 10 + (party.length * 6) && i < 80
-      pbSEPlay("Harden",160) if !played_se
-      played_se = true
-      sprites["vs"].opacity += 16
-    end
-    
-    if i > 150
-      sprites["vs"].opacity -= 16
-    end
-    
-    i+=1
-  end
-  
-  pbSEPlay("Wind1")
-  
-  32.times do
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-    
-    sprites["vs"].opacity -= 16
-    
-    for s in top_sprites
-      sprites[s].x -= 24
-    end
-    for s in bottom_sprites
-      sprites[s].x += 24
-    end
-  end
-  
-  while sprites["bg"].ox < 0
-    Graphics.update
-    viewport.update
-    Input.update
-    
-    sprites["bg"].ox -= 24
-    sprites["bg"].ox = 0 if sprites["bg"].ox <= -512
-  end
-  
-  pbDisposeSpriteHash(sprites)
-  viewport.dispose
-  
+  transition = StadiumTransition.new(cup)
+  transition.start
+  transition.showVictory
+  transition.end
+  transition.dispose
 end
 
 def pbStadiumTrainerOffset(type)
@@ -931,7 +655,8 @@ def pbStadiumTrainerOffset(type)
     return [  0,-14]
   when :YOUNGSTER, :SCHOOLBOY, :SCHOOLGIRL,
        :LIBRARIAN, :DOCTOR, :ROUGHNECK,
-       :CHANNELER, :ENGINEER, :BURGLAR
+       :CHANNELER, :ENGINEER, :BURGLAR,
+       :JANUS
     return [  0,-28]
   when :RUINMANIAC
     return [ 10,-24]
@@ -945,6 +670,8 @@ def pbStadiumTrainerOffset(type)
     return [  8,  0]
   when :GAMBLER
     return [ -8,  0]
+  when :OLDPROTAGONIST
+    return [  0, -8]
   when :BACKPACKER_F, :CYCLIST_F
     return [-14,  0]
   when :FISHERMAN

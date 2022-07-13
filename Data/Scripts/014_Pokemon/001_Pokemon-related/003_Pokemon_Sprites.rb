@@ -99,6 +99,7 @@ class PokemonIconSprite < SpriteWrapper
     @logical_y    = 0   # Actual y coordinate
     @adjusted_x   = 0   # Offset due to "jumping" animation in party screen
     @adjusted_y   = 0   # Offset due to "jumping" animation in party screen
+    @species      = nil
   end
 
   def dispose
@@ -124,11 +125,13 @@ class PokemonIconSprite < SpriteWrapper
     @animBitmap.dispose if @animBitmap
     @animBitmap = nil
     if !@pokemon
+      @species = nil
       self.bitmap = nil
       @currentFrame = 0
       @counter = 0
       return
     end
+    @species = @pokemon.species
     @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename_from_pokemon(value))
     self.bitmap = @animBitmap.bitmap
     self.src_rect.width  = @animBitmap.height
@@ -171,7 +174,7 @@ class PokemonIconSprite < SpriteWrapper
     return 0 if @pokemon.fainted?    # Fainted - no animation
     # ret is initially the time a whole animation cycle lasts. It is divided by
     # the number of frames in that cycle at the end.
-    ret = Graphics.frame_rate/4                       # Green HP - 0.25 seconds
+    ret = Graphics.frame_rate/3                       # Green HP - 0.25 seconds
     if @pokemon.hp<=@pokemon.totalhp/4;    ret *= 4   # Red HP - 1 second
     elsif @pokemon.hp<=@pokemon.totalhp/2; ret *= 2   # Yellow HP - 0.5 seconds
     end
@@ -181,6 +184,9 @@ class PokemonIconSprite < SpriteWrapper
   end
 
   def update
+    if @pokemon && @pokemon.species != @species
+      self.pokemon = @pokemon
+    end
     return if !@animBitmap
     super
     @animBitmap.update

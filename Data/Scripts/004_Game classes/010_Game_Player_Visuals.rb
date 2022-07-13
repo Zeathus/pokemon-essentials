@@ -47,6 +47,9 @@ class Game_Player < Game_Character
     player = 0
     if $game_variables
       player = getPartyActive(0)
+      if $game_switches[FORCE_VISUAL_LEADER]
+        player = $game_variables[FORCED_VISUAL_LEADER]
+      end
     end
     charsets = ["walk", "run", "surf"]
     if !@move_route_forcing && $Trainer.character_ID>=0

@@ -62,7 +62,9 @@ class Sprite_Character < RPG::Sprite
     super(viewport)
     @character    = character
     @partner      = nil
+    @text_bubble  = nil
     @marker_id    = -1
+    @marker_text  = nil
     @markerSprite = nil
     @isPartner    = @character.is_a?(String)
     @oldbushdepth = 0
@@ -97,6 +99,10 @@ class Sprite_Character < RPG::Sprite
   def partner
     return @partner
   end
+
+  def set_text_bubble(text_bubble)
+    @text_bubble = text_bubble
+  end
   
   def visibility=(value)
     @visibility = value
@@ -130,6 +136,9 @@ class Sprite_Character < RPG::Sprite
     if @partner
       @partner.dispose
       @partner = nil
+    end
+    if @text_bubble
+      @text_bubble.on_event_dispose
     end
     if @markerSprite
       @markerSprite.dispose
@@ -219,18 +228,46 @@ class Sprite_Character < RPG::Sprite
     if @partner
       @partner.updatePartner(self, sx, sy, @character_name[/run/])
     end
-    if @marker_id != @character.marker_id
+    if @text_bubble
+      @text_bubble.update
+      if @text_bubble.disposed?
+        @text_bubble = nil
+      end
+    end
+    if @marker_id != @character.marker_id || @marker_text != @character.marker_text
       @marker_id = @character.marker_id
-      if @marker_id == -1 && @markerSprite
-        @markerSprite.dispose
-        @markerSprite = nil
-      else
-        if !@markerSprite
-          @markerSprite = IconSprite.new(0, 0, self.viewport)
-          @markerSprite.setBitmap("Graphics/Pictures/Quests/markers")
+      @marker_text = @character.marker_text
+      if @marker_id == -1
+        if @markerSprite
+          @markerSprite.dispose
+          @markerSprite = nil
         end
-        @markerSprite.src_rect = Rect.new(32 * @marker_id, 0, 32, 48)
-        @markerSprite.ox = 16
+      else
+        if @marker_text
+          if @markerSprite
+            @markerSprite.dispose
+          end
+          @markerSprite = Sprite.new(self.viewport)
+          bm = Bitmap.new(64, 48)
+          pbSetSmallFont(bm)
+          text_width = bm.text_size(@marker_text).width
+          if bm.width <= text_width
+            bm = Bitmap.new(text_width + 8, 48)
+            pbSetSmallFont(bm)
+          end
+          src_bm = RPG::Cache.load_bitmap("","Graphics/Pictures/Quests/markers")
+          bm.blt(bm.width / 2 - 16, 0, src_bm, Rect.new(32 * (@marker_id % 4), 48 * (@marker_id / 4).floor, 32, 48))
+          src_bm.dispose
+          pbDrawTextPositions(bm, [[_INTL(@marker_text),bm.width / 2,0,2,Color.new(252,252,252),Color.new(0,0,0),true]])
+          @markerSprite.bitmap = bm
+        else
+          if !@markerSprite
+            @markerSprite = IconSprite.new(0, 0, self.viewport)
+            @markerSprite.setBitmap("Graphics/Pictures/Quests/markers")
+          end
+        end
+        @markerSprite.src_rect = Rect.new(32 * (@marker_id % 4), 48 * (@marker_id / 4).floor, 32, 48) if !@marker_text
+        @markerSprite.ox = @marker_text ? (@markerSprite.bitmap.width / 2) : 16
         @markerSprite.oy = @ch + 40
       end
     end
@@ -242,6 +279,12 @@ class Sprite_Character < RPG::Sprite
   end
 
   def updatePartner(owner, sx, sy, run)
+    if @text_bubble
+      @text_bubble.update
+      if @text_bubble.disposed?
+        @text_bubble = nil
+      end
+    end
     RPG::Sprite.instance_method(:update).bind(self).call
     fullcharactername = _INTL("{1}_{2}", @character, (run ? "run" : "walk"))
     if @charactername != fullcharactername

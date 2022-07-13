@@ -2,25 +2,25 @@ def pbDrinkShop(town)
   choices = "\\ch[1,5,"
   if town=="lapis"
     choices += "$750 Sweet Swig,"
-    choices += "$1000 Warding Water,"
+    #choices += "$1000 Warding Water,"
     choices += "$1200 Eggnog Express,"
     choices += "$2000 Rising Refresh,"
     choices += "Cancel]"
-    drinks=["Sweet Swig","Warding Water","Eggnog Express","Rising Refresh"]
+    drinks=["Sweet Swig","Eggnog Express","Rising Refresh"]
   elsif town=="chert"
     choices += "$750 Sweet Swig,"
-    choices += "$1200 Effort Extract,"
+    #choices += "$1200 Effort Extract,"
     choices += "$2000 Rising Refresh,"
     choices += "$3000 Golden Glass,"
     choices += "Cancel]"
-    drinks=["Sweet Swig","Effort Extract","Rising Refresh","Golden Glass"]
+    drinks=["Sweet Swig","Rising Refresh","Golden Glass"]
   elsif town="town3"
     choices += "$750 Sweet Swig,"
     choices += "$1000 Warding Water,"
-    choices += "$1600 Capture Cup,"  #NOT CODED
-    choices += "$2500 Mending Mix," #NOT CODED (heal after combat)
+    #choices += "$1600 Capture Cup,"  #NOT CODED
+    #choices += "$2500 Mending Mix," #NOT CODED (heal after combat)
     choices += "Cancel]"
-    drinks=["Sweet Swig","Warding Water","Eggnog Express","Rising Refresh"]
+    drinks=["Sweet Swig","Warding Water"]
   end
   Kernel.pbMessage("\\GWhat would you like to drink?"+choices)
   if pbGet(1)==4

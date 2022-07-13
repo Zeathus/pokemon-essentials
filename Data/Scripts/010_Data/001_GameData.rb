@@ -225,5 +225,6 @@ module GameData
     Trainer.load
     Metadata.load
     MapMetadata.load
+    Quest.load
   end
 end

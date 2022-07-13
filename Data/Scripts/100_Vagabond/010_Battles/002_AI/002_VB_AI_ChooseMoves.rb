@@ -291,6 +291,7 @@ class PokeBattle_Battle
             for g in 0...possible_target_groups.length
               group = possible_target_groups[g]
               score = 0
+              kills = 0
               all_damage = [0,0,0,0,0,0]
               for target in group
                 next if fainted[target.index]
@@ -301,9 +302,17 @@ class PokeBattle_Battle
                 if !move.pbMoveFailed?(user, group) && (target == user || !move.pbFailsAgainstTarget?(user, target))
                   if target != user && !move.statusMove?
                     damage = move.pbPredictDamage(user, target, group.length, queue, affinityboost[user.index])
+                    damage = 0 if !damage
                   end
                   eff_score = pbGetEffectScore(move, damage, user, target, actionable, fainted)
                   this_score += [damage * 100 / target.totalhp, target.hp * 100 / target.totalhp - hurt_potential[target.index]].min
+                  if damage > (target.hp - hurt_potential[target.index]) && target != user
+                    if target.opposes?(user)
+                      kills += 1
+                    else
+                      kills -= 1
+                    end
+                  end
                   this_score = 0 if this_score < 0
                   this_score += eff_score
                 end
@@ -320,7 +329,7 @@ class PokeBattle_Battle
                   next
                 end
               end
-              if score > high_score
+              if score + kills * 80 > high_score
                 high_target_group = g
                 high_score = score
                 high_damage = all_damage
@@ -342,8 +351,8 @@ class PokeBattle_Battle
             end
 
             for t in target_group
-              if (high_damage[t.index] * 100 / t.totalhp) + hurt_potential[t.index] > 101
-                high_score += t.opposes?(user) ? 50 : -50
+              if (high_damage[t.index] > (t.hp - hurt_potential[t.index]))
+                high_score += t.opposes?(user) ? 80 : -80
                 actionable[t.index] = false
                 fainted[t.index] = true
               end
@@ -772,6 +781,8 @@ class PokeBattle_Battle
         break
       end
     end
+    
+    pbWriteLogTurn(scores, idxBattlers, will_switch, max_score, max_index, max_target) if WRITE_BATTLE_LOGS
     
     # Finally register the moves
     for i in 0...idxBattlers.length

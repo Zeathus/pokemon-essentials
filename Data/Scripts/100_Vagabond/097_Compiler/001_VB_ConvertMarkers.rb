@@ -40,7 +40,7 @@ module Compiler
             command+="\r\n"+list[j].parameters[0]
             j+=1
           end
-          if command[/^(MarkerType\:|MarkerQuest\:|MarkerReq\:)/i]
+          if command[/^(MarkerType\:|MarkerQuest\:|MarkerReq\:|MarkerText\:)/i]
             commands.push(command)
             isFirstCommand=true if i==0
           end
@@ -51,23 +51,32 @@ module Compiler
       markertype=-1
       markerquest=false
       markerreqs=false
+      markertext=nil
       for command in commands
         cmd = command[0...(command.index(":"))]
         arg = command[(command.index(":")+1)..command.length]
         arg.strip!
         if cmd == "MarkerType"
           if markertype >= 0
-            markers.push([event.id,page,markertype,markerreqs,markerquest])
+            if markertype == 3
+              markers.push([event.id,page,markertype,markerreqs,markertext])
+            else
+              markers.push([event.id,page,markertype,markerreqs,markerquest])
+            end
             markerquest=false
             markerreqs=false
+            markertext=nil
           end
           arg = "0" if arg=="?"
           arg = "1" if arg=="!"
           arg = "2" if arg=="..."
+          arg = "3" if arg.downcase=="text"
           markertype = arg.to_i
         elsif cmd == "MarkerQuest"
-          if markertype >= 0
+          if [0,1,2].include?(markertype)
             markerquest = arg
+          elsif markertype == 3
+            raise "MarkerType Text does not support MarkerQuest."
           else
             raise "MarkerType must be set before MarkerQuest."
           end
@@ -78,9 +87,19 @@ module Compiler
           else
             raise "MarkerType must be set before MarkerReq."
           end
+        elsif cmd == "MarkerText"
+          if markertype == 3
+            markertext = arg
+          else
+            raise "MarkerType Text must be set before MarkerText."
+          end
         end
       end
-      markers.push([event.id,page,markertype,markerreqs,markerquest])
+      if markertype == 3
+        markers.push([event.id,page,markertype,markerreqs,markertext])
+      else
+        markers.push([event.id,page,markertype,markerreqs,markerquest])
+      end
     end
   end
 end

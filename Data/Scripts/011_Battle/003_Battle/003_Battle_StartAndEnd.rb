@@ -264,6 +264,30 @@ class PokeBattle_Battle
   end
 
   def pbStartBattleCore
+    # Start writing log
+    if WRITE_BATTLE_LOGS
+      if wildBattle? && $game_variables[WILD_AI_LEVEL] > 0 && pbParty(1).length < 3
+        party_str = pbParty(1)[0].species.to_s
+        party_str += pbParty(1)[0].form.to_s if pbParty(1)[0].form != 0
+        for i in 1..2
+          if pbParty(1)[i]
+            party_str += " "
+            party_str += pbParty(1)[i].species.to_s
+            party_str += pbParty(1)[i].form.to_s if pbParty(1)[i].form != 0
+          end
+        end
+        fname = _INTL("Logs/wild_{1}.txt", party_str)
+        @battle_log = File.open(fname,"w")
+      elsif trainerBattle? && @opponent.length < 3
+        fname = _INTL("Logs/trainer_{1}_{2}_{3}.txt",
+                      @opponent[0].trainer_type.to_s,
+                      @opponent[0].name.to_s,
+                      @opponent[0].id.to_s)
+        fname.gsub!("???", "QMARKS")
+        fname.gsub!("?", "Q")
+        @battle_log = File.open(fname,"w")
+      end
+    end
     # Set up the battlers on each side
     sendOuts = pbSetUpSides
     # Create all the sprites and play the battle intro animation
@@ -314,17 +338,10 @@ class PokeBattle_Battle
           pokemon_name = "Numel"
           pokemon_affinity = "Steel"
         end
-        if pokemon_name
-          pbSpeech("Duke", "none",
-            "PLAYER, do you know about affinities?")
-          pbSpeech("PLAYER", "none",
-            "Affinities?WT Never heard of them.")
-          pbSpeech("Duke", "none",
-            "Allow me to explain...")
-          pbShowTutorial("affinity")
-          pbSpeech("Duke", "none",
-            _INTL("Riolu is faster than your {1}, so make Riolu use a {2}-type move to trigger an Affinity Boost.",
-            pokemon_name, pokemon_affinity))
+        if [:KRABBY, :SKIDDO, :NUMEL].include?(pbGetChoice(:Starter))
+          pbDialog("PROLOGUE_AFFINITY_BOOST_TUTORIAL", 0)
+          pbGuide("Affinity Boosts")
+          pbDialog("PROLOGUE_AFFINITY_BOOST_TUTORIAL", 1)
         end
       end
     end
@@ -333,6 +350,10 @@ class PokeBattle_Battle
     pbOnActiveAll
     # Main battle loop
     pbBattleLoop
+
+    if @battle_log
+      @battle_log.close
+    end
   end
 
   #=============================================================================
@@ -466,6 +487,19 @@ class PokeBattle_Battle
           @scene.pbShowOpponent(i)
           msg = (@endSpeeches[i] && @endSpeeches[i]!="") ? @endSpeeches[i] : "..."
           pbDisplayPaused(msg.gsub(/\\[Pp][Nn]/,pbPlayer.name))
+        end
+      end
+      if !trainerBattle?
+        if $game_variables[CHAIN_SPECIES] == @battlers[1].species
+          $game_variables[CHAIN_LENGTH] += 1
+        else
+          $game_variables[CHAIN_SPECIES] = @battlers[1].species
+          $game_variables[CHAIN_LENGTH] = 1
+        end
+        # Breccia Trail - Vespiquen Boss
+        if $game_map.map_id == 62
+          $game_self_switches[[62, 34, "A"]] = true
+          $MapFactory.getMap($game_map.map_id, false).need_refresh = true
         end
       end
       # Gain money from winning a trainer battle, and from Pay Day

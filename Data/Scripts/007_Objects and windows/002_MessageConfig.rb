@@ -32,6 +32,7 @@ module MessageConfig
   end
 
   def self.pbDefaultSpeechFrame
+    return pbResolveBitmap("Graphics/Windowskins/speech vb") || ""
     if $PokemonSystem
       return pbResolveBitmap("Graphics/Windowskins/" + Settings::SPEECH_WINDOWSKINS[$PokemonSystem.textskin]) || ""
     else

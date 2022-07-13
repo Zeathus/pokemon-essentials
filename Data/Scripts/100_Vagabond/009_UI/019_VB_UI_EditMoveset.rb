@@ -31,7 +31,7 @@ def pbEditMoveset(pokemon)
   
 end
 
-class EditMovesetMove < Sprite
+class EditMovesetMoveOld < Sprite
   def initialize(viewport,x,y,buttonBitmap)
     super(viewport)
     @buttonBitmap = buttonBitmap

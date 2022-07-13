@@ -594,24 +594,49 @@ end
 # Shows a Pokémon flashing after taking damage
 #===============================================================================
 class BattlerDamageAnimation < PokeBattle_Animation
-  def initialize(sprites,viewport,idxBattler,effectiveness)
+  def initialize(sprites,viewport,idxBattler,effectiveness,critical=false,move=nil)
     @idxBattler    = idxBattler
     @effectiveness = effectiveness
+    @critical      = critical
+    @move          = move
     super(sprites,viewport)
   end
 
   def createProcesses
     batSprite = @sprites["pokemon_#{@idxBattler}"]
     shaSprite = @sprites["shadow_#{@idxBattler}"]
+    splashSprite = @sprites["splash_#{@idxBattler}"]
+    do_splash = false
+    if @critical
+      splashSprite.setBitmap("Graphics/Pictures/Battle/splash_critical")
+      category = GameData::Move.get(@move).category
+      splashSprite.src_rect = Rect.new(0, 120 * category, 144, 120)
+      do_splash = true
+    elsif @effectiveness == 2
+      splashSprite.setBitmap("Graphics/Pictures/Battle/splash_weakness")
+      type_id = GameData::Type.get(GameData::Move.get(@move).type).id_number
+      splashSprite.src_rect = Rect.new(0, 120 * type_id, 144, 120)
+      do_splash = true
+    end
+    if do_splash
+      splashSprite.x = batSprite.x
+      splashSprite.y = batSprite.y + 30
+    end
     # Set up battler/shadow sprite
     battler = addSprite(batSprite,PictureOrigin::Bottom)
     shadow  = addSprite(shaSprite,PictureOrigin::Center)
+    splash  = addSprite(splashSprite,PictureOrigin::Bottom)
     # Animation
     delay = 0
     case @effectiveness
     when 0 then battler.setSE(delay, "Battle damage normal")
     when 1 then battler.setSE(delay, "Battle damage weak")
     when 2 then battler.setSE(delay, "Battle damage super")
+    end
+    if do_splash
+      splash.setVisible(delay,true)
+      splash.setOpacity(delay,255)
+      splash.moveOpacity(delay+8,12,0)
     end
     4.times do   # 4 flashes, each lasting 0.2 (4/20) seconds
       battler.setVisible(delay,false)

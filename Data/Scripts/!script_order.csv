@@ -319,6 +319,7 @@
 001_Utilities
 002_Utilities_Pokemon
 003_Utilities_BattleAudio
+004_Utilities_Input
 ---------------------------~blank
 @020_Debug
 001_Editor_Utilities
@@ -362,6 +363,8 @@
 003_VB_ClassTrainer
 004_VB_ClassMail
 005_VB_ClassPlayerStats
+006_VB_ClassCustomPokemon
+007_VB_ClassJob
 @@004_Data
 001_VB_DataAffection
 002_VB_DataBattleSim
@@ -373,8 +376,6 @@
 008_VB_DataMail
 009_VB_DataMessages
 013_VB_DataOverworldMarkers
-014_VB_DataQuests
-015_VB_DataQuestsMain
 016_VB_DataQuestsMini
 017_VB_DataShops
 018_VB_DataShopsSpecial
@@ -386,6 +387,7 @@
 @@005_Informational
 001_VB_BattleParties
 002_VB_CharacterLocation
+003_VB_ItemHints
 @@006_Utils and math
 001_VB_ListsItems
 002_VB_ListsPokemon
@@ -409,6 +411,7 @@
 007_VB_PuzzleLightMirrors
 008_VB_Gloom
 009_VB_WhosThatPokemon
+010_VB_OrePuzzle
 @@008_Maps and events
 001_VB_EventUtils
 002_VB_EventBoulders
@@ -422,6 +425,7 @@
 010_VB_OverworldPokemon
 011_VB_TileStairs
 012_VB_Dialog
+013_VB_TextBubbles
 @@009_UI
 001_VB_CharData
 002_VB_UI_Overlay
@@ -445,11 +449,17 @@
 020_VB_UI_Party
 021_VB_UI_Summary
 022_VB_UI_Battle
+023_VB_UI_Guide
+024_VB_UI_Jobs
+025_VB_UI_ChoosePokemon
+026_VB_UI_ShellOS
+027_VB_UI_ItemPickup
+028_VB_UI_CustomPokemon
 @@010_Battles
 001_VB_AddedAI
 002_VB_BossBattle
-003_VB_CustomMoves
-004_VB_LeagueBattle
+003_VB_BossReq
+004_VB_BossEffect
 005_VB_Battler_Affinity
 006_VB_PBModifier
 008_VB_Battle_Scene
@@ -468,6 +478,9 @@
 002_VB_Speech
 003_VB_VFX
 004_VB_ItemIconSmallSprite
+005_VB_MiniDialog
+006_VB_Commands
+007_VB_Emotes
 @@012_Animations
 001_VB_Transformation
 002_VB_CriticalAnimation
@@ -475,6 +488,7 @@
 @@097_Compiler
 001_VB_ConvertMarkers
 002_VB_CompileDialog
+003_VB_CompileQuests
 @@098_Debug
 001_VB_Debug
 002_VB_DebugMenu

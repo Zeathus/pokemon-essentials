@@ -158,6 +158,226 @@ class PokeBattle_Battle
     
   end
 
+  def pbWriteLogTurn(scores, idxBattlers, will_switch, max_score, max_index, max_target)
+    return if !@battle_log
+    @battle_log.write(_INTL(">>> TURN {1} <<<\n", @turnCount))
+    @battle_log.write("Global Field:\n")
+    @battle_log.write(_INTL("  > Weather: {1} {2}\n", @field.weather.to_s, @field.weatherDuration))
+    @battle_log.write(_INTL("  > Terrain: {1} {2}\n", @field.terrain.to_s, @field.terrainDuration))
+    field_effects = [
+      :Gravity,
+      :MagicRoom,
+      :WonderRoom,
+      :TrickRoom,
+      :WaterSportField,
+      :MudSportField
+    ]
+    for i in field_effects
+      field_effect = getID(PBEffects, i)
+      value = @field.effects[field_effect]
+      if value == true
+        @battle_log.write(_INTL("  > {1}: Active\n", i.to_s))
+      elsif value && value > 0
+        @battle_log.write(_INTL("  > {1}: {2}\n", i.to_s, value))
+      end
+    end
+    field_effects = [
+      :Reflect,
+      :LightScreen,
+      :AuroraVeil,
+      :Safeguard,
+      :LuckyChant,
+      :Mist,
+      :Rainbow,
+      :SeaOfFire,
+      :Swamp,
+      :Tailwind,
+      :Spikes,
+      :ToxicSpikes,
+      :StealthRock,
+      :StickyWeb
+    ]
+    @battle_log.write("Player's Field:\n")
+    for i in field_effects
+      field_effect = getID(PBEffects, i)
+      value = @sides[0].effects[field_effect]
+      if value == true
+        @battle_log.write(_INTL("  > {1}: Active\n", i.to_s))
+      elsif value && value > 0
+        @battle_log.write(_INTL("  > {1}: {2}\n", i.to_s, value))
+      end
+    end
+    @battle_log.write("Opponent's Field:\n")
+    for i in field_effects
+      field_effect = getID(PBEffects, i)
+      value = @sides[1].effects[field_effect]
+      if value == true
+        @battle_log.write(_INTL("  > {1}: Active\n", i.to_s))
+      elsif value && value > 0
+        @battle_log.write(_INTL("  > {1}: {2}\n", i.to_s, value))
+      end
+    end
+    @battle_log.write("Player's Pokemon:\n")
+    eachSameSideBattler(0) { |b|
+      pbWriteLogBattlerState(b)
+    }
+    @battle_log.write("Opponent's Pokemon:\n")
+    eachOtherSideBattler(0) { |b|
+      pbWriteLogBattlerState(b)
+    }
+    if idxBattlers.length == 1
+      @battle_log.write("Move Scores:\n")
+      user = @battlers[idxBattlers[0]]
+      user.eachMoveWithIndex do |m, i|
+        @battle_log.write(sprintf("  > %16s: %.2f\n", m.name, scores[i]))
+      end
+      @battle_log.write("AI Choice:\n")
+      if will_switch[idxBattlers[0]]
+        @battle_log.write(_INTL("  > Switch\n", ))
+      else
+        move = user.moves[max_index[0]]
+        target = @battlers[max_target[0]]
+        @battle_log.write(_INTL("  > Use {1} on {2}\n", move.name, target.species.to_s))
+      end
+    elsif idxBattlers.length == 2
+      @battle_log.write("Move Scores:\n")
+      user1 = @battlers[idxBattlers[0]]
+      user2 = @battlers[idxBattlers[1]]
+      @battle_log.write(sprintf("  %16s", ""))
+      user1.eachMoveWithIndex do |m, i|
+        @battle_log.write(sprintf(" %16s", m.name))
+      end
+      @battle_log.write("\n")
+      user2.eachMoveWithIndex do |m2, j|
+        @battle_log.write(sprintf("  %16s", m2.name))
+        user1.eachMoveWithIndex do |m1, i|
+          @battle_log.write(sprintf(" %16s", sprintf("%.2f", scores[i][j])))
+        end
+        @battle_log.write("\n")
+      end
+      @battle_log.write("AI Choice:\n")
+      for i in 0...2
+        battler = @battlers[idxBattlers[i]]
+        if will_switch[idxBattlers[i]]
+          @battle_log.write(_INTL("  > {1}: Switch\n", battler.species.to_s))
+        else
+          move = battler.moves[max_index[i]]
+          target = @battlers[max_target[i]]
+          @battle_log.write(_INTL("  > {1}: Use {2} on {3}\n", battler.species.to_s, move.name, target.species.to_s))
+        end
+      end
+    end
+    @battle_log.write("\n\n")
+  end
+
+  def pbWriteLogBattlerState(b)
+    effects = [
+      :AquaRing,
+      :Confusion,
+      :Curse,
+      :Embargo,
+      :FocusEnergy,
+      :GastroAcid,
+      :HealBlock,
+      :Ingrain,
+      :LaserFocus,
+      :LeechSeed,
+      :LockOn, :LockOnPos,
+      :MagnetRise,
+      :PerishSong, :PerishSongUser,
+      :PowerTrick,
+      :Substitute,
+      :Telekinesis,
+      :Bide,
+      :BideDamage, :BideTarget,
+      :BurnUp,
+      :Charge,
+      :DefenseCurl,
+      :Disable, :DisableMove,
+      :Encore, :EncoreMove,
+      :FlashFire,
+      :Foresight,
+      :FuryCutter,
+      :HyperBeam,
+      :Imprison,
+      :MagicBounce,
+      :MeanLook,
+      :Minimize,
+      :MudSport,
+      :WaterSport,
+      :Nightmare,
+      :Outrage,
+      :Pinch,
+      :Powder,
+      :Prankster,
+      :ProtectRate,
+      :Rollout,
+      :SkyDrop,
+      :SlowStart,
+      :SmackDown,
+      :Stockpile,
+      :Taunt,
+      :ThroatChop,
+      :Torment,
+      :Toxic,
+      :Trapping, :TrappingMove, :TrappingUser,
+      :Truant,
+      :TwoTurnAttack,
+      :Type3,
+      :Unburden,
+      :Uproar,
+      :WeightChange,
+      :Yawn,
+      :CorrosiveAcid
+    ]
+    @battle_log.write(_INTL("  > Lv. {1} {2} {3}\n", b.level, b.species.to_s, ["M", "F", ""][b.gender]))
+    if b.type1 == b.type2
+      @battle_log.write(_INTL("    Types:   {1} - {2}\n", b.type1, b.pokemon.affinity))
+    else
+      @battle_log.write(_INTL("    Types:   {1}/{2} - {3}\n", b.type1, b.type2, b.pokemon.affinity))
+    end
+    @battle_log.write(_INTL("    HP:      {1} / {2} ({3}%)\n", b.hp.to_i, b.totalhp, (b.hp * 100 / b.totalhp).to_i))
+    @battle_log.write(_INTL("    Status:  {1} {2}\n", b.status.to_s, (b.statusCount > 0) ? b.statusCount : 0))
+    @battle_log.write(_INTL("    Ability: {1}\n", b.ability.name))
+    @battle_log.write(_INTL("    Item:    {1}\n", b.item.to_s))
+    @battle_log.write(_INTL("    Moves:  "))
+    for i in b.moves
+      @battle_log.write(_INTL(" {1}|{2}PP", i.name, i.pp))
+    end
+    @battle_log.write("\n")
+    @battle_log.write(_INTL("    Stages: "))
+    GameData::Stat.each_battle do |s|
+      if b.stages[s.id] > 0
+        @battle_log.write(_INTL(" +{1}{2}", b.stages[s.id], s.real_name_brief))
+      elsif b.stages[s.id] < 0
+        @battle_log.write(_INTL(" {1}{2}", b.stages[s.id], s.real_name_brief))
+      end
+    end
+    @battle_log.write("\n")
+    @battle_log.write(_INTL("    Effects:\n"))
+    for i in effects
+      effect = getID(PBEffects, i)
+      value = b.effects[effect]
+      if effect == PBEffects::ProtectRate
+        if value != 1
+          @battle_log.write(_INTL("      > {1}: {2}\n", i.to_s, value.to_s))
+        end
+      elsif value == true
+        @battle_log.write(_INTL("      > {1}: Active\n", i.to_s))
+      elsif value && value.is_a?(Numeric) && value > 0
+        @battle_log.write(_INTL("      > {1}: {2}\n", i.to_s, value.to_s))
+      elsif value && value.is_a?(Symbol)
+        @battle_log.write(_INTL("      > {1}: {2}\n", i.to_s, value.to_s))
+      #elsif value && value.is_a?(Move)
+      #  @battle_log.write(_INTL("      > {1}: {2}\n", i.to_s, value.name))
+      #elsif value && value.is_a?(Battler)
+      #  @battle_log.write(_INTL("      > {1}: {2}\n", i.to_s, value.name))
+      elsif value && value != 0 && value != -1
+        @battle_log.write(_INTL("      > {1}: {2}\n", i.to_s, value.to_s))
+      end
+    end
+  end
+
   def pbPrintQueue(queue)
 
     str = "Queue:"

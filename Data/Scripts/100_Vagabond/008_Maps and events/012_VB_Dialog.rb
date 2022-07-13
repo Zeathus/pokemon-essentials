@@ -1,10 +1,21 @@
 DIALOG_FILES = [
   "prologue",
+  "chapter1",
+  "chapter2",
   "crosswoods",
   "breccia",
+  "lazuli",
+  "lapis",
+  "quartz",
+  "feldspar",
+  "mica",
   "general",
+  "pokemon",
   "ruins",
-  "quests_minor"
+  "quests_minor",
+  "gpo",
+  "evergone",
+  "job_engineer"
 ]
 
 def pbDialog(name, index=0)
@@ -86,7 +97,7 @@ def pbRunDialogFeed(dialog, opts={})
       case command
       when "speaker"
         # Change all speaker properties
-        speaker = pbFormatDialog(args[0])
+        speaker = args[0] ? pbFormatDialog(args[0]) : nil
         emotion = args[1] || "neutral"
         lines = opts["lines"]
         opts = {}
@@ -103,6 +114,8 @@ def pbRunDialogFeed(dialog, opts={})
         opts["namepos"] = args[0]
       when "hidename"
         opts["hide_name"] = args[0]
+      when "hidenamebox"
+        opts["hide_namebox"] = args[0]
       when "window"
         opts["window_type"] = args[0]
       when "windowpos"
@@ -212,6 +225,9 @@ def pbRunDialogFeed(dialog, opts={})
         when "exclaim"
           event = get_character(args[args.length - 1])
           pbExclaim(event)
+        when "popup"
+          event = get_character(args[args.length - 2])
+          pbEmote(event, args[args.length - 1])
         end
       when "dialog"
         if args[1]

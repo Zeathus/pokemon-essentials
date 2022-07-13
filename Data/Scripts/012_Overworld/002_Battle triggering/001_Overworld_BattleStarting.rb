@@ -75,7 +75,7 @@ def setBattleRule(*args)
     else
       case arg.downcase
       when "terrain", "weather", "environment", "environ", "backdrop",
-           "battleback", "base", "outcome", "outcomevar"
+           "battleback", "base", "outcome", "outcomevar", "specialmod", "startover"
         r = arg
         next
       end
@@ -226,8 +226,9 @@ def pbWildBattleCore(*args)
     $PokemonGlobal.nextBattleCaptureME = nil
     $PokemonGlobal.nextBattleBack      = nil
     # Reset battle vars
-    $game_variables[BOSS_BATTLE]=0
-    $game_variables[WILD_MODIFIER]=0
+    $game_variables[BOSS_BATTLE] = 0
+    $game_variables[WILD_MODIFIER] = 0
+    $game_variables[WILD_AI_LEVEL] = 0
     pbMEStop
     return 1   # Treat it as a win
   end
@@ -316,6 +317,7 @@ def pbWildBattleCore(*args)
   #    4 - Wild Pokémon was caught
   #    5 - Draw
   pbSet(outcomeVar,decision)
+  $game_variables[WILD_AI_LEVEL] = 0
   return decision
 end
 
@@ -361,7 +363,7 @@ def pbTripleWildBattle(species1, level1, species2, level2, species3, level3,
   setBattleRule("outcomeVar",outcomeVar) if outcomeVar!=1
   setBattleRule("cannotRun") if !canRun
   setBattleRule("canLose") if canLose
-  setBattleRule("triple")
+  setBattleRule("triple") if !$PokemonTemp.battleRules["size"]
   # Perform the battle
   decision = pbWildBattleCore(species1, level1, species2, level2, species3, level3)
   # Return false if the player lost or drew the battle, and true if any other result

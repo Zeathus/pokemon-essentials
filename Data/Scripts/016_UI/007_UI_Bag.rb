@@ -38,8 +38,8 @@ class Window_PokemonBag < Window_DrawableCommand
     refresh
   end
 
-  def page_row_max; return @mode==0 ? 3 : PokemonBag_Scene::ITEMSVISIBLE; end
-  def page_item_max; return @mode==0 ? 15 : PokemonBag_Scene::ITEMSVISIBLE; end
+  def page_row_max; return @mode==0 ? 6 : PokemonBag_Scene::ITEMSVISIBLE; end
+  def page_item_max; return @mode==0 ? 23 : PokemonBag_Scene::ITEMSVISIBLE; end
 
   def item
     return nil if @filterlist && !@filterlist[@pocket][self.index]
@@ -141,8 +141,6 @@ class Window_PokemonBag < Window_DrawableCommand
       end
       pbSetSmallFont(self.contents)
       pbDrawTextPositions(self.contents,textpos)
-      imagepos=[["Graphics/Pictures/Bag/overlay.png",6,224,0,0,-1,-1]]
-      pbDrawImagePositions(self.contents,imagepos)
       pbSetSystemFont(self.contents)
       if index!=pocketLen
         if @bag.pbIsRegistered?(indexItem(index))
@@ -222,7 +220,7 @@ class PokemonBag_Scene
   ITEMTEXTSHADOWCOLOR   = Color.new(0,0,0)
   POCKETNAMEBASECOLOR   = Color.new(88,88,80)
   POCKETNAMESHADOWCOLOR = Color.new(168,184,184)
-  ITEMSVISIBLE          = 7
+  ITEMSVISIBLE          = 13
 
   def pbUpdate
     pbUpdateSpriteHash(@sprites)
@@ -230,8 +228,6 @@ class PokemonBag_Scene
 
   def pbStartScene(bag,choosing=false,filterproc=nil,resetpocket=true)
     @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-    @viewport.ox = -128
-    @viewport.oy = -96
     @viewport.z = 99999
     @bag        = bag
     @mode       = $PokemonSystem ? $PokemonSystem.bagmode : 0
@@ -275,7 +271,7 @@ class PokemonBag_Scene
     @sprites["pocketicon"].x = 0
     @sprites["pocketicon"].y = 224
     @sprites["pocketicon"].visible = false
-    @sprites["itemlist"] = Window_PokemonBag.new(@bag,@filterlist,lastpocket,168,-8,314,40+32+ITEMSVISIBLE*32,@mode)
+    @sprites["itemlist"] = Window_PokemonBag.new(@bag,@filterlist,lastpocket,296,2,314,40+32+ITEMSVISIBLE*32,@mode)
     @sprites["itemlist"].viewport    = @viewport
     @sprites["itemlist"].pocket      = lastpocket
     @sprites["itemlist"].index       = @bag.getChoice(lastpocket)
@@ -284,9 +280,9 @@ class PokemonBag_Scene
     #@sprites["itemicon"] = ItemIconSprite.new(48,Graphics.height-48,nil,@viewport)
     #@sprites["itemtext"] = Window_UnformattedTextPokemon.newWithSize("",
     #   72, 270, Graphics.width - 72 - 24, 128, @viewport)
-    @sprites["itemicon"] = ItemIconSprite.new(48,384-48,nil,@viewport)
+    @sprites["itemicon"] = ItemIconSprite.new(112,528,nil,@viewport)
     @sprites["itemtext"] = Window_UnformattedTextPokemon.newWithSize("",
-      72, 270, 512 - 72 - 24, 128, @viewport)
+      140, 462, 530, 128, @viewport)
     @sprites["itemtext"].baseColor   = ITEMTEXTBASECOLOR
     @sprites["itemtext"].shadowColor = ITEMTEXTSHADOWCOLOR
     @sprites["itemtext"].visible     = true
@@ -294,27 +290,36 @@ class PokemonBag_Scene
     @sprites["helpwindow"] = Window_UnformattedTextPokemon.new("")
     @sprites["helpwindow"].visible  = false
     @sprites["helpwindow"].viewport = @viewport
-    @sprites["helpwindow"].ox = 128
-    @sprites["helpwindow"].oy = 96
     @sprites["msgwindow"] = Window_AdvancedTextPokemon.new("")
     @sprites["msgwindow"].visible  = false
     @sprites["msgwindow"].viewport = @viewport
     @sprites["msgwindow"].z = 999999
-    @sprites["msgwindow"].ox = 128
-    @sprites["msgwindow"].oy = 96
-    @sprites["menusel"]=IconSprite.new(14,50,@viewport)
+    @sprites["menusel"]=IconSprite.new(142,86,@viewport)
     @sprites["menusel"].setBitmap(sprintf("Graphics/Pictures/Bag/cursor_pocket"))
     if @mode==0
       @sprites["nametext"]=Window_UnformattedTextPokemon.new("")
       @sprites["nametext"].visible=true
       @sprites["nametext"].viewport=@viewport
       @sprites["nametext"].z=100
-      @sprites["nametext"].x=190
-      @sprites["nametext"].y=220
+      @sprites["nametext"].x=316
+      @sprites["nametext"].y=394
       @sprites["nametext"].width=300
       @sprites["nametext"].height=128
       @sprites["nametext"].windowskin=nil
       @sprites["nametext"].text=""
+      @sprites["nametext"].baseColor   = ITEMTEXTBASECOLOR
+      @sprites["nametext"].shadowColor = ITEMTEXTSHADOWCOLOR
+      keybinds = [
+        [Input::USE, "Select"],
+        [Input::BACK, "Cancel"],
+        [Input::ACTION, "Sort"],
+        [[Input::JUMPUP, Input::JUMPDOWN], "Jump Up/Down"],
+        [[Input::UP, Input::DOWN, Input::LEFT, Input::RIGHT], "Move"]
+      ]
+      for i in 0...keybinds.length
+        sprite = KeybindSprite.new(keybinds[i][0], keybinds[i][1], 128, 302+28*i, @viewport)
+        @sprites[_INTL("keybinds_{1}", i)] = sprite
+      end
     end
     pbUpdateMenuCursor
     pbBottomLeftLines(@sprites["helpwindow"],1)
@@ -325,8 +330,8 @@ class PokemonBag_Scene
   
   def pbUpdateMenuCursor
     pocket=@sprites["itemlist"].pocket
-    @sprites["menusel"].x=14+(50*((pocket-1)%3))
-    @sprites["menusel"].y=50+(50*((pocket-1)/3.0).floor)
+    @sprites["menusel"].x=142+(50*((pocket-1)%3))
+    @sprites["menusel"].y=86+(50*((pocket-1)/3.0).floor)
     @sprites["menusel"].visible=@sprites["itemlist"].inMenu
   end
 
@@ -393,34 +398,34 @@ class PokemonBag_Scene
     overlay.clear
     # Draw the pocket name
     pbDrawTextPositions(overlay,[
-       [PokemonBag.pocketNames[@bag.lastpocket],94,218,2,POCKETNAMEBASECOLOR,POCKETNAMESHADOWCOLOR]
+       [PokemonBag.pocketNames[@bag.lastpocket],224,254,2,POCKETNAMEBASECOLOR,POCKETNAMESHADOWCOLOR]
     ])
     # Draw slider arrows
     showslider = false
     if itemlist.top_row>0
-      overlay.blt(470,16,@sliderbitmap.bitmap,Rect.new(0,0,36,38))
+      #overlay.blt(598,16,@sliderbitmap.bitmap,Rect.new(0,0,36,38))
       showslider = true
     end
     if itemlist.top_item+itemlist.page_item_max<itemlist.itemCount
-      overlay.blt(470,228,@sliderbitmap.bitmap,Rect.new(0,38,36,38))
+      #overlay.blt(598,228,@sliderbitmap.bitmap,Rect.new(0,38,36,38))
       showslider = true
     end
     # Draw slider box
     if showslider
-      sliderheight = 174
+      sliderheight = 322
       boxheight = (sliderheight*itemlist.page_row_max/itemlist.row_max).floor
       boxheight += [(sliderheight-boxheight)/2,sliderheight/6].min
       boxheight = [boxheight.floor,38].max
-      y = 54
+      y = 76
       y += ((sliderheight-boxheight)*itemlist.top_row/(itemlist.row_max-itemlist.page_row_max)).floor
-      overlay.blt(470,y,@sliderbitmap.bitmap,Rect.new(36,0,36,4))
+      overlay.blt(598,y,@sliderbitmap.bitmap,Rect.new(36,0,36,4))
       i = 0
       while i*16<boxheight-4-18
         height = [boxheight-4-18-i*16,16].min
-        overlay.blt(470,y+4+i*16,@sliderbitmap.bitmap,Rect.new(36,4,36,height))
+        overlay.blt(598,y+4+i*16,@sliderbitmap.bitmap,Rect.new(36,4,36,height))
         i += 1
       end
-      overlay.blt(470,y+boxheight-18,@sliderbitmap.bitmap,Rect.new(36,20,36,18))
+      overlay.blt(598,y+boxheight-18,@sliderbitmap.bitmap,Rect.new(36,20,36,18))
     end
     return if itemlist.item == 0
     # Set the selected item's icon
@@ -428,7 +433,12 @@ class PokemonBag_Scene
     # Set the selected item's description
     @sprites["itemtext"].text =
        (itemlist.item) ? GameData::Item.get(itemlist.item).description : _INTL("Close bag.")
-    @sprites["nametext"].text = ((itemlist.item) ? GameData::Item.get(itemlist.item).name : "") if @mode==0
+    if itemlist.item && GameData::Item.get(itemlist.item).is_TM?
+      movename = GameData::Move.get(GameData::Item.get(itemlist.item).move).name
+      @sprites["nametext"].text = _INTL("{1} {2}", GameData::Item.get(itemlist.item).name, movename) if @mode==0
+    else
+      @sprites["nametext"].text = ((itemlist.item) ? GameData::Item.get(itemlist.item).name : "") if @mode==0
+    end
   end
 
   def pbRefreshFilter
@@ -607,12 +617,15 @@ class PokemonBagScreen
         elsif itm.is_important?
           @scene.pbDisplay(_INTL("The {1} can't be held.",itemname))
         else
-          pbFadeOutIn {
-            sscene = PokemonParty_Scene.new
-            sscreen = PokemonPartyScreen.new(sscene,$Trainer.party)
-            sscreen.pbPokemonGiveScreen(item)
-            @scene.pbRefresh
+          pbChoosePokemonScreen(0) { |member, pkmn|
+            if !member && !pkmn
+              true
+            else
+              pkmn = getPartyPokemon(member)[pkmn]
+              pbGiveItemToPokemon(item, pkmn, @scene)
+            end
           }
+          @scene.pbRefresh
         end
       elsif cmdToss>=0 && command==cmdToss   # Toss item
         qty = @bag.pbQuantity(item)

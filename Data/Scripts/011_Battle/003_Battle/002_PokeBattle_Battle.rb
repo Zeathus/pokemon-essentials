@@ -688,6 +688,7 @@ class PokeBattle_Battle
     # Check for end of primordial weather, and weather-triggered form changes
     eachBattler { |b| b.pbCheckFormOnWeatherChange }
     pbEndPrimordialWeather
+    pbBoss.checkTriggers(self, :Weather)
   end
 
   def pbEndPrimordialWeather
@@ -748,6 +749,7 @@ class PokeBattle_Battle
     end
     # Check for terrain seeds that boost stats in a terrain
     eachBattler { |b| b.pbItemTerrainStatBoostCheck }
+    pbBoss.checkTriggers(self, :Terrain)
   end
 
   #=============================================================================

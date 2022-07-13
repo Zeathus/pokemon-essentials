@@ -29,7 +29,7 @@ def pbSetTextMessages
         t = Time.now.to_i
         Graphics.update
       end
-      scr=Zlib::Inflate.inflate(script[2])
+      scr=Zlib::Inflate.inflate(script[2]) if script[2]
       pbAddRgssScriptTexts(texts,scr)
     end
     if safeExists?("Data/PluginScripts.rxdata")
@@ -120,7 +120,7 @@ def pbSetTextMessages
         t = Time.now.to_i
         Graphics.update
       end
-      filename=sprintf("Data/Map%03d.rxdata",id)
+      filename=pbMapFile(id, Settings::COMPRESS_MAPS)
       next if !pbRgssExists?(filename)
       map = load_data(filename)
       items=[]

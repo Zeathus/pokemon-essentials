@@ -61,6 +61,7 @@ class PokeBattle_Battler
     if abilityActive?
       BattleHandlers.triggerAbilityOnStatGain(self.ability,self,stat,user)
     end
+    pbBoss.checkTriggers(@battle, :StatChange, self)
     return true
   end
 
@@ -90,6 +91,7 @@ class PokeBattle_Battler
     if abilityActive?
       BattleHandlers.triggerAbilityOnStatGain(self.ability,self,stat,user)
     end
+    pbBoss.checkTriggers(@battle, :StatChange, self)
     return true
   end
 
@@ -194,6 +196,7 @@ class PokeBattle_Battler
     if abilityActive?
       BattleHandlers.triggerAbilityOnStatLoss(self.ability,self,stat,user)
     end
+    pbBoss.checkTriggers(@battle, :StatChange, self)
     return true
   end
 
@@ -223,6 +226,7 @@ class PokeBattle_Battler
     if abilityActive?
       BattleHandlers.triggerAbilityOnStatLoss(self.ability,self,stat,user)
     end
+    pbBoss.checkTriggers(@battle, :StatChange, self)
     return true
   end
 

@@ -83,7 +83,7 @@ BattleHandlers::DamageCalcTargetItem.add(:NORMALRESIST,
     }
 )
 
-BattleHandlers::DamageCalcTargetItem.add(:POISONRESIST,
+BattleHandlers::DamageCalcTargetItem.add(:FACEMASK,
     proc { |item,user,target,move,mults,baseDmg,type|
         mults[:final_damage_multiplier] *= 0.8 if type == :POISON
     }

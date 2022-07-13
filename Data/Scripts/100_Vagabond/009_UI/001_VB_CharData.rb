@@ -3,6 +3,7 @@ def charWidth(char,font)
     return realCharWidth(4) if font=="Small" || font=="Smallest"
     return realCharWidth(6)
   end
+  char = "0" if char == "1" && font=="System" # make all numbers same width
   rects = charRects(char,font)
   max = 0
   for r in rects
@@ -581,6 +582,13 @@ def charRects(char,font)
             [1,6,3,1],
             [0,8,5,1],
             [2,7,1,5]]
+  when '⚲'
+    return [[1,2,3,1],
+            [0,3,1,3],
+            [4,3,1,3],
+            [1,6,3,1],
+            #[0,8,5,1],
+            [2,7,1,5]]
   end
   return [[0,3,1,9],
           [1,3,3,1],
@@ -1070,7 +1078,30 @@ def charRectsSmall(char)
             [4,5,1,2],
             [0,8,1,1],
             [1,7,1,3]]
+  when '♂'
+    return [[0,7,1,2],
+            [1,6,3,1],
+            [1,9,3,1],
+            [4,7,1,2],
+            [2,2,1,4],
+            [1,3,3,1],
+            [0,4,1,1],
+            [4,4,1,1]]
+  when '♀'
+    return [[0,3,1,2],
+            [1,2,3,1],
+            [1,5,3,1],
+            [4,3,1,2],
+            [2,6,1,4],
+            [0,7,5,1]]
+  when '⚲'
+    return [[0,3,1,2],
+            [1,2,3,1],
+            [1,5,3,1],
+            [4,3,1,2],
+            [2,6,1,4]]
   end
+  
   return [[0,3,1,7],
           [1,3,2,1],
           [1,9,2,1],

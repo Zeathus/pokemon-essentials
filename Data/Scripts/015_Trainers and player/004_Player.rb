@@ -90,7 +90,6 @@ class Player < Trainer
   end
   
   def stats
-    $game_switches[TAKEN_STEP]=true
     if @playerstats == nil
       @playerstats=PlayerStats.new()
     end

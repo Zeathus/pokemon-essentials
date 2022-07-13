@@ -25,6 +25,7 @@ class Game_Temp
   attr_accessor :fadestate                # for sprite hashes
   attr_accessor :background_bitmap
   attr_accessor :mart_prices
+  attr_accessor :text_bubble_queue
   #-----------------------------------------------------------------------------
   # * Object Initialization
   #-----------------------------------------------------------------------------
@@ -51,6 +52,24 @@ class Game_Temp
     @message_window_showing = false
     @transition_processing  = false
     @mart_prices            = {}
+    @text_bubble_queue      = []
+  end
+
+  def text_bubble(event_id, text)
+    @text_bubble_queue.push(TextBubble.new(event_id, text))
+  end
+
+  def partner_text_bubble(pid, text)
+    @text_bubble_queue.push(TextBubble.new(pid, text, true))
+  end
+
+  def clear_text_bubbles
+    if @text_bubble_queue.length > 0
+      if @text_bubble_queue[0].active
+        @text_bubble_queue[0].dispose
+      end
+    end
+    @text_bubble_queue = []
   end
 
   def clear_mart_prices

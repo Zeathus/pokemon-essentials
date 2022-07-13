@@ -34,6 +34,7 @@ class PokemonDataBox < SpriteWrapper
     @showExp      = false   # Specifically, show the Exp bar
     @animatingExp = false
     @expFlash     = 0
+    @sideSize     = sideSize
     initializeDataBoxGraphic(sideSize)
     initializeOtherGraphics(viewport)
     refresh
@@ -64,7 +65,21 @@ class PokemonDataBox < SpriteWrapper
       @spriteY = 36
       @spriteBaseX = 16
     end
+    @smallLevel = (sideSize == 3)
     case sideSize
+    when 1
+      if @battler.index == 1
+        offset = 0
+        for gauge in pbBoss.gauges
+          if gauge.type == PBGauge::Half
+            offset += 6
+          else
+            offset += 12
+          end
+        end
+        @spriteY -= [offset, 40].min
+        @smallLevel = true if offset >= 36
+      end
     when 2
       mod = [-12,  12,  0,  0][@battler.index]
       @spriteX += onPlayerSide ? -mod : mod
@@ -72,7 +87,7 @@ class PokemonDataBox < SpriteWrapper
     when 3
       mod = [-12,  12, -6,  6,  0,  0][@battler.index]
       @spriteX += onPlayerSide ? -mod : mod
-      @spriteY += [-42, -46,  4,  0, 50, 46][@battler.index]
+      @spriteY += [-42, -40,  4,  6, 50, 52][@battler.index]
     end
   end
 
@@ -98,7 +113,7 @@ class PokemonDataBox < SpriteWrapper
     @expBar.bitmap = @expBarBitmap.bitmap
     @sprites["expBar"] = @expBar
     # Create sprite wrapper that displays everything except the above
-    @contents = BitmapWrapper.new(@databoxBitmap.width,@databoxBitmap.height)
+    @contents = BitmapWrapper.new(@databoxBitmap.width,@databoxBitmap.height + 256)
     self.bitmap  = @contents
     self.visible = false
     self.z       = 150+((@battler.index)/2)*5
@@ -237,6 +252,13 @@ class PokemonDataBox < SpriteWrapper
       textPos.push([_INTL("♀"),genderX,-4,false,FEMALE_BASE_COLOR,FEMALE_SHADOW_COLOR,true])
     end
     pbSetSystemFont(self.bitmap)
+    if @sideSize == 3 || 
+      pbSetSmallFont(self.bitmap)
+      for t in textPos
+        t[1] += 2
+        t[2] += 4
+      end
+    end
     pbDrawTextPositions(self.bitmap,textPos)
     textPos = []
     # Draw Pokémon's name
@@ -283,6 +305,7 @@ class PokemonDataBox < SpriteWrapper
     pbDrawImagePositions(self.bitmap,imagePos)
     refreshHP
     refreshExp
+    refreshBossGauges
   end
 
   def refreshHP
@@ -296,6 +319,7 @@ class PokemonDataBox < SpriteWrapper
         pbDrawNumber(@battler.totalhp,@hpNumbers.bitmap,70,2)
       else
         hpPercent = (self.hp*100.0/@battler.totalhp).ceil
+        hpPercent = 1 if self.hp == 1
         hpText = self.hp>=@battler.totalhp ? sprintf("%d%%",hpPercent.round) : sprintf("%.1f%%",hpPercent)
         pbDrawNumber(hpText,@hpNumbers.bitmap,76,2,2)
       end
@@ -369,6 +393,79 @@ class PokemonDataBox < SpriteWrapper
     #       fit in with the rest of the graphics which are doubled in size.
     w = ((w/2).round)*2
     @expBar.src_rect.width = w
+  end
+
+  def refreshBossGauges
+    return if @battler.index != 1 || @sideSize > 1
+
+    x_offset = @spriteBaseX
+    y_offset = 48
+    
+    base = Color.new(248,248,248)
+    shadow = Color.new(15,15,15)
+
+    for gauge in pbBoss.gauges
+      next if !gauge.enabled
+      
+      imagepos = []
+      textpos = []
+
+      case gauge.type
+      when PBGauge::Full
+        imagepos.push(["Graphics/Pictures/Battle/boss_gauge.png",x_offset,y_offset,0,0,180,24])
+        textpos.push([gauge.name,x_offset + 90,y_offset - 12,2,base,shadow])
+      when PBGauge::Half
+        imagepos.push(["Graphics/Pictures/Battle/boss_gauge.png",x_offset,y_offset,0,24,92,24])
+        textpos.push([gauge.name,x_offset + 45,y_offset - 12,2,base,shadow])
+      when PBGauge::Long
+        imagepos.push(["Graphics/Pictures/Battle/boss_gauge.png",x_offset,y_offset,0,48,180,16])
+        textpos.push([gauge.name,x_offset + 8,y_offset - 12,0,base,shadow])
+      end
+      pbDrawImagePositions(self.bitmap,imagepos)
+      pbSetSmallestFont(self.bitmap)
+      pbDrawTextPositions(self.bitmap,textpos)
+
+      colors = gauge.get_colors
+
+      case gauge.type
+      when PBGauge::Full
+        self.bitmap.fill_rect(
+          x_offset+4,y_offset+16,
+          172 * gauge.value / gauge.max, 6, colors[1])
+        self.bitmap.fill_rect(
+          x_offset+4,y_offset+18,
+          172 * gauge.value / gauge.max, 2, colors[0])
+        y_offset += 24
+      when PBGauge::Half
+        self.bitmap.fill_rect(
+          x_offset+4,y_offset+16,
+          84 * gauge.value / gauge.max, 6, colors[1])
+        self.bitmap.fill_rect(
+          x_offset+4,y_offset+18,
+          84 * gauge.value / gauge.max, 2, colors[0])
+        x_offset += 88
+        if x_offset > @spriteBaseX + 88
+          x_offset = @spriteBaseX
+          y_offset += 24
+        end
+      when PBGauge::Long
+        x_start = 12 + self.bitmap.text_size(gauge.name).width
+        self.bitmap.fill_rect(x_offset+x_start,y_offset+2,178-x_start,12,shadow)
+        self.bitmap.fill_rect(
+          x_start+x_offset+2,y_offset+4,
+          174-x_start, 8, Color.new(71,58,58))
+        self.bitmap.fill_rect(
+          x_start+x_offset+2,y_offset+6,
+          174-x_start, 4, Color.new(61,50,50))
+        self.bitmap.fill_rect(
+          x_start+x_offset+2,y_offset+4,
+          (174-x_start) * gauge.value / gauge.max, 8, colors[1])
+        self.bitmap.fill_rect(
+          x_start+x_offset+2,y_offset+6,
+          (174-x_start) * gauge.value / gauge.max, 4, colors[0])
+        y_offset += 14
+      end
+    end
   end
 
   def updateHPAnimation

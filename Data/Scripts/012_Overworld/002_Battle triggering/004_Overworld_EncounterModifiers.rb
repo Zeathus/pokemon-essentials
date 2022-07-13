@@ -55,6 +55,9 @@ Events.onWildPokemonCreate += proc { |_sender, e|
   pokemon = e[0]
   if $game_variables[WILD_MODIFIER] && $game_variables[WILD_MODIFIER] != 0
     mod = $game_variables[WILD_MODIFIER]
+    if mod.species && pokemon.species != mod.species
+      next
+    end
     if mod.moves # Custom Moves
       pokemon.moves = []
       for m in mod.moves
@@ -75,7 +78,11 @@ Events.onWildPokemonCreate += proc { |_sender, e|
     pokemon.hp            = pokemon.totalhp
     pokemon.hp            = mod.hp                if mod.hp
     pokemon.hp           *= mod.hpmult            if mod.hpmult
-    $game_variables[WILD_MODIFIER] = 0
+    if mod.next
+      $game_variables[WILD_MODIFIER] = mod.next
+    else
+      $game_variables[WILD_MODIFIER] = 0
+    end
   end
 }
 

@@ -266,7 +266,7 @@ class SpawnArea
     @y       = y
     @width   = 1
     @height  = 1
-    self.DFS(x,y)
+    self.BFS(x,y)
     maxX=@x
     maxY=@y
     for tile in @tiles
@@ -283,23 +283,48 @@ class SpawnArea
     end
     @max_pkmn = (@tiles.length / divisor).ceil
   end
+
+  def BFS(x,y)
+    @tiles.push([x,y])
+    i = 0
+    while i < @tiles.length
+      if i % 100 == 0
+        Graphics.update
+        Input.update
+      end
+      x = @tiles[i][0]
+      y = @tiles[i][1]
+      for coord in [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]
+        x2 = coord[0]
+        y2 = coord[1]
+        if self.valid_tile?(x2,y2) && !self.include?(x2,y2)
+          @tiles.push([x2, y2])
+        end
+      end
+      i += 1
+    end
+  end
   
-  def DFS(x,y)
+  def DFS(x,y,depth=0)
+    return if depth > 200
     @tiles.push([x,y])
     for coord in [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]
       x2 = coord[0]
       y2 = coord[1]
-      next if x2 < 0 || x2 >= @map.width || y2 < 0 || y2 >= @map.height
-      if (@terrain == -1 ?
-          (@map.passable?(x2,y2,2) &&
-           @map.passable?(x2,y2,4) &&
-           @map.passable?(x2,y2,6) &&
-           @map.passable?(x2,y2,8)) :
-          @map.terrain_tag(x2,y2)==@terrain) &&
-          !self.include?(x2,y2)
-        self.DFS(x2,y2)
+      if self.valid_tile?(x2,y2) && !self.include?(x2,y2)
+        self.DFS(x2,y2,depth=depth+1)
       end
     end
+  end
+
+  def valid_tile?(x, y)
+    return false if x < 0 || x >= @map.width || y < 0 || y >= @map.height
+    return (@terrain == -1 ?
+      (@map.passable?(x,y,2) &&
+       @map.passable?(x,y,4) &&
+       @map.passable?(x,y,6) &&
+       @map.passable?(x,y,8)) :
+      @map.terrain_tag(x,y)==@terrain)
   end
   
   def include?(x,y)
@@ -353,6 +378,7 @@ class SpawnArea
   end
   
   def updateMovements(willmove)
+    ret = false
     for i in 0...@pokemon.length
       pkmn = @pokemon[i]
       next if !pkmn
@@ -361,11 +387,12 @@ class SpawnArea
         pkmn.dispose
         @pokemon.delete(pkmn)
       elsif (pkmn.map_x-$game_player.x)**2 + (pkmn.map_y-$game_player.y)**2 < 0.5
-        return false if $DEBUG && Input.press?(Input::CTRL)
-        return pkmn
+        if !($DEBUG && Input.press?(Input::CTRL))
+          ret = pkmn
+        end
       end
     end
-    return false
+    return ret
   end
   
   def updateStill
@@ -394,8 +421,13 @@ class Spriteset_Map
   def initSpawnAreas
     $PokemonEncounters.setup(@map.map_id)
     count=0
-    for y in 0...@map.height
-      for x in 0...@map.width
+    for y in 1...(@map.height - 1)
+      for x in 1...(@map.width - 1)
+        if (x + y * @map.width) % 1000 == 0
+          Graphics.update
+          Input.update
+        end
+        next if x % 2 == y % 2
         visited = false
         for area in @spawn_areas
           if area.include?(x,y)

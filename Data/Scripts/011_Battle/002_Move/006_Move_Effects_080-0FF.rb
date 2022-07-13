@@ -3210,11 +3210,11 @@ class PokeBattle_Move_0EB < PokeBattle_Move
       @battle.pbDisplay(_INTL("But it failed!")) if !@battle.predictingDamage
       return true
     end
-    if @battle.wildBattle? && target.level>user.level
+    if @battle.wildBattle? && target.level>user.level && $game_variables[WILD_AI_LEVEL] == 0
       @battle.pbDisplay(_INTL("But it failed!")) if !@battle.predictingDamage
       return true
     end
-    if @battle.trainerBattle?
+    if @battle.trainerBattle? || $game_variables[WILD_AI_LEVEL] > 0
       canSwitch = false
       @battle.eachInTeamFromBattlerIndex(target.index) do |_pkmn,i|
         next if !@battle.pbCanSwitchLax?(target.index,i)
@@ -3230,11 +3230,12 @@ class PokeBattle_Move_0EB < PokeBattle_Move
   end
 
   def pbEffectGeneral(user)
-    @battle.decision = 3 if @battle.wildBattle?   # Escaped from battle
+    # Escaped from battle
+    @battle.decision = 3 if @battle.wildBattle? && $game_variables[WILD_AI_LEVEL] == 0
   end
 
   def pbSwitchOutTargetsEffect(user,targets,numHits,switchedBattlers)
-    return if @battle.wildBattle?
+    return if @battle.wildBattle? && $game_variables[WILD_AI_LEVEL] == 0
     return if user.fainted? || numHits==0
     roarSwitched = []
     targets.each do |b|
@@ -3739,7 +3740,7 @@ class PokeBattle_Move_0F7 < PokeBattle_Move
               :PINKNECTAR,:PURPLENECTAR,:REDNECTAR,:YELLOWNECTAR,
               # Incenses
               :FULLINCENSE,:LAXINCENSE,:LUCKINCENSE,:ODDINCENSE,:PUREINCENSE,
-              :ROCKINCENSE,:ROSEINCENSE,:SEAINCENSE,:WAVEINCENSE,
+              :ROCKINCENSE,:ROSEINCENSE,:SEAINCENSE,:WAVEINCENSE,:TROPICALINCENSE,
               # Scarves
               :BLUESCARF,:GREENSCARF,:PINKSCARF,:REDSCARF,:YELLOWSCARF
              ]
